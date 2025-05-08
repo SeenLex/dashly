@@ -24,17 +24,14 @@ const Login = () => {
 
       const data = await res.json();
 
-      if (!res.ok) {
-        setError(data.error || 'Login failed');
-        return;
+      if (res.ok) {
+        localStorage.setItem('token', data.token);
+        navigate('/home');
+      } else {
+        alert(data.error || 'Login failed');
       }
-
-      // Save login state or user info
-      localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('user', JSON.stringify(data.user));
-      navigate('/home');
     } catch (err) {
-      setError('Unable to connect to server');
+      alert('Network error');
     }
   };
 

@@ -1,18 +1,31 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, User, Lock, ArrowRight } from "lucide-react";
+import axios from "axios";
+
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
-    e.preventDefault();
-    //login logic to be added when backend is ready
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [status, setStatus] = useState("");
 
-    //login mockup
-    localStorage.setItem("isLoggedIn", "true");
-    navigate("/home");
+  const handleLogin = async () => {
+    try {
+      const response = await axios.post("http://localhost/login.php", {
+        username,
+        password,
+      });
+      if (response.data.status === "success") {
+        setStatus("Logged in successfully!");
+      } else {
+        setStatus("Invalid credentials");
+      }
+    } catch (error) {
+      setStatus("Login failed: " + error.response?.data?.message || error.message);
+    }
   };
 
   return (
@@ -68,6 +81,7 @@ const Login = () => {
                   type="text"
                   placeholder="Enter your email"
                   className="bg-transparent outline-none flex-1 text-gray-800 text-sm sm:text-base"
+                  onChange={(e) => setUsername(e.target.value)}
                 />
               </div>
             </div>
@@ -86,6 +100,7 @@ const Login = () => {
                   type={showPassword ? "text" : "password"}
                   placeholder="Enter your password"
                   className="bg-transparent outline-none flex-1 text-gray-800 text-sm sm:text-base"
+                  onChange={(e) => setPassword(e.target.value)}
                 />
                 <button
                   type="button"

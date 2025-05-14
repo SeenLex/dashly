@@ -1,44 +1,67 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 
 const RequestsTable = () => {
-  const initialRequests = [
-    {
-      id: 1,
-      fullName: "Jane Doe",
-      email: "jane.doe@example.com",
-      projectName: "Project Alpha",
-      status: "Pending",
-    },
-    {
-      id: 2,
-      fullName: "John Smith",
-      email: "john.smith@example.com",
-      projectName: "Project Beta",
-      status: "Pending",
-    },
-    {
-      id: 3,
-      fullName: "Alice Johnson",
-      email: "alice.johnson@example.com",
-      projectName: "Project Gamma",
-      status: "Pending",
-    },
-  ];
-
   const [requests, setRequests] = useState([]);
+  const token = localStorage.getItem('token'); // or sessionStorage
+
+  const fetchRequests = async () => {
+    try {
+      const response = await fetch('http://localhost/get_requests.php', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Not authorized');
+      }
+
+      const data = await response.json();
+      setRequests(data);
+    } catch (error) {
+      console.error('Failed to fetch requests:', error);
+      alert('You are not authorized. Please login.');
+      window.location.href = '/login';
+    }
+  };
 
   useEffect(() => {
-    setRequests(initialRequests);
+    fetchRequests();
   }, []);
 
-  const handleAction = (id, action) => {
-    setRequests((prevRequests) =>
-      prevRequests.map((req) =>
-        req.id === id
-          ? { ...req, status: action === "accept" ? "Accepted" : "Declined" }
-          : req
-      )
-    );
+  const handleAction = async (id, action) => {
+    const endpoint =
+      action === 'accept'
+        ? '/http://localhostaprove_request.php'
+        : 'http://localhost/refuse_request.php';
+
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id_cerere: id }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setRequests((prev) =>
+          prev.map((req) =>
+            req.id === id
+              ? { ...req, status: action === 'accept' ? 'accepted' : 'refused' }
+              : req
+          )
+        );
+      } else {
+        alert(result.error || 'Action failed');
+      }
+    } catch (error) {
+      console.error('Action error:', error);
+      alert('Server error. Try again.');
+    }
   };
 
   return (
@@ -52,36 +75,47 @@ const RequestsTable = () => {
               <th className="py-2 px-4 border border-gray-300">Email</th>
               <th className="py-2 px-4 border border-gray-300">Project Name</th>
               <th className="py-2 px-4 border border-gray-300">Status</th>
-              <th className="py-2 px-4 border border-gray-300 text-center">Actions</th>
+              <th className="py-2 px-4 border border-gray-300 text-center">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody>
             {requests.length > 0 ? (
               requests.map((req) => (
                 <tr key={req.id} className="hover:bg-gray-50">
-                  <td className="py-2 px-4 border border-gray-300">{req.fullName}</td>
-                  <td className="py-2 px-4 border border-gray-300">{req.email}</td>
-                  <td className="py-2 px-4 border border-gray-300">{req.projectName}</td>
-                  <td className="py-2 px-4 border border-gray-300">{req.status}</td>
+                  <td className="py-2 px-4 border border-gray-300">
+                    {req.fullName}
+                  </td>
+                  <td className="py-2 px-4 border border-gray-300">
+                    {req.email}
+                  </td>
+                  <td className="py-2 px-4 border border-gray-300">
+                    {req.projectName}
+                  </td>
+                  <td className="py-2 px-4 border border-gray-300 capitalize">
+                    {req.status}
+                  </td>
                   <td className="py-2 px-4 border border-gray-300 flex justify-center space-x-2">
-                    {req.status === "Pending" && (
+                    {req.status === 'pending' ? (
                       <>
                         <button
-                          onClick={() => handleAction(req.id, "accept")}
+                          onClick={() => handleAction(req.id, 'accept')}
                           className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded"
                         >
                           Accept
                         </button>
                         <button
-                          onClick={() => handleAction(req.id, "decline")}
+                          onClick={() => handleAction(req.id, 'decline')}
                           className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
                         >
                           Decline
                         </button>
                       </>
-                    )}
-                    {req.status !== "Pending" && (
-                      <span className="text-sm font-semibold text-gray-700">{req.status}</span>
+                    ) : (
+                      <span className="text-sm font-semibold text-gray-700">
+                        {req.status}
+                      </span>
                     )}
                   </td>
                 </tr>

@@ -30,10 +30,11 @@ const RequestsTable = () => {
   }, []);
 
   const handleAction = async (id, action) => {
+    const baseURL = 'http://localhost'; // Apache backend base URL
     const endpoint =
       action === 'accept'
-        ? '/http://localhostaprove_request.php'
-        : 'http://localhost/refuse_request.php';
+        ? `${baseURL}/aprove_request.php`
+        : `${baseURL}/refuse_request.php`;
 
     try {
       const response = await fetch(endpoint, {
@@ -47,20 +48,20 @@ const RequestsTable = () => {
 
       const result = await response.json();
 
-      if (response.ok) {
-        setRequests((prev) =>
-          prev.map((req) =>
-            req.id === id
-              ? { ...req, status: action === 'accept' ? 'accepted' : 'refused' }
-              : req
-          )
-        );
-      } else {
-        alert(result.error || 'Action failed');
+      if (!response.ok) {
+        throw new Error(result.error || 'Action failed');
       }
+
+      setRequests((prev) =>
+        prev.map((req) =>
+          req.id === id
+            ? { ...req, status: action === 'accept' ? 'accepted' : 'refused' }
+            : req
+        )
+      );
     } catch (error) {
       console.error('Action error:', error);
-      alert('Server error. Try again.');
+      alert(error.message || 'Server error. Try again.');
     }
   };
 

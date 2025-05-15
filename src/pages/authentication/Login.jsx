@@ -37,7 +37,6 @@ const Login = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col lg:flex-row">
-      {/* Sidebar */}
       <div className="bg-blue-800 lg:w-1/3 p-6 flex flex-col justify-between">
         <div>
           <div className="flex items-center mb-12">
@@ -59,7 +58,6 @@ const Login = () => {
         </div>
       </div>
 
-      {/* Login Form */}
       <div className="lg:w-2/3 flex items-center justify-center p-8">
         <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
           <h2 className="text-2xl font-semibold text-gray-800 mb-2">Sign In</h2>
@@ -81,7 +79,7 @@ const Login = () => {
               >
                 Email
               </label>
-              <div className="flex items-center border border-gray-300 rounded-lg px-3 py-2">
+              <div className="flex items-center border border-gray-300 rounded-lg px-3 py-2 focus-within:ring-1">
                 <User size={16} className="text-gray-400 mr-2" />
                 <input
                   id="email"
@@ -102,7 +100,7 @@ const Login = () => {
               >
                 Password
               </label>
-              <div className="flex items-center border border-gray-300 rounded-lg px-3 py-2">
+              <div className="flex items-center border border-gray-300 rounded-lg px-3 py-2 focus-within:ring-1">
                 <Lock size={16} className="text-gray-400 mr-2" />
                 <input
                   id="password"

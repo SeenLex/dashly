@@ -83,7 +83,7 @@ const Register = () => {
 
       if (res.ok) {
         alert('Registration request submitted. Await admin approval.');
-        navigate('/login');
+        navigate('/');
       } else {
         alert(data.error || 'Registration failed');
       }
@@ -134,25 +134,47 @@ const Register = () => {
           </p>
 
           <form onSubmit={handleRegister} className="space-y-5">
-            <InputField
-              label="Full Name"
-              id="fullName"
-              icon={<User size={16} className="text-gray-400 mr-2" />}
-              value={form.fullName}
-              onChange={(e) => setForm({ ...form, fullName: e.target.value })}
-              type="text"
-              placeholder="Enter your full name"
-            />
+            <div>
+              <label
+                htmlFor="fullName"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Full Name
+              </label>
+              <div className="flex items-center border border-gray-300 rounded-lg px-3 py-2 focus-within:ring-1">
+                <User size={16} className="text-gray-400 mr-2" />
+                <input
+                  id="fullName"
+                  type="text"
+                  placeholder="Enter your full name"
+                  value={form.fullName}
+                  onChange={(e) =>
+                    setForm({ ...form, fullName: e.target.value })
+                  }
+                  className="bg-transparent outline-none flex-1 text-gray-800 text-base"
+                />
+              </div>
+            </div>
 
-            <InputField
-              label="Email Address"
-              id="email"
-              icon={<Mail size={16} className="text-gray-400 mr-2" />}
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-              type="email"
-              placeholder="Enter your email address"
-            />
+            <div>
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Email Address
+              </label>
+              <div className="flex items-center border border-gray-300 rounded-lg px-3 py-2 focus-within:ring-1">
+                <Mail size={16} className="text-gray-400 mr-2" />
+                <input
+                  id="email"
+                  type="email"
+                  placeholder="Enter your email address"
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  className="bg-transparent outline-none flex-1 text-gray-800 text-base"
+                />
+              </div>
+            </div>
 
             <div className="relative">
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -207,28 +229,67 @@ const Register = () => {
                 </div>
               )}
             </div>
+            <div>
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Password
+              </label>
+              <div className="flex items-center border border-gray-300 rounded-lg px-3 py-2 focus-within:ring-1">
+                <Lock size={16} className="text-gray-400 mr-2" />
+                <input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Create a password"
+                  value={form.password}
+                  onChange={(e) =>
+                    setForm({ ...form, password: e.target.value })
+                  }
+                  className="bg-transparent outline-none flex-1 text-gray-800 text-base"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="text-gray-400 hover:text-gray-600 ml-2"
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+            </div>
 
-            <PasswordField
-              label="Password"
-              id="password"
-              show={showPassword}
-              toggle={() => setShowPassword(!showPassword)}
-              value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
-              placeholder="Create a password"
-            />
-
-            <PasswordField
-              label="Confirm Password"
-              id="confirmPassword"
-              show={showConfirmPassword}
-              toggle={() => setShowConfirmPassword(!showConfirmPassword)}
-              value={form.confirmPassword}
-              onChange={(e) =>
-                setForm({ ...form, confirmPassword: e.target.value })
-              }
-              placeholder="Confirm your password"
-            />
+            <div>
+              <label
+                htmlFor="confirmPassword"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Confirm Password
+              </label>
+              <div className="flex items-center border border-gray-300 rounded-lg px-3 py-2 focus-within:ring-1">
+                <Lock size={16} className="text-gray-400 mr-2" />
+                <input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  placeholder="Confirm your password"
+                  value={form.confirmPassword}
+                  onChange={(e) =>
+                    setForm({ ...form, confirmPassword: e.target.value })
+                  }
+                  className="bg-transparent outline-none flex-1 text-gray-800 text-base"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="text-gray-400 hover:text-gray-600 ml-2"
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff size={16} />
+                  ) : (
+                    <Eye size={16} />
+                  )}
+                </button>
+              </div>
+            </div>
 
             <button
               type="submit"
@@ -255,72 +316,5 @@ const Register = () => {
     </div>
   );
 };
-
-const InputField = ({
-  label,
-  id,
-  icon,
-  type,
-  placeholder,
-  value,
-  onChange,
-}) => (
-  <div>
-    <label
-      htmlFor={id}
-      className="block text-sm font-medium text-gray-700 mb-1"
-    >
-      {label}
-    </label>
-    <div className="flex items-center border border-gray-300 rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500">
-      {icon}
-      <input
-        id={id}
-        type={type}
-        placeholder={placeholder}
-        value={value}
-        onChange={onChange}
-        className="bg-transparent outline-none flex-1 text-gray-800 text-base"
-      />
-    </div>
-  </div>
-);
-
-const PasswordField = ({
-  label,
-  id,
-  show,
-  toggle,
-  value,
-  onChange,
-  placeholder,
-}) => (
-  <div>
-    <label
-      htmlFor={id}
-      className="block text-sm font-medium text-gray-700 mb-1"
-    >
-      {label}
-    </label>
-    <div className="flex items-center border border-gray-300 rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500">
-      <Lock size={16} className="text-gray-400 mr-2" />
-      <input
-        id={id}
-        type={show ? 'text' : 'password'}
-        placeholder={placeholder}
-        value={value}
-        onChange={onChange}
-        className="bg-transparent outline-none flex-1 text-gray-800 text-base"
-      />
-      <button
-        type="button"
-        onClick={toggle}
-        className="text-gray-400 hover:text-gray-600"
-      >
-        {show ? <EyeOff size={16} /> : <Eye size={16} />}
-      </button>
-    </div>
-  </div>
-);
 
 export default Register;

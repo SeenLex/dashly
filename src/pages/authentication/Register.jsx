@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useRef, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import {
   Eye,
   EyeOff,
@@ -8,40 +8,37 @@ import {
   Mail,
   ArrowRight,
   FolderCog,
-} from 'lucide-react';
+} from "lucide-react";
 
 const Register = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [form, setForm] = useState({
-    fullName: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    projectId: '',
+    fullName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    projectId: "",
   });
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
 
   const projectOptions = [
-    { id: 1, name: 'Project Orange' },
-    { id: 2, name: 'Project Telekom' },
-    { id: 3, name: 'Project ' },
+    { id: 1, name: "Project Orange" },
+    { id: 2, name: "Project Telekom" },
+    { id: 3, name: "Project " },
   ];
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target)
-      ) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsDropdownOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
@@ -49,7 +46,7 @@ const Register = () => {
     e.preventDefault();
 
     if (form.password !== form.confirmPassword) {
-      alert('Passwords do not match');
+      alert("Passwords do not match");
       return;
     }
 
@@ -61,23 +58,22 @@ const Register = () => {
     };
 
     try {
-      const res = await fetch('http://localhost/request_register.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("http://localhost/request_register.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-
       const data = await res.json();
 
       if (res.ok) {
-        alert('Registration request submitted. Await admin approval.');
-        navigate('/login');
+        alert("Registration request submitted. Await admin approval.");
+        navigate("/login");
       } else {
-        alert(data.error || 'Registration failed');
+        alert(data.error || "Registration failed");
       }
     } catch (err) {
       console.error(err);
-      alert('An error occurred. Please try again later.');
+      alert("An error occurred. Please try again later.");
     }
   };
 
@@ -91,20 +87,12 @@ const Register = () => {
       <div className="bg-blue-800 lg:w-1/3 p-4 sm:p-6 lg:p-8 flex flex-col justify-between">
         <div>
           <div className="flex items-center mb-6 sm:mb-12">
-            <span className="text-white text-4xl sm:text-6xl font-bold">
-              Dash
-            </span>
-            <span className="text-red-400 text-3xl sm:text-5xl font-bold">
-              ly
-            </span>
+            <span className="text-white text-4xl sm:text-6xl font-bold">Dash</span>
+            <span className="text-red-400 text-3xl sm:text-5xl font-bold">ly</span>
           </div>
           <div className="hidden sm:block">
-            <h1 className="text-2xl font-bold text-white mb-3">
-              Create your Account
-            </h1>
-            <p className="text-blue-100 mb-6">
-              Join our platform — all in one seamless view!
-            </p>
+            <h1 className="text-2xl font-bold text-white mb-3">Create your Account</h1>
+            <p className="text-blue-100 mb-6">Join our platform — all in one seamless view!</p>
           </div>
         </div>
         <div className="text-blue-200 text-xs sm:text-sm pt-2">
@@ -114,56 +102,64 @@ const Register = () => {
 
       <div className="lg:w-2/3 flex items-center justify-center p-6">
         <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-2">
-            Request Access
-          </h2>
+          <h2 className="text-2xl font-semibold text-gray-800 mb-2">Request Access</h2>
           <p className="text-gray-500 text-sm mb-6">
             Fill in your details to create a new account
           </p>
 
           <form onSubmit={handleRegister} className="space-y-5">
-            <InputField
-              label="Full Name"
-              id="fullName"
-              icon={<User size={16} className="text-gray-400 mr-2" />}
-              value={form.fullName}
-              onChange={(e) => setForm({ ...form, fullName: e.target.value })}
-              type="text"
-              placeholder="Enter your full name"
-            />
+            <div>
+              <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
+                Full Name
+              </label>
+              <div className="flex items-center border border-gray-300 rounded-lg px-3 py-2 focus-within:ring-1">
+                <User size={16} className="text-gray-400 mr-2" />
+                <input
+                  id="fullName"
+                  type="text"
+                  placeholder="Enter your full name"
+                  value={form.fullName}
+                  onChange={(e) => setForm({ ...form, fullName: e.target.value })}
+                  className="bg-transparent outline-none flex-1 text-gray-800 text-base"
+                />
+              </div>
+            </div>
 
-            <InputField
-              label="Email Address"
-              id="email"
-              icon={<Mail size={16} className="text-gray-400 mr-2" />}
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-              type="email"
-              placeholder="Enter your email address"
-            />
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                Email Address
+              </label>
+              <div className="flex items-center border border-gray-300 rounded-lg px-3 py-2 focus-within:ring-1">
+                <Mail size={16} className="text-gray-400 mr-2" />
+                <input
+                  id="email"
+                  type="email"
+                  placeholder="Enter your email address"
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  className="bg-transparent outline-none flex-1 text-gray-800 text-base"
+                />
+              </div>
+            </div>
 
             <div className="relative">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Project
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Project</label>
               <button
                 type="button"
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="w-full flex items-center justify-between border border-gray-300 rounded-lg px-3 py-2 bg-white hover:bg-gray-50 focus:outline-none"
+                className="w-full flex items-center justify-between border border-gray-300 rounded-lg px-3 py-2 bg-white hover:bg-gray-50 focus:outline-none focus-within:ring-1"
               >
                 <div className="flex items-center">
                   <FolderCog size={16} className="text-gray-400 mr-2" />
                   <span>
                     {form.projectId
-                      ? projectOptions.find(
-                          (p) => p.id.toString() === form.projectId
-                        )?.name
-                      : 'Select your project'}
+                      ? projectOptions.find((p) => p.id.toString() === form.projectId)?.name
+                      : "Select your project"}
                   </span>
                 </div>
                 <svg
                   className={`w-4 h-4 transition-transform duration-200 ${
-                    isDropdownOpen ? 'transform rotate-180' : ''
+                    isDropdownOpen ? "transform rotate-180" : ""
                   }`}
                   fill="none"
                   stroke="currentColor"
@@ -172,7 +168,6 @@ const Register = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
-
               {isDropdownOpen && (
                 <div
                   ref={dropdownRef}
@@ -191,27 +186,53 @@ const Register = () => {
               )}
             </div>
 
-            <PasswordField
-              label="Password"
-              id="password"
-              show={showPassword}
-              toggle={() => setShowPassword(!showPassword)}
-              value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
-              placeholder="Create a password"
-            />
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                Password
+              </label>
+              <div className="flex items-center border border-gray-300 rounded-lg px-3 py-2 focus-within:ring-1">
+                <Lock size={16} className="text-gray-400 mr-2" />
+                <input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Create a password"
+                  value={form.password}
+                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                  className="bg-transparent outline-none flex-1 text-gray-800 text-base"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="text-gray-400 hover:text-gray-600 ml-2"
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+            </div>
 
-            <PasswordField
-              label="Confirm Password"
-              id="confirmPassword"
-              show={showConfirmPassword}
-              toggle={() => setShowConfirmPassword(!showConfirmPassword)}
-              value={form.confirmPassword}
-              onChange={(e) =>
-                setForm({ ...form, confirmPassword: e.target.value })
-              }
-              placeholder="Confirm your password"
-            />
+            <div>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+                Confirm Password
+              </label>
+              <div className="flex items-center border border-gray-300 rounded-lg px-3 py-2 focus-within:ring-1">
+                <Lock size={16} className="text-gray-400 mr-2" />
+                <input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="Confirm your password"
+                  value={form.confirmPassword}
+                  onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
+                  className="bg-transparent outline-none flex-1 text-gray-800 text-base"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="text-gray-400 hover:text-gray-600 ml-2"
+                >
+                  {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+            </div>
 
             <button
               type="submit"
@@ -225,10 +246,7 @@ const Register = () => {
           <div className="text-center mt-6">
             <p className="text-gray-600 text-sm">
               Already have an account?
-              <Link
-                to="/"
-                className="text-blue-700 font-medium ml-1 hover:text-blue-800"
-              >
+              <Link to="/" className="text-blue-700 font-medium ml-1 hover:text-blue-800">
                 Sign In
               </Link>
             </p>
@@ -238,72 +256,5 @@ const Register = () => {
     </div>
   );
 };
-
-const InputField = ({
-  label,
-  id,
-  icon,
-  type,
-  placeholder,
-  value,
-  onChange,
-}) => (
-  <div>
-    <label
-      htmlFor={id}
-      className="block text-sm font-medium text-gray-700 mb-1"
-    >
-      {label}
-    </label>
-    <div className="flex items-center border border-gray-300 rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500">
-      {icon}
-      <input
-        id={id}
-        type={type}
-        placeholder={placeholder}
-        value={value}
-        onChange={onChange}
-        className="bg-transparent outline-none flex-1 text-gray-800 text-base"
-      />
-    </div>
-  </div>
-);
-
-const PasswordField = ({
-  label,
-  id,
-  show,
-  toggle,
-  value,
-  onChange,
-  placeholder,
-}) => (
-  <div>
-    <label
-      htmlFor={id}
-      className="block text-sm font-medium text-gray-700 mb-1"
-    >
-      {label}
-    </label>
-    <div className="flex items-center border border-gray-300 rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500">
-      <Lock size={16} className="text-gray-400 mr-2" />
-      <input
-        id={id}
-        type={show ? 'text' : 'password'}
-        placeholder={placeholder}
-        value={value}
-        onChange={onChange}
-        className="bg-transparent outline-none flex-1 text-gray-800 text-base"
-      />
-      <button
-        type="button"
-        onClick={toggle}
-        className="text-gray-400 hover:text-gray-600"
-      >
-        {show ? <EyeOff size={16} /> : <Eye size={16} />}
-      </button>
-    </div>
-  </div>
-);
 
 export default Register;

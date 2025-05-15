@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 const RequestsTable = () => {
   const [requests, setRequests] = useState([]);
-  const token = localStorage.getItem('token'); // or sessionStorage
+  const token = localStorage.getItem('token');
 
   const fetchRequests = async () => {
     try {
@@ -30,7 +30,7 @@ const RequestsTable = () => {
   }, []);
 
   const handleAction = async (id, action) => {
-    const baseURL = 'http://localhost'; // Apache backend base URL
+    const baseURL = 'http://localhost';
     const endpoint =
       action === 'accept'
         ? `${baseURL}/aprove_request.php`

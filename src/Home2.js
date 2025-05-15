@@ -22,16 +22,27 @@ export default function Home2() {
     setRole(userRole);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    const token = localStorage.getItem('token');
+
+    try {
+      await fetch('http://localhost/logout.php', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+    } catch (err) {
+      console.error('Logout API call failed:', err);
+    }
+
     localStorage.removeItem('token');
     localStorage.removeItem('role');
     setAuthenticated(false);
     setRole('');
+    window.location.href = '/';
   };
-
-  if (!authenticated) {
-    return <Login onLogin={handleLoginSuccess} />;
-  }
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300">

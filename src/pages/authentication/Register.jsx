@@ -23,23 +23,35 @@ const Register = () => {
   });
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
-
-  const projectOptions = [
-    { id: 1, name: 'Project Orange' },
-    { id: 2, name: 'Project Telekom' },
-    { id: 3, name: 'Project ' },
-  ];
+  const [projectOptions, setProjectOptions] = useState([]);
 
   useEffect(() => {
+    // Dropdown outside click
     const handleClickOutside = (event) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target)
-      ) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsDropdownOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
+
+    // Fetch projects
+    const fetchProjects = async () => {
+      try {
+        const res = await fetch('http://localhost/get_projects.php');
+        const data = await res.json();
+        setProjectOptions(
+          data.map((proj) => ({
+            id: proj.id_project,
+            name: proj.provider,
+          }))
+        );
+      } catch (error) {
+        console.error('Failed to load projects', error);
+      }
+    };
+
+    fetchProjects();
+
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
@@ -169,7 +181,12 @@ const Register = () => {
                   stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
                 </svg>
               </button>
 

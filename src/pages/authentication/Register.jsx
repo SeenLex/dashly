@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import {
   Eye,
@@ -21,6 +21,29 @@ const Register = () => {
     confirmPassword: '',
     projectId: '',
   });
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  const projectOptions = [
+    { id: 1, name: 'Project Orange' },
+    { id: 2, name: 'Project Telekom' },
+    { id: 3, name: 'Project ' },
+  ];
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target)
+      ) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -56,6 +79,11 @@ const Register = () => {
       console.error(err);
       alert('An error occurred. Please try again later.');
     }
+  };
+
+  const handleProjectSelect = (project) => {
+    setForm({ ...form, projectId: project.id.toString() });
+    setIsDropdownOpen(false);
   };
 
   return (
@@ -114,15 +142,54 @@ const Register = () => {
               placeholder="Enter your email address"
             />
 
-            <InputField
-              label="Project ID"
-              id="projectId"
-              icon={<FolderCog size={16} className="text-gray-400 mr-2" />}
-              value={form.projectId}
-              onChange={(e) => setForm({ ...form, projectId: e.target.value })}
-              type="number"
-              placeholder="Enter your project ID"
-            />
+            <div className="relative">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Project
+              </label>
+              <button
+                type="button"
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className="w-full flex items-center justify-between border border-gray-300 rounded-lg px-3 py-2 bg-white hover:bg-gray-50 focus:outline-none"
+              >
+                <div className="flex items-center">
+                  <FolderCog size={16} className="text-gray-400 mr-2" />
+                  <span>
+                    {form.projectId
+                      ? projectOptions.find(
+                          (p) => p.id.toString() === form.projectId
+                        )?.name
+                      : 'Select your project'}
+                  </span>
+                </div>
+                <svg
+                  className={`w-4 h-4 transition-transform duration-200 ${
+                    isDropdownOpen ? 'transform rotate-180' : ''
+                  }`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {isDropdownOpen && (
+                <div
+                  ref={dropdownRef}
+                  className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg max-h-60 overflow-y-auto shadow-lg"
+                >
+                  {projectOptions.map((project) => (
+                    <button
+                      key={project.id}
+                      className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                      onClick={() => handleProjectSelect(project)}
+                    >
+                      {project.name}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
 
             <PasswordField
               label="Password"

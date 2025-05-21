@@ -134,6 +134,21 @@ export default function Dashboard() {
 
       <StatsCards stats={stats} />
 
+      
+
+      {/* Dacă e superuser - buton Adaugă Ticket */}
+      {role === "superuser" && (
+        <div className="flex justify-center mb-8">
+          <button
+            onClick={() => setShowAddForm(true)}
+            className="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+          >
+            Adaugă Ticket Nou
+          </button>
+        </div>
+      )}
+
+      {/* Lista Tickete */}
       {loading ? (
         <p className="text-center text-gray-400">Se încarcă ticketele...</p>
       ) : tickets.length === 0 ? (

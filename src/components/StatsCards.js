@@ -26,7 +26,7 @@ export default function StatsCards({ stats = { total: 0, closed: 0, avgTime: 0, 
       <div className="bg-white p-6 rounded-lg shadow text-center border-l-4 border-yellow-500">
         <FaClock className="mx-auto mb-2 text-2xl text-yellow-600" />
         <h2 className="text-sm text-gray-500">Timp Mediu Rezolvare (h)</h2>
-        <p className="text-2xl font-semibold text-gray-800">{stats.avgTime.toFixed(1)}</p>
+        <p className="text-2xl font-semibold text-gray-800">{stats.avgTime?.toFixed(1)}</p>
       </div>
     </div>
   );

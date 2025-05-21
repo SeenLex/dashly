@@ -1,6 +1,7 @@
 import { useState } from "react";
 
-export default function TicketList({ tickets, onDelete, onAdd, filters, setFilters }) {
+export default function TicketList({ tickets, onDelete, onAdd, filters, setFilters, currentPage, ticketsPerPage }) {
+
   const [expandedDescriptionId, setExpandedDescriptionId] = useState(null);
   const [expandedCommentId, setExpandedCommentId] = useState(null);
   const [expandedStartId, setExpandedStartId] = useState(null);
@@ -117,15 +118,17 @@ export default function TicketList({ tickets, onDelete, onAdd, filters, setFilte
           <tbody>
             {tickets.map((ticket, index) => (
               <tr key={ticket.id} className="text-gray-700 dark:text-gray-200">
-                <td className="px-4 py-2 border">{ticket.id}</td>
+                <td className="px-4 py-2 border">
+                  {(currentPage - 1) * ticketsPerPage + index + 1}
+                </td>
+
                 <td className="px-4 py-2 border">{ticket.ticket_id}</td>
                 <td className="px-4 py-2 border">{ticket.status}</td>
-                <td className={`px-4 py-2 border font-medium ${
-                  ticket.priority_name === "Critical" ? "bg-red-200 dark:bg-red-700" :
-                  ticket.priority_name === "High" ? "bg-orange-200 dark:bg-orange-700" :
-                  ticket.priority_name === "Medium" ? "bg-yellow-200 dark:bg-yellow-700" :
-                  "bg-green-200 dark:bg-green-700"
-                }`}>
+                <td className={`px-4 py-2 border font-medium ${ticket.priority_name === "Critical" ? "bg-red-200 dark:bg-red-700" :
+                    ticket.priority_name === "High" ? "bg-orange-200 dark:bg-orange-700" :
+                      ticket.priority_name === "Medium" ? "bg-yellow-200 dark:bg-yellow-700" :
+                        "bg-green-200 dark:bg-green-700"
+                  }`}>
                   {ticket.priority_name}
                 </td>
                 <td className="px-4 py-2 border">{ticket.duration_hours || "-"}</td>

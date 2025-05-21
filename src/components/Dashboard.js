@@ -12,7 +12,9 @@ export default function Dashboard() {
   const [ticketsPerPage, setTicketsPerPage] = useState(10);
   const role = localStorage.getItem("role");
   const [showAddForm, setShowAddForm] = useState(false);
-
+  const role = localStorage.getItem("role");
+  const [showAddForm, setShowAddForm] = useState(false);
+  
   const [filters, setFilters] = useState({
     search: "",
     priority: "",
@@ -124,8 +126,13 @@ export default function Dashboard() {
             key={p}
             onClick={() => handlePeriodChange(p)}
             className={`px-4 py-2 text-sm rounded-full ${period === p
+<<<<<<< HEAD
                 ? "bg-blue-600 text-white"
                 : "bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-300"
+=======
+              ? "bg-blue-600 text-white"
+              : "bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-300"
+>>>>>>> 62dc13037d9ecd9f137c3e88e225f3c6647d9d73
               }`}
           >
             {p === "day" ? "Azi" : p === "week" ? "Săptămână" : p === "month" ? "Lună" : "An"}
@@ -167,7 +174,10 @@ export default function Dashboard() {
             }}
             onDelete={handleDeleteTicket}
             onAdd={fetchData}
+            currentPage={currentPage} // 👈 adaugă
+            ticketsPerPage={ticketsPerPage} // 👈 adaugă
           />
+
 
           {/* Per page selector */}
           <div className="flex justify-end mb-4">
@@ -195,8 +205,13 @@ export default function Dashboard() {
                 key={i}
                 onClick={() => setCurrentPage(i + 1)}
                 className={`px-3 py-1 rounded text-sm ${currentPage === i + 1
+<<<<<<< HEAD
                     ? "bg-blue-600 text-white"
                     : "bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-white hover:bg-gray-400"
+=======
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-white hover:bg-gray-400"
+>>>>>>> 62dc13037d9ecd9f137c3e88e225f3c6647d9d73
                   }`}
               >
                 {i + 1}

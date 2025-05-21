@@ -8,7 +8,7 @@ export default function useAutoLogout(timeoutMinutes = 30) {
       clearTimeout(timer);
       timer = setTimeout(() => {
         localStorage.removeItem("token");
-        window.location.href = "/login"; // Redirect la login
+        window.location.href = "/"; // Redirect la login
       }, timeoutMinutes * 60 * 1000);
     };
 

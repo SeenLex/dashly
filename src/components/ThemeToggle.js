@@ -4,11 +4,26 @@ import { FaMoon, FaSun } from "react-icons/fa";
 export default function ThemeToggle() {
   const [darkMode, setDarkMode] = useState(false);
 
+  // ✅ La montare, citește preferința din localStorage
+  useEffect(() => {
+    const storedTheme = localStorage.getItem("theme");
+    if (storedTheme === "dark") {
+      setDarkMode(true);
+      document.documentElement.classList.add("dark");
+    } else {
+      setDarkMode(false);
+      document.documentElement.classList.remove("dark");
+    }
+  }, []);
+
+  // ✅ Aplică tema și salvează în localStorage
   useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
     } else {
       document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
     }
   }, [darkMode]);
 

@@ -1,6 +1,16 @@
+// ✅ UPDATED AdminPanel.js
 import { useState, useEffect } from "react";
+import RequestsTable from "./RequestsTable"; // ajustează calea dacă este diferită
+
 
 export default function AdminPanel() {
+  const [expandedDescriptionId, setExpandedDescriptionId] = useState(null);
+  const [expandedCommentId, setExpandedCommentId] = useState(null);
+  const [expandedStartId, setExpandedStartId] = useState(null);
+  const [expandedModifiedId, setExpandedModifiedId] = useState(null);
+  const [expandedClosedId, setExpandedClosedId] = useState(null);
+
+
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedTicket, setSelectedTicket] = useState(null);
@@ -12,7 +22,6 @@ export default function AdminPanel() {
     priority_id: "",
     assigned_person: ""
   });
-
 
   const [filters, setFilters] = useState({
     search: "",
@@ -45,7 +54,6 @@ export default function AdminPanel() {
 
 
 
-
   const [visibleCount, setVisibleCount] = useState(20);
   const role = localStorage.getItem("role");
 
@@ -68,7 +76,7 @@ export default function AdminPanel() {
     fetch("http://localhost/tickets-api/update_ticket.php", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: ticketId, status: newStatus }),
+      body: JSON.stringify({ id: ticketId, status: newStatus })
     })
       .then((res) => res.json())
       .then((data) => {
@@ -91,7 +99,7 @@ export default function AdminPanel() {
     if (!window.confirm("Sigur dorești să ștergi acest ticket?")) return;
 
     fetch(`http://localhost/tickets-api/delete_ticket.php?id=${ticketId}`, {
-      method: "DELETE",
+      method: "DELETE"
     })
       .then((res) => res.json())
       .then((data) => {
@@ -114,7 +122,7 @@ export default function AdminPanel() {
     fetch("http://localhost/tickets-api/add_ticket.php", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newTicket),
+      body: JSON.stringify(newTicket)
     })
       .then((res) => res.json())
       .then((data) => {
@@ -126,7 +134,7 @@ export default function AdminPanel() {
             incident_title: "",
             project: "",
             priority_id: "",
-            assigned_person: "",
+            assigned_person: ""
           });
         } else {
           alert("Eroare la adăugare ticket.");
@@ -138,15 +146,27 @@ export default function AdminPanel() {
       });
   };
 
-
+ const formatTime = (datetime) => {
+    if (!datetime) return "N/A";
+    const dateObj = new Date(datetime);
+    if (isNaN(dateObj)) return datetime;
+    return dateObj.toLocaleTimeString("ro-RO", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+  };
 
   return (
     <div className="p-6">
       <h1 className="text-3xl font-bold mb-8 text-center text-gray-800 dark:text-gray-100">
         Admin Panel - Management Tickete
       </h1>
+      <div className="mt-12">
+        <RequestsTable />
+      </div>
 
-      {role === "superuser" && (
+      {role === "super_admin" && (
         <div className="flex justify-center mb-6">
           <button
             onClick={() => setShowAddForm(true)}
@@ -207,10 +227,11 @@ export default function AdminPanel() {
           <thead>
             <tr className="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-left text-sm uppercase">
               <th className="px-4 py-2 border border-gray-300 dark:border-gray-600">ID</th>
-              <th className="px-4 py-2 border border-gray-300 dark:border-gray-600">Incident</th>
+              <th className="px-4 py-2 border border-gray-300 dark:border-gray-600">Incident No</th>
               <th className="px-4 py-2 border border-gray-300 dark:border-gray-600">Status</th>
               <th className="px-4 py-2 border border-gray-300 dark:border-gray-600">Prioritate</th>
               <th className="px-4 py-2 border border-gray-300 dark:border-gray-600">SLA</th>
+              <th className="px-4 py-2 border border-gray-300 dark:border-gray-600">IN/OUT SLA</th>
               <th className="px-4 py-2 border border-gray-300 dark:border-gray-600">Proiect</th>
               <th className="px-4 py-2 border border-gray-300 dark:border-gray-600">Start Date</th>
               <th className="px-4 py-2 border border-gray-300 dark:border-gray-600">Last Modified</th>
@@ -231,7 +252,7 @@ export default function AdminPanel() {
             {currentTickets.map((ticket) => (
               <tr key={ticket.id} className="text-gray-700 dark:text-gray-200">
                 <td className="px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800 font-semibold">#{ticket.id}</td>
-                <td className="px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800">{ticket.incident_title}</td>
+                <td className="px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800">NUMBER</td>
                 <td className="px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800">{ticket.status}</td>
                 <td className={`px-4 py-2 border dark:border-gray-600 font-medium ${ticket.priority_name === "Critical"
                   ? "bg-red-200 dark:bg-red-700"
@@ -244,12 +265,80 @@ export default function AdminPanel() {
                   {ticket.priority_name}
                 </td>
                 <td className="px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800">{ticket.duration_hours}</td>
+                <td className="px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800">{ticket.IN_OUT_SLA}</td>
                 <td className="px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800">{ticket.project}</td>
-                <td className="px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800">{ticket.start_date}</td>
-                <td className="px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800">{ticket.last_modified_date || "N/A"}</td>
-                <td className="px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800">{ticket.closed_date || "N/A"}</td>
-                <td className="px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800">{ticket.description || "-"}</td>
-                <td className="px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800">{ticket.comment || "-"}</td>
+                {/* START DATE */}
+                <td
+                  className="px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800 cursor-pointer"
+                  onClick={() =>
+                    setExpandedStartId(
+                      expandedStartId === ticket.id ? null : ticket.id
+                    )
+                  }
+                  title={ticket.start_date}
+                >
+                  {expandedStartId === ticket.id
+                    ? ticket.start_date
+                    : formatTime(ticket.start_date)}
+                </td>
+
+                {/* Last Modified Date */}
+                <td
+                  className="px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800 cursor-pointer"
+                  onClick={() =>
+                    setExpandedModifiedId(expandedModifiedId === ticket.id ? null : ticket.id)
+                  }
+                  title={ticket.last_modified_date || "N/A"}
+                >
+                  {expandedModifiedId === ticket.id
+                    ? ticket.last_modified_date || "N/A"
+                    : formatTime(ticket.last_modified_date)}
+                </td>
+                {/* Closed Date */}
+                <td
+                  className="px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800 cursor-pointer"
+                  onClick={() =>
+                    setExpandedClosedId(expandedClosedId === ticket.id ? null : ticket.id)
+                  }
+                  title={ticket.closed_date || "N/A"}
+                >
+                  {expandedClosedId === ticket.id
+                    ? ticket.closed_date || "N/A"
+                    : formatTime(ticket.closed_date)}
+                </td>
+                {/* DESCRIPTION */}
+                <td
+                  className={`px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800 max-w-[200px] cursor-pointer ${expandedDescriptionId !== String(ticket.id) ? "truncate" : ""
+                    }`}
+                  title={ticket.description}
+                  onClick={() =>
+                    setExpandedDescriptionId(
+                      expandedDescriptionId === String(ticket.id) ? null : String(ticket.id)
+                    )
+                  }
+                >
+                  {expandedDescriptionId === String(ticket.id)
+                    ? ticket.description || "-"
+                    : (ticket.description || "-").slice(0, 100) +
+                    ((ticket.description?.length || 0) > 100 ? "..." : "")}
+                </td>
+
+                {/* COMMENT */}
+                <td
+                  className={`px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800 max-w-[200px] cursor-pointer ${expandedCommentId !== String(ticket.id) ? "truncate" : ""
+                    }`}
+                  title={ticket.comment}
+                  onClick={() =>
+                    setExpandedCommentId(
+                      expandedCommentId === String(ticket.id) ? null : String(ticket.id)
+                    )
+                  }
+                >
+                  {expandedCommentId === String(ticket.id)
+                    ? ticket.comment || "-"
+                    : (ticket.comment || "-").slice(0, 100) +
+                    ((ticket.comment?.length || 0) > 100 ? "..." : "")}
+                </td>
                 <td className="px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800">{ticket.assigned_person || "Neasignat"}</td>
                 <td className="px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800">{ticket.team_assigned_person || "-"}</td>
                 <td className="px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800">{ticket.created_by || "-"}</td>

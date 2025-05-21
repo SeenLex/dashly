@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import Dashboard from './components/Dashboard';
-import History from './components/History';
 import AdminPanel from './components/AdminPanel';
 import ThemeToggle from './components/ThemeToggle';
 import Login from './components/Login';

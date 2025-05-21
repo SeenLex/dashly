@@ -155,29 +155,7 @@ export default function Dashboard() {
       {/* KPI */}
       <StatsCards stats={stats} />
 
-      {/* Charts */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow hover:scale-105 transition-transform">
-          <h2 className="text-lg font-semibold mb-6 text-gray-700 dark:text-gray-300 text-center">
-            Status Tickete
-          </h2>
-          {loading ? (
-            <p className="text-center text-gray-400">Se încarcă...</p>
-          ) : (
-            <TicketStatusPieChart data={statusChart} height={400} />
-          )}
-        </div>
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow hover:scale-105 transition-transform">
-          <h2 className="text-lg font-semibold mb-6 text-gray-700 dark:text-gray-300 text-center">
-            Tickete pe Echipă
-          </h2>
-          {loading ? (
-            <p className="text-center text-gray-400">Se încarcă...</p>
-          ) : (
-            <AverageTimePerTeamChart data={teamChart} height={450} />
-          )}
-        </div>
-      </div>
+      
 
       {/* Dacă e superuser - buton Adaugă Ticket */}
       {role === "superuser" && (

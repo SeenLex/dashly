@@ -1,30 +1,28 @@
-import { useState, useEffect, useCallback, useRef } from "react";
-import StatsCards from "./StatsCards";
-import TicketList from "./TicketList";
+import { useState, useEffect, useCallback, useRef } from 'react';
+import StatsCards from './StatsCards';
+import TicketList from './TicketList';
 
 export default function Dashboard() {
-  const [period, setPeriod] = useState("day");
+  const [period, setPeriod] = useState('day');
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ total: 0, closed: 0, avgTime: 0 });
   const [tickets, setTickets] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [ticketsPerPage, setTicketsPerPage] = useState(10);
-  const role = localStorage.getItem("role");
+  const role = localStorage.getItem('role');
   const [showAddForm, setShowAddForm] = useState(false);
-  const role = localStorage.getItem("role");
-  const [showAddForm, setShowAddForm] = useState(false);
-  
+
   const [filters, setFilters] = useState({
-    search: "",
-    priority: "",
-    status: "",
-    project: "",
-    assigned_person: "",
-    dateFrom: "",
-    dateTo: "",
-    ticket_id: "",
-    created_by: ""
+    search: '',
+    priority: '',
+    status: '',
+    project: '',
+    assigned_person: '',
+    dateFrom: '',
+    dateTo: '',
+    ticket_id: '',
+    created_by: '',
   });
 
   const typingTimeoutRef = useRef(null);
@@ -42,7 +40,7 @@ export default function Dashboard() {
 
     // Fetch statistics
     fetch(`http://localhost/tickets-api/dashboard_stats.php?period=${period}`, {
-      signal: controller.signal
+      signal: controller.signal,
     })
       .then((res) => res.json())
       .then((statsData) => {
@@ -52,10 +50,10 @@ export default function Dashboard() {
         const query = {
           page: currentPage,
           limit: ticketsPerPage,
-          period
+          period,
         };
         for (const key in filters) {
-          if (filters[key] && filters[key].trim() !== "") {
+          if (filters[key] && filters[key].trim() !== '') {
             query[key] = filters[key];
           }
         }
@@ -63,24 +61,29 @@ export default function Dashboard() {
         const queryParams = new URLSearchParams(query).toString();
 
         // Fetch tickets
-        return fetch(`http://localhost/tickets-api/tickets.php?${queryParams}`, {
-          signal: controller.signal
-        });
+        return fetch(
+          `http://localhost/tickets-api/tickets.php?${queryParams}`,
+          {
+            signal: controller.signal,
+          }
+        );
       })
       .then((res) => {
         if (!res.ok) {
-          console.warn("⚠️ tickets.php responded with status", res.status);
+          console.warn('⚠️ tickets.php responded with status', res.status);
           return { tickets: [], totalCount: 0 };
         }
         return res.json();
       })
       .then((ticketsData) => {
         setTickets(ticketsData.tickets || []);
-        setTotalPages(Math.ceil((ticketsData.totalCount || 0) / ticketsPerPage));
+        setTotalPages(
+          Math.ceil((ticketsData.totalCount || 0) / ticketsPerPage)
+        );
       })
       .catch((err) => {
-        if (err.name !== "AbortError") {
-          console.error("❌ Fetch error:", err);
+        if (err.name !== 'AbortError') {
+          console.error('❌ Fetch error:', err);
         }
       })
       .finally(() => setLoading(false));
@@ -93,22 +96,22 @@ export default function Dashboard() {
   }, [filters, period, ticketsPerPage, currentPage, fetchData]);
 
   const handleDeleteTicket = (ticketId) => {
-    if (!window.confirm("Sigur dorești să ștergi acest ticket?")) return;
+    if (!window.confirm('Sigur dorești să ștergi acest ticket?')) return;
     fetch(`http://localhost/tickets-api/delete_ticket.php?id=${ticketId}`, {
-      method: "DELETE"
+      method: 'DELETE',
     })
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
-          alert("Ticket șters!");
+          alert('Ticket șters!');
           fetchData();
         } else {
-          alert("Eroare la ștergere.");
+          alert('Eroare la ștergere.');
         }
       })
       .catch((err) => {
-        console.error("Eroare ștergere:", err);
-        alert("Eroare server!");
+        console.error('Eroare ștergere:', err);
+        alert('Eroare server!');
       });
   };
 
@@ -121,31 +124,31 @@ export default function Dashboard() {
     <div className="p-6">
       {/* Period selector */}
       <div className="flex justify-center gap-4 mb-8">
-        {["day", "week", "month", "year"].map((p) => (
+        {['day', 'week', 'month', 'year'].map((p) => (
           <button
             key={p}
             onClick={() => handlePeriodChange(p)}
-            className={`px-4 py-2 text-sm rounded-full ${period === p
-<<<<<<< HEAD
-                ? "bg-blue-600 text-white"
-                : "bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-300"
-=======
-              ? "bg-blue-600 text-white"
-              : "bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-300"
->>>>>>> 62dc13037d9ecd9f137c3e88e225f3c6647d9d73
-              }`}
+            className={`px-4 py-2 text-sm rounded-full ${
+              period === p
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-300'
+            }`}
           >
-            {p === "day" ? "Azi" : p === "week" ? "Săptămână" : p === "month" ? "Lună" : "An"}
+            {p === 'day'
+              ? 'Azi'
+              : p === 'week'
+              ? 'Săptămână'
+              : p === 'month'
+              ? 'Lună'
+              : 'An'}
           </button>
         ))}
       </div>
 
       <StatsCards stats={stats} />
 
-
-
       {/* Dacă e superuser - buton Adaugă Ticket */}
-      {role === "superuser" && (
+      {role === 'superuser' && (
         <div className="flex justify-center mb-8">
           <button
             onClick={() => setShowAddForm(true)}
@@ -178,7 +181,6 @@ export default function Dashboard() {
             ticketsPerPage={ticketsPerPage} // 👈 adaugă
           />
 
-
           {/* Per page selector */}
           <div className="flex justify-end mb-4">
             <label className="text-sm font-medium text-gray-600 dark:text-gray-300 mr-2">
@@ -193,7 +195,9 @@ export default function Dashboard() {
               className="p-2 border border-gray-300 rounded-md dark:bg-gray-700 dark:text-white"
             >
               {[5, 10, 20, 50, 100].map((val) => (
-                <option key={val} value={val}>{val}</option>
+                <option key={val} value={val}>
+                  {val}
+                </option>
               ))}
             </select>
           </div>
@@ -204,15 +208,11 @@ export default function Dashboard() {
               <button
                 key={i}
                 onClick={() => setCurrentPage(i + 1)}
-                className={`px-3 py-1 rounded text-sm ${currentPage === i + 1
-<<<<<<< HEAD
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-white hover:bg-gray-400"
-=======
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-white hover:bg-gray-400"
->>>>>>> 62dc13037d9ecd9f137c3e88e225f3c6647d9d73
-                  }`}
+                className={`px-3 py-1 rounded text-sm ${
+                  currentPage === i + 1
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-white hover:bg-gray-400'
+                }`}
               >
                 {i + 1}
               </button>

@@ -70,7 +70,7 @@ export default function Home2() {
         </button>
 
         {/* Dacă este admin sau superuser, afișează Admin Panel */}
-        {(role === 'admin' || role === 'superuser') && (
+        {(role === 'admin' || role === 'super_admin') && (
           <button
             onClick={() => setActiveTab('adminpanel')}
             className={`px-6 py-2 rounded ${

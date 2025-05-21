@@ -10,6 +10,8 @@ export default function Dashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [ticketsPerPage, setTicketsPerPage] = useState(10);
+  const role = localStorage.getItem("role");
+  const [showAddForm, setShowAddForm] = useState(false);
 
   const [filters, setFilters] = useState({
     search: "",
@@ -121,11 +123,10 @@ export default function Dashboard() {
           <button
             key={p}
             onClick={() => handlePeriodChange(p)}
-            className={`px-4 py-2 text-sm rounded-full ${
-              period === p
+            className={`px-4 py-2 text-sm rounded-full ${period === p
                 ? "bg-blue-600 text-white"
                 : "bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-300"
-            }`}
+              }`}
           >
             {p === "day" ? "Azi" : p === "week" ? "Săptămână" : p === "month" ? "Lună" : "An"}
           </button>
@@ -134,7 +135,7 @@ export default function Dashboard() {
 
       <StatsCards stats={stats} />
 
-      
+
 
       {/* Dacă e superuser - buton Adaugă Ticket */}
       {role === "superuser" && (
@@ -193,11 +194,10 @@ export default function Dashboard() {
               <button
                 key={i}
                 onClick={() => setCurrentPage(i + 1)}
-                className={`px-3 py-1 rounded text-sm ${
-                  currentPage === i + 1
+                className={`px-3 py-1 rounded text-sm ${currentPage === i + 1
                     ? "bg-blue-600 text-white"
                     : "bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-white hover:bg-gray-400"
-                }`}
+                  }`}
               >
                 {i + 1}
               </button>

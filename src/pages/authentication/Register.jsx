@@ -14,12 +14,14 @@ const Register = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const roleId = form.isAdmin ? 2 : 1;
   const [form, setForm] = useState({
-    fullName: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-    projectId: "",
+    fullName:         "",
+    email:            "",
+    password:         "",
+    confirmPassword:  "",
+    projectId:        "",
+    id_rol:           roleId
   });
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -70,6 +72,7 @@ const Register = () => {
       parola: form.password,
       nume: form.fullName,
       id_project: parseInt(form.projectId),
+      isAdmin: form.isAdmin,
     };
 
     try {
@@ -97,6 +100,7 @@ const Register = () => {
     setForm({ ...form, projectId: project.id.toString() });
     setIsDropdownOpen(false);
   };
+
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col lg:flex-row">
@@ -291,6 +295,24 @@ const Register = () => {
                   )}
                 </button>
               </div>
+            </div>
+            
+            <div className="flex items-center">
+              <input
+                id="isAdmin"
+                type="checkbox"
+                checked={form.isAdmin}
+                onChange={(e) =>
+                  setForm({ ...form, isAdmin: e.target.checked })
+                }
+                className="h-4 w-4 text-blue-600 border-gray-300 rounded"
+              />
+              <label
+                htmlFor="isAdmin"
+                className="ml-2 block text-sm text-gray-700"
+              >
+                Register as Admin
+              </label>
             </div>
 
             <button

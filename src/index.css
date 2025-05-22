@@ -31,12 +31,12 @@ code {
 
 /* Custom styles for input fields to match the dark theme */
 .custom-input-field {
-  @apply px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+  @apply px-3 py-2 bg-blue-100 dark:bg-gray-700 text-black dark:text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
 }
 
 /* Custom styles for select dropdowns to match the dark theme */
 .custom-select-field {
-  @apply px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none cursor-pointer;
+  @apply px-3 py-2 bg-blue-100 dark:bg-gray-700 text-black dark:text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none cursor-pointer;
 }
 
 /* Custom styles for buttons */
@@ -45,9 +45,9 @@ code {
 }
 
 .custom-button-active {
-  @apply bg-blue-600 text-white;
+  @apply bg-blue-600 dark:bg-gray-800 text-black dark:text-white;
 }
 
 .custom-button-inactive {
-  @apply bg-gray-700 text-gray-300 hover:bg-gray-600;
+  @apply bg-blue-300 dark:bg-gray-700 text-black dark:text-white hover:bg-gray-600;
 }

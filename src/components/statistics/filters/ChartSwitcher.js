@@ -66,8 +66,8 @@ function ChartSwitcher() {
       </div>
 
       {showFilters && (
-        <div className="bg-gray-700 border border-gray-600 rounded-lg p-6 mb-6 shadow-inner">
-          <h3 className="text-lg font-semibold text-white mb-4">Advanced Filters</h3>
+        <div className="bg-blue-200 dark:bg-gray-700 border border-gray-600 rounded-lg p-6 mb-6 shadow-inner">
+          <h3 className="text-lg font-semibold text-black dark:text-white mb-4">Advanced Filters</h3>
           <Filters
             filters={filters}
             setFilters={setFilters}

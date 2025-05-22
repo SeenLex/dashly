@@ -21,7 +21,7 @@ const RequestsTable = () => {
         setRequests(data);
       } catch (error) {
         console.error("Failed to fetch requests:", error);
-        alert("You are not authorized. Please login.");
+        // alert("You are not authorized. Please login.");
         window.location.href = "/";
       }
     };

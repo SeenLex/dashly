@@ -166,9 +166,9 @@ export default function Dashboard() {
               setFilters(f);
             }}
             onDelete={handleDeleteTicket}
-            onAdd={fetchData}
-            currentPage={currentPage} // 👈 adaugă
-            ticketsPerPage={ticketsPerPage} // 👈 adaugă
+            currentPage={currentPage}
+            ticketsPerPage={ticketsPerPage}
+            fetchData={fetchData}
           />
 
 

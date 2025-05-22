@@ -87,7 +87,7 @@ function BarChartSection({ tickets, totalCount }) {
   return (
     <>
       <div style={{ display: "flex", justifyContent: "center" }}>
-        <h1>Bar charts</h1>
+        <h1 className="text-black dark:text-white">Bar charts</h1>
       </div>
       <CustomHorizontalContainer
         components={[

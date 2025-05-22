@@ -40,7 +40,7 @@ function CustomPieChart({ title, data, nameKey, onSliceClick }) {
 
   return (
     <div>
-      <p className="text-lg font-semibold text-white mb-4 text-center">{title}</p>
+      <p className="text-lg font-semibold text-black dark:text-white mb-4 text-center">{title}</p>
       <ResponsiveContainer width="100%" height={400}>
         <PieChart>
           <Legend layout="horizontal" verticalAlign="bottom" align="center" wrapperStyle={{ color: 'var(--text-color-primary)' }} />

@@ -66,7 +66,7 @@ function LineChartSection({ tickets }) {
   return (
     <>
       <div style={{ display: "flex", justifyContent: "center" }}>
-        <h1>Line charts</h1>
+        <h1 className="text-black dark:text-white">Line charts</h1>
       </div>
       <CustomHorizontalContainer
         components={[

@@ -15,8 +15,8 @@ function CustomBarChart({
   const defaultColors = ["#4299e1", "#48bb78", "#ed8936", "#f56565"]; // Aligned with the new palette
 
   return (
-    <div>
-      <p className="text-lg font-semibold text-white mb-4 text-center">{title}</p>
+    <div >
+      <p className="text-lg font-semibold text-black dark:text-white mb-4 text-center">{title}</p>
       <ResponsiveContainer width="100%" height={300}>
         <BarChart
           data={isEmpty ? fallbackData : data}

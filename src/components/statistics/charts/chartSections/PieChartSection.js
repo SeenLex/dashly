@@ -35,7 +35,7 @@ function PieChartSection({ tickets }) {
   return (
     <>
       <div style={{ display: "flex", justifyContent: "center" }}>
-        <h1>Pie charts</h1>
+        <h1 className="text-black dark:text-white">Pie charts</h1>
       </div>
       <CustomHorizontalContainer
         components={[

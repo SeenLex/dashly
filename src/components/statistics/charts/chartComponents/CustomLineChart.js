@@ -24,7 +24,7 @@ const CustomLineChart = ({
 
   return (
     <div>
-      <p className="text-lg font-semibold text-white mb-4 text-center">{title}</p>
+      <p className="text-lg font-semibold text-black dark:text-white mb-4 text-center">{title}</p>
       <ResponsiveContainer width="100%" height={400}>
         <AreaChart
           data={data}

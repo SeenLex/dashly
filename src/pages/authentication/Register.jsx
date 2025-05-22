@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import {
   Eye,
   EyeOff,
@@ -8,18 +8,19 @@ import {
   Mail,
   ArrowRight,
   FolderCog,
-} from "lucide-react";
+} from 'lucide-react';
 
 const Register = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [form, setForm] = useState({
-    fullName: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-    projectId: "",
+    fullName: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    projectId: '',
+    isAdmin: false, // ← add this
   });
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -32,12 +33,12 @@ const Register = () => {
         setIsDropdownOpen(false);
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
 
     // Fetch projects
     const fetchProjects = async () => {
       try {
-        const res = await fetch("http://localhost/get_projects.php");
+        const res = await fetch('http://localhost/get_projects.php');
         const data = await res.json();
         setProjectOptions(
           data.map((proj) => ({
@@ -46,14 +47,14 @@ const Register = () => {
           }))
         );
       } catch (error) {
-        console.error("Failed to load projects", error);
+        console.error('Failed to load projects', error);
       }
     };
 
     fetchProjects();
 
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
 
@@ -61,7 +62,7 @@ const Register = () => {
     e.preventDefault();
 
     if (form.password !== form.confirmPassword) {
-      alert("Passwords do not match");
+      alert('Passwords do not match');
       return;
     }
 
@@ -70,26 +71,27 @@ const Register = () => {
       parola: form.password,
       nume: form.fullName,
       id_project: parseInt(form.projectId),
+      isAdmin: form.isAdmin,
     };
 
     try {
-      const res = await fetch("http://localhost/request_register.php", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const res = await fetch('http://localhost/request_register.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 
       const data = await res.json();
 
       if (res.ok) {
-        alert("Registration request submitted. Await admin approval.");
-        navigate("/");
+        alert('Registration request submitted. Await admin approval.');
+        navigate('/');
       } else {
-        alert(data.error || "Registration failed");
+        alert(data.error || 'Registration failed');
       }
     } catch (err) {
       console.error(err);
-      alert("An error occurred. Please try again later.");
+      alert('An error occurred. Please try again later.');
     }
   };
 
@@ -192,12 +194,12 @@ const Register = () => {
                       ? projectOptions.find(
                           (p) => p.id.toString() === form.projectId
                         )?.name
-                      : "Select your project"}
+                      : 'Select your project'}
                   </span>
                 </div>
                 <svg
                   className={`w-4 h-4 transition-transform duration-200 ${
-                    isDropdownOpen ? "transform rotate-180" : ""
+                    isDropdownOpen ? 'transform rotate-180' : ''
                   }`}
                   fill="none"
                   stroke="currentColor"
@@ -240,7 +242,7 @@ const Register = () => {
                 <Lock size={16} className="text-gray-400 mr-2" />
                 <input
                   id="password"
-                  type={showPassword ? "text" : "password"}
+                  type={showPassword ? 'text' : 'password'}
                   placeholder="Create a password"
                   value={form.password}
                   onChange={(e) =>
@@ -271,7 +273,7 @@ const Register = () => {
                 <Lock size={16} className="text-gray-400 mr-2" />
                 <input
                   id="confirmPassword"
-                  type={showConfirmPassword ? "text" : "password"}
+                  type={showConfirmPassword ? 'text' : 'password'}
                   placeholder="Confirm your password"
                   value={form.confirmPassword}
                   onChange={(e) =>
@@ -291,6 +293,24 @@ const Register = () => {
                   )}
                 </button>
               </div>
+            </div>
+
+            <div className="flex items-center">
+              <input
+                id="isAdmin"
+                type="checkbox"
+                checked={form.isAdmin}
+                onChange={(e) =>
+                  setForm({ ...form, isAdmin: e.target.checked })
+                }
+                className="h-4 w-4 text-blue-600 border-gray-300 rounded"
+              />
+              <label
+                htmlFor="isAdmin"
+                className="ml-2 block text-sm text-gray-700"
+              >
+                Register as Admin
+              </label>
             </div>
 
             <button

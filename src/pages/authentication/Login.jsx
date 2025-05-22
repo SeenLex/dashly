@@ -88,7 +88,7 @@ const Login = () => {
                   value={mail}
                   onChange={(e) => setMail(e.target.value)}
                   placeholder="Enter your email"
-                  required
+                  //required
                   className="flex-1 bg-transparent outline-none text-gray-800"
                 />
               </div>
@@ -109,7 +109,7 @@ const Login = () => {
                   value={parola}
                   onChange={(e) => setParola(e.target.value)}
                   placeholder="Enter your password"
-                  required
+                  //required
                   className="flex-1 bg-transparent outline-none text-gray-800"
                 />
                 <button

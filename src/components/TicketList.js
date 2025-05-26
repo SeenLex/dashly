@@ -1,6 +1,7 @@
 import { useState } from "react";
 
-export default function TicketList({ tickets, onDelete, onAdd, filters, setFilters }) {
+export default function TicketList({ tickets, onDelete, fetchData, onAdd, filters, setFilters, currentPage, ticketsPerPage }) {
+
   const [expandedDescriptionId, setExpandedDescriptionId] = useState(null);
   const [expandedCommentId, setExpandedCommentId] = useState(null);
   const [expandedStartId, setExpandedStartId] = useState(null);
@@ -26,6 +27,41 @@ export default function TicketList({ tickets, onDelete, onAdd, filters, setFilte
     priority_id: "",
     assigned_person: ""
   });
+
+  const [selectedTicket, setSelectedTicket] = useState(null);
+  const [newStatus, setNewStatus] = useState("");
+  const [showAddForm, setShowAddForm] = useState(false);
+
+  const handleEditTicket = (id, newStatus) => {
+    fetch(`http://localhost/tickets-api/update_ticket.php`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, status: newStatus }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          alert("Ticket actualizat!");
+          fetchData();
+        } else {
+          alert("Eroare la actualizare.");
+        }
+      })
+      .catch((err) => {
+        console.error("Eroare actualizare:", err);
+        alert("Eroare server edit!");
+      });
+  };
+
+  const handleUpdateStatus = (ticketId) => {
+    if (!newStatus) {
+      alert("Selectează un status valid.");
+      return;
+    }
+    handleEditTicket(ticketId, newStatus);
+    setSelectedTicket(null);
+    setNewStatus("");
+  };
 
   const handleAddTicket = (e) => {
     e.preventDefault();
@@ -117,15 +153,17 @@ export default function TicketList({ tickets, onDelete, onAdd, filters, setFilte
           <tbody>
             {tickets.map((ticket, index) => (
               <tr key={ticket.id} className="text-gray-700 dark:text-gray-200">
-                <td className="px-4 py-2 border">{ticket.id}</td>
+                <td className="px-4 py-2 border">
+                  {(currentPage - 1) * ticketsPerPage + index + 1}
+                </td>
+
                 <td className="px-4 py-2 border">{ticket.ticket_id}</td>
                 <td className="px-4 py-2 border">{ticket.status}</td>
-                <td className={`px-4 py-2 border font-medium ${
-                  ticket.priority_name === "Critical" ? "bg-red-200 dark:bg-red-700" :
+                <td className={`px-4 py-2 border font-medium ${ticket.priority_name === "Critical" ? "bg-red-200 dark:bg-red-700" :
                   ticket.priority_name === "High" ? "bg-orange-200 dark:bg-orange-700" :
-                  ticket.priority_name === "Medium" ? "bg-yellow-200 dark:bg-yellow-700" :
-                  "bg-green-200 dark:bg-green-700"
-                }`}>
+                    ticket.priority_name === "Medium" ? "bg-yellow-200 dark:bg-yellow-700" :
+                      "bg-green-200 dark:bg-green-700"
+                  }`}>
                   {ticket.priority_name}
                 </td>
                 <td className="px-4 py-2 border">{ticket.duration_hours || "-"}</td>
@@ -206,19 +244,129 @@ export default function TicketList({ tickets, onDelete, onAdd, filters, setFilte
                 <td className="px-4 py-2 border">{ticket.created_by || "-"}</td>
                 <td className="px-4 py-2 border">{ticket.team_created_by || "-"}</td>
                 <td className="px-4 py-2 border">{ticket.response_time || "-"}</td>
-                {role === "superuser" && onDelete && (
-                  <td className="px-4 py-2 border">
-                    <button onClick={() => onDelete(ticket.id)}
-                      className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700">
-                      Șterge
-                    </button>
-                  </td>
+                {role === "admin" && (
+                  <>
+                    <td className="px-4 py-2 border">
+                      <button 
+                      className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                      onClick={() => {
+                        setSelectedTicket(ticket);
+                        setNewStatus(ticket.status);
+                      }}>
+                        Modifică Status
+                      </button>
+                    </td>
+                  </>
                 )}
+
+
               </tr>
             ))}
           </tbody>
+
+          {/* Modal Modificare Status */}
+          {selectedTicket && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg w-full max-w-md">
+                <h2 className="text-xl font-bold mb-4 text-gray-700 dark:text-gray-200">
+                  Modifică Status pentru #{selectedTicket.id}
+                </h2>
+                <select
+                  value={newStatus}
+                  onChange={(e) => setNewStatus(e.target.value)}
+                  className="w-full p-2 border rounded mb-4 dark:bg-gray-700 dark:text-white"
+                >
+                  <option value="">Selectează un status</option>
+                  <option value="Open">Open</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Closed">Closed</option>
+                </select>
+                <div className="flex gap-4 justify-end">
+                  <button
+                    onClick={() => setSelectedTicket(null)}
+                    className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+                  >
+                    Anulează
+                  </button>
+                  <button
+                    onClick={() => handleUpdateStatus(selectedTicket.id)}
+                    className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                  >
+                    Salvează
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Modal Adaugă Ticket */}
+          {showAddForm && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg w-full max-w-md">
+                <h2 className="text-xl font-bold mb-6 text-gray-700 dark:text-gray-200">
+                  Adaugă Ticket Nou
+                </h2>
+                <form onSubmit={handleAddTicket} className="space-y-4">
+                  <input
+                    type="text"
+                    placeholder="Titlu Incident"
+                    value={newTicket.incident_title}
+                    onChange={(e) => setNewTicket({ ...newTicket, incident_title: e.target.value })}
+                    required
+                    className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Proiect"
+                    value={newTicket.project}
+                    onChange={(e) => setNewTicket({ ...newTicket, project: e.target.value })}
+                    required
+                    className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
+                  />
+                  <select
+                    value={newTicket.priority_id}
+                    onChange={(e) => setNewTicket({ ...newTicket, priority_id: e.target.value })}
+                    required
+                    className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
+                  >
+                    <option value="">Selectează Prioritate</option>
+                    <option value="1">Critical</option>
+                    <option value="2">High</option>
+                    <option value="3">Medium</option>
+                    <option value="4">Low</option>
+                  </select>
+                  <input
+                    type="text"
+                    placeholder="Assigned Person"
+                    value={newTicket.assigned_person}
+                    onChange={(e) => setNewTicket({ ...newTicket, assigned_person: e.target.value })}
+                    required
+                    className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
+                  />
+                  <div className="flex justify-end gap-4">
+                    <button
+                      onClick={() => setShowAddForm(false)}
+                      type="button"
+                      className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+                    >
+                      Anulează
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                    >
+                      Adaugă
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+
         </table>
       </div>
-    </div>
+    </div >
   );
 }

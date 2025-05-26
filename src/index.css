@@ -16,3 +16,38 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* Custom styles for recharts tooltips and legends */
+.recharts-tooltip-wrapper {
+  background-color: var(--secondary-bg) !important; /* Use CSS variable */
+  border: 1px solid var(--card-border) !important; /* Use CSS variable */
+  border-radius: 0.375rem !important;
+  color: var(--text-color-primary) !important; /* Use CSS variable */
+}
+
+.recharts-legend-wrapper {
+  color: var(--text-color-primary) !important; /* Use CSS variable */
+}
+
+/* Custom styles for input fields to match the dark theme */
+.custom-input-field {
+  @apply px-3 py-2 bg-blue-100 dark:bg-gray-700 text-black dark:text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+}
+
+/* Custom styles for select dropdowns to match the dark theme */
+.custom-select-field {
+  @apply px-3 py-2 bg-blue-100 dark:bg-gray-700 text-black dark:text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none cursor-pointer;
+}
+
+/* Custom styles for buttons */
+.custom-button {
+  @apply px-6 py-2 rounded-lg font-medium transition-colors;
+}
+
+.custom-button-active {
+  @apply bg-blue-600 dark:bg-gray-800 text-black dark:text-white;
+}
+
+.custom-button-inactive {
+  @apply bg-blue-300 dark:bg-gray-700 text-black dark:text-white hover:bg-gray-600;
+}

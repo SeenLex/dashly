@@ -10,7 +10,8 @@ export default function Dashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [ticketsPerPage, setTicketsPerPage] = useState(10);
-
+  const role = localStorage.getItem("role");    
+  const [showAddForm, setShowAddForm] = useState(false);
   const [filters, setFilters] = useState({
     search: "",
     priority: "",
@@ -166,8 +167,8 @@ export default function Dashboard() {
             }}
             onDelete={handleDeleteTicket}
             onAdd={fetchData}
+            startIndex={(currentPage - 1) * ticketsPerPage}
           />
-
           {/* Per page selector */}
           <div className="flex justify-end mb-4">
             <label className="text-sm font-medium text-gray-600 dark:text-gray-300 mr-2">

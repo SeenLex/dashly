@@ -1,7 +1,6 @@
 // ✅ UPDATED AdminPanel.js
-import { useState, useEffect } from "react";
-import RequestsTable from "./RequestsTable"; // ajustează calea dacă este diferită
-
+import { useState, useEffect } from 'react';
+import RequestsTable from './RequestsTable'; // ajustează calea dacă este diferită
 
 export default function AdminPanel() {
   const [expandedDescriptionId, setExpandedDescriptionId] = useState(null);
@@ -10,52 +9,54 @@ export default function AdminPanel() {
   const [expandedModifiedId, setExpandedModifiedId] = useState(null);
   const [expandedClosedId, setExpandedClosedId] = useState(null);
 
-
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedTicket, setSelectedTicket] = useState(null);
-  const [newStatus, setNewStatus] = useState("");
+  const [newStatus, setNewStatus] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
   const [newTicket, setNewTicket] = useState({
-    incident_title: "",
-    project: "",
-    priority_id: "",
-    assigned_person: ""
+    incident_title: '',
+    project: '',
+    priority_id: '',
+    assigned_person: '',
   });
 
   const [filters, setFilters] = useState({
-    search: "",
-    priority: "",
-    status: "",
-    project: "",
-    assigned_person: ""
+    search: '',
+    priority: '',
+    status: '',
+    project: '',
+    assigned_person: '',
   });
   const filteredTickets = tickets.filter((t) => {
     const term = filters.search.toLowerCase();
     return (
-      (filters.search === "" ||
+      (filters.search === '' ||
         t.incident_title?.toLowerCase().includes(term) ||
         t.id?.toString().includes(term)) &&
-      (filters.priority === "" || t.priority_name === filters.priority) &&
-      (filters.status === "" || t.status === filters.status) &&
-      (filters.project === "" || t.project?.toLowerCase().includes(filters.project.toLowerCase())) &&
-      (filters.assigned_person === "" || t.assigned_person?.toLowerCase().includes(filters.assigned_person.toLowerCase()))
+      (filters.priority === '' || t.priority_name === filters.priority) &&
+      (filters.status === '' || t.status === filters.status) &&
+      (filters.project === '' ||
+        t.project?.toLowerCase().includes(filters.project.toLowerCase())) &&
+      (filters.assigned_person === '' ||
+        t.assigned_person
+          ?.toLowerCase()
+          .includes(filters.assigned_person.toLowerCase()))
     );
   });
-
 
   const [currentPage, setCurrentPage] = useState(1);
   const ticketsPerPage = 10;
 
   const indexOfLastTicket = currentPage * ticketsPerPage;
   const indexOfFirstTicket = indexOfLastTicket - ticketsPerPage;
-  const currentTickets = filteredTickets.slice(indexOfFirstTicket, indexOfLastTicket);
-
-
-
+  const currentTickets = filteredTickets.slice(
+    indexOfFirstTicket,
+    indexOfLastTicket
+  );
 
   const [visibleCount, setVisibleCount] = useState(20);
-  const role = localStorage.getItem("role");
+  const role = localStorage.getItem('role');
 
   useEffect(() => {
     fetchTickets();
@@ -63,96 +64,96 @@ export default function AdminPanel() {
 
   const fetchTickets = () => {
     setLoading(true);
-    fetch("http://localhost/tickets-api/tickets.php")
+    fetch('http://localhost/tickets-api/tickets.php')
       .then((res) => res.json())
       .then((data) => setTickets(data || []))
-      .catch((err) => console.error("Eroare la fetch tickete:", err))
+      .catch((err) => console.error('Eroare la fetch tickete:', err))
       .finally(() => setLoading(false));
   };
 
   const handleUpdateStatus = (ticketId) => {
     if (!newStatus) return;
 
-    fetch("http://localhost/tickets-api/update_ticket.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: ticketId, status: newStatus })
+    fetch('http://localhost/tickets-api/update_ticket.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: ticketId, status: newStatus }),
     })
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
-          alert("Status actualizat!");
+          alert('Status actualizat!');
           fetchTickets();
           setSelectedTicket(null);
-          setNewStatus("");
+          setNewStatus('');
         } else {
-          alert("Eroare la actualizare status.");
+          alert('Eroare la actualizare status.');
         }
       })
       .catch((err) => {
-        console.error("Eroare update:", err);
-        alert("Eroare server!");
+        console.error('Eroare update:', err);
+        alert('Eroare server!');
       });
   };
 
   const handleDeleteTicket = (ticketId) => {
-    if (!window.confirm("Sigur dorești să ștergi acest ticket?")) return;
+    if (!window.confirm('Sigur dorești să ștergi acest ticket?')) return;
 
     fetch(`http://localhost/tickets-api/delete_ticket.php?id=${ticketId}`, {
-      method: "DELETE"
+      method: 'DELETE',
     })
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
-          alert("Ticket șters!");
+          alert('Ticket șters!');
           fetchTickets();
         } else {
-          alert("Eroare la ștergere.");
+          alert('Eroare la ștergere.');
         }
       })
       .catch((err) => {
-        console.error("Eroare ștergere:", err);
-        alert("Eroare server!");
+        console.error('Eroare ștergere:', err);
+        alert('Eroare server!');
       });
   };
 
   const handleAddTicket = (e) => {
     e.preventDefault();
 
-    fetch("http://localhost/tickets-api/add_ticket.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newTicket)
+    fetch('http://localhost/tickets-api/add_ticket.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newTicket),
     })
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
-          alert("Ticket adăugat!");
+          alert('Ticket adăugat!');
           fetchTickets();
           setShowAddForm(false);
           setNewTicket({
-            incident_title: "",
-            project: "",
-            priority_id: "",
-            assigned_person: ""
+            incident_title: '',
+            project: '',
+            priority_id: '',
+            assigned_person: '',
           });
         } else {
-          alert("Eroare la adăugare ticket.");
+          alert('Eroare la adăugare ticket.');
         }
       })
       .catch((err) => {
-        console.error("Eroare adăugare:", err);
-        alert("Eroare server!");
+        console.error('Eroare adăugare:', err);
+        alert('Eroare server!');
       });
   };
 
- const formatTime = (datetime) => {
-    if (!datetime) return "N/A";
+  const formatTime = (datetime) => {
+    if (!datetime) return 'N/A';
     const dateObj = new Date(datetime);
     if (isNaN(dateObj)) return datetime;
-    return dateObj.toLocaleTimeString("ro-RO", {
-      hour: "2-digit",
-      minute: "2-digit",
+    return dateObj.toLocaleTimeString('ro-RO', {
+      hour: '2-digit',
+      minute: '2-digit',
       hour12: false,
     });
   };
@@ -166,7 +167,7 @@ export default function AdminPanel() {
         <RequestsTable />
       </div>
 
-      {role === "super_admin" && (
+      {role === 'super_admin' && (
         <div className="flex justify-center mb-6">
           <button
             onClick={() => setShowAddForm(true)}
@@ -194,12 +195,16 @@ export default function AdminPanel() {
             type="text"
             placeholder="Proiect"
             value={filters.project}
-            onChange={(e) => setFilters({ ...filters, project: e.target.value })}
+            onChange={(e) =>
+              setFilters({ ...filters, project: e.target.value })
+            }
             className="p-2 border rounded dark:bg-gray-700 dark:text-white"
           />
           <select
             value={filters.priority}
-            onChange={(e) => setFilters({ ...filters, priority: e.target.value })}
+            onChange={(e) =>
+              setFilters({ ...filters, priority: e.target.value })
+            }
             className="p-2 border rounded dark:bg-gray-700 dark:text-white"
           >
             <option value="">Prioritate</option>
@@ -226,47 +231,98 @@ export default function AdminPanel() {
         <table className="min-w-full bg-white dark:bg-gray-800 shadow rounded-lg">
           <thead>
             <tr className="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-left text-sm uppercase">
-              <th className="px-4 py-2 border border-gray-300 dark:border-gray-600">ID</th>
-              <th className="px-4 py-2 border border-gray-300 dark:border-gray-600">Incident No</th>
-              <th className="px-4 py-2 border border-gray-300 dark:border-gray-600">Status</th>
-              <th className="px-4 py-2 border border-gray-300 dark:border-gray-600">Prioritate</th>
-              <th className="px-4 py-2 border border-gray-300 dark:border-gray-600">SLA</th>
-              <th className="px-4 py-2 border border-gray-300 dark:border-gray-600">IN/OUT SLA</th>
-              <th className="px-4 py-2 border border-gray-300 dark:border-gray-600">Proiect</th>
-              <th className="px-4 py-2 border border-gray-300 dark:border-gray-600">Start Date</th>
-              <th className="px-4 py-2 border border-gray-300 dark:border-gray-600">Last Modified</th>
-              <th className="px-4 py-2 border border-gray-300 dark:border-gray-600">Closed Date</th>
-              <th className="px-4 py-2 border border-gray-300 dark:border-gray-600">Description</th>
-              <th className="px-4 py-2 border border-gray-300 dark:border-gray-600">Comment</th>
-              <th className="px-4 py-2 border border-gray-300 dark:border-gray-600">Assigned</th>
-              <th className="px-4 py-2 border border-gray-300 dark:border-gray-600">Team Assigned</th>
-              <th className="px-4 py-2 border border-gray-300 dark:border-gray-600">Created By</th>
-              <th className="px-4 py-2 border border-gray-300 dark:border-gray-600">Team Created By</th>
-              <th className="px-4 py-2 border border-gray-300 dark:border-gray-600">Response Time</th>
-              {role === "superuser" && (
-                <th className="px-4 py-2 border border-gray-300 dark:border-gray-600">Actions</th>
+              <th className="px-4 py-2 border border-gray-300 dark:border-gray-600">
+                ID
+              </th>
+              <th className="px-4 py-2 border border-gray-300 dark:border-gray-600">
+                Incident No
+              </th>
+              <th className="px-4 py-2 border border-gray-300 dark:border-gray-600">
+                Status
+              </th>
+              <th className="px-4 py-2 border border-gray-300 dark:border-gray-600">
+                Prioritate
+              </th>
+              <th className="px-4 py-2 border border-gray-300 dark:border-gray-600">
+                SLA
+              </th>
+              <th className="px-4 py-2 border border-gray-300 dark:border-gray-600">
+                IN/OUT SLA
+              </th>
+              <th className="px-4 py-2 border border-gray-300 dark:border-gray-600">
+                Proiect
+              </th>
+              <th className="px-4 py-2 border border-gray-300 dark:border-gray-600">
+                Start Date
+              </th>
+              <th className="px-4 py-2 border border-gray-300 dark:border-gray-600">
+                Last Modified
+              </th>
+              <th className="px-4 py-2 border border-gray-300 dark:border-gray-600">
+                Closed Date
+              </th>
+              <th className="px-4 py-2 border border-gray-300 dark:border-gray-600">
+                Description
+              </th>
+              <th className="px-4 py-2 border border-gray-300 dark:border-gray-600">
+                Comment
+              </th>
+              <th className="px-4 py-2 border border-gray-300 dark:border-gray-600">
+                Assigned
+              </th>
+              <th className="px-4 py-2 border border-gray-300 dark:border-gray-600">
+                Team Assigned
+              </th>
+              <th className="px-4 py-2 border border-gray-300 dark:border-gray-600">
+                Created By
+              </th>
+              <th className="px-4 py-2 border border-gray-300 dark:border-gray-600">
+                Team Created By
+              </th>
+              <th className="px-4 py-2 border border-gray-300 dark:border-gray-600">
+                Response Time
+              </th>
+              {role === 'superuser' && (
+                <th className="px-4 py-2 border border-gray-300 dark:border-gray-600">
+                  Actions
+                </th>
               )}
             </tr>
           </thead>
           <tbody>
             {currentTickets.map((ticket) => (
               <tr key={ticket.id} className="text-gray-700 dark:text-gray-200">
-                <td className="px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800 font-semibold">#{ticket.id}</td>
-                <td className="px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800">NUMBER</td>
-                <td className="px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800">{ticket.status}</td>
-                <td className={`px-4 py-2 border dark:border-gray-600 font-medium ${ticket.priority_name === "Critical"
-                  ? "bg-red-200 dark:bg-red-700"
-                  : ticket.priority_name === "High"
-                    ? "bg-orange-200 dark:bg-orange-700"
-                    : ticket.priority_name === "Medium"
-                      ? "bg-yellow-200 dark:bg-yellow-700"
-                      : "bg-green-200 dark:bg-green-700"
-                  }`}>
+                <td className="px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800 font-semibold">
+                  #{ticket.id}
+                </td>
+                <td className="px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800">
+                  NUMBER
+                </td>
+                <td className="px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800">
+                  {ticket.status}
+                </td>
+                <td
+                  className={`px-4 py-2 border dark:border-gray-600 font-medium ${
+                    ticket.priority_name === 'Critical'
+                      ? 'bg-red-200 dark:bg-red-700'
+                      : ticket.priority_name === 'High'
+                      ? 'bg-orange-200 dark:bg-orange-700'
+                      : ticket.priority_name === 'Medium'
+                      ? 'bg-yellow-200 dark:bg-yellow-700'
+                      : 'bg-green-200 dark:bg-green-700'
+                  }`}
+                >
                   {ticket.priority_name}
                 </td>
-                <td className="px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800">{ticket.duration_hours}</td>
-                <td className="px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800">{ticket.IN_OUT_SLA}</td>
-                <td className="px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800">{ticket.project}</td>
+                <td className="px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800">
+                  {ticket.duration_hours}
+                </td>
+                <td className="px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800">
+                  {ticket.IN_OUT_SLA}
+                </td>
+                <td className="px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800">
+                  {ticket.project}
+                </td>
                 {/* START DATE */}
                 <td
                   className="px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800 cursor-pointer"
@@ -286,65 +342,87 @@ export default function AdminPanel() {
                 <td
                   className="px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800 cursor-pointer"
                   onClick={() =>
-                    setExpandedModifiedId(expandedModifiedId === ticket.id ? null : ticket.id)
+                    setExpandedModifiedId(
+                      expandedModifiedId === ticket.id ? null : ticket.id
+                    )
                   }
-                  title={ticket.last_modified_date || "N/A"}
+                  title={ticket.last_modified_date || 'N/A'}
                 >
                   {expandedModifiedId === ticket.id
-                    ? ticket.last_modified_date || "N/A"
+                    ? ticket.last_modified_date || 'N/A'
                     : formatTime(ticket.last_modified_date)}
                 </td>
                 {/* Closed Date */}
                 <td
                   className="px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800 cursor-pointer"
                   onClick={() =>
-                    setExpandedClosedId(expandedClosedId === ticket.id ? null : ticket.id)
+                    setExpandedClosedId(
+                      expandedClosedId === ticket.id ? null : ticket.id
+                    )
                   }
-                  title={ticket.closed_date || "N/A"}
+                  title={ticket.closed_date || 'N/A'}
                 >
                   {expandedClosedId === ticket.id
-                    ? ticket.closed_date || "N/A"
+                    ? ticket.closed_date || 'N/A'
                     : formatTime(ticket.closed_date)}
                 </td>
                 {/* DESCRIPTION */}
                 <td
-                  className={`px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800 max-w-[200px] cursor-pointer ${expandedDescriptionId !== String(ticket.id) ? "truncate" : ""
-                    }`}
+                  className={`px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800 max-w-[200px] cursor-pointer ${
+                    expandedDescriptionId !== String(ticket.id)
+                      ? 'truncate'
+                      : ''
+                  }`}
                   title={ticket.description}
                   onClick={() =>
                     setExpandedDescriptionId(
-                      expandedDescriptionId === String(ticket.id) ? null : String(ticket.id)
+                      expandedDescriptionId === String(ticket.id)
+                        ? null
+                        : String(ticket.id)
                     )
                   }
                 >
                   {expandedDescriptionId === String(ticket.id)
-                    ? ticket.description || "-"
-                    : (ticket.description || "-").slice(0, 100) +
-                    ((ticket.description?.length || 0) > 100 ? "..." : "")}
+                    ? ticket.description || '-'
+                    : (ticket.description || '-').slice(0, 100) +
+                      ((ticket.description?.length || 0) > 100 ? '...' : '')}
                 </td>
 
                 {/* COMMENT */}
                 <td
-                  className={`px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800 max-w-[200px] cursor-pointer ${expandedCommentId !== String(ticket.id) ? "truncate" : ""
-                    }`}
+                  className={`px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800 max-w-[200px] cursor-pointer ${
+                    expandedCommentId !== String(ticket.id) ? 'truncate' : ''
+                  }`}
                   title={ticket.comment}
                   onClick={() =>
                     setExpandedCommentId(
-                      expandedCommentId === String(ticket.id) ? null : String(ticket.id)
+                      expandedCommentId === String(ticket.id)
+                        ? null
+                        : String(ticket.id)
                     )
                   }
                 >
                   {expandedCommentId === String(ticket.id)
-                    ? ticket.comment || "-"
-                    : (ticket.comment || "-").slice(0, 100) +
-                    ((ticket.comment?.length || 0) > 100 ? "..." : "")}
+                    ? ticket.comment || '-'
+                    : (ticket.comment || '-').slice(0, 100) +
+                      ((ticket.comment?.length || 0) > 100 ? '...' : '')}
                 </td>
-                <td className="px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800">{ticket.assigned_person || "Neasignat"}</td>
-                <td className="px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800">{ticket.team_assigned_person || "-"}</td>
-                <td className="px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800">{ticket.created_by || "-"}</td>
-                <td className="px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800">{ticket.team_created_by || "-"}</td>
-                <td className="px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800">{ticket.response_time || "-"}</td>
-                {role === "superuser" && (
+                <td className="px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800">
+                  {ticket.assigned_person || 'Neasignat'}
+                </td>
+                <td className="px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800">
+                  {ticket.team_assigned_person || '-'}
+                </td>
+                <td className="px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800">
+                  {ticket.created_by || '-'}
+                </td>
+                <td className="px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800">
+                  {ticket.team_created_by || '-'}
+                </td>
+                <td className="px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800">
+                  {ticket.response_time || '-'}
+                </td>
+                {role === 'superuser' && (
                   <td className="px-4 py-2 border dark:border-gray-600 bg-white dark:bg-gray-800">
                     <div className="flex gap-2 flex-wrap">
                       <button
@@ -368,22 +446,24 @@ export default function AdminPanel() {
         </table>
 
         <div className="flex justify-center mt-6 gap-2 flex-wrap">
-          {Array.from({ length: Math.ceil(filteredTickets.length / ticketsPerPage) }, (_, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrentPage(i + 1)}
-              className={`px-3 py-1 rounded text-sm ${currentPage === i + 1
-                ? "bg-blue-600 text-white"
-                : "bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-white hover:bg-gray-400"
+          {Array.from(
+            { length: Math.ceil(filteredTickets.length / ticketsPerPage) },
+            (_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrentPage(i + 1)}
+                className={`px-3 py-1 rounded text-sm ${
+                  currentPage === i + 1
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-white hover:bg-gray-400'
                 }`}
-            >
-              {i + 1}
-            </button>
-          ))}
+              >
+                {i + 1}
+              </button>
+            )
+          )}
         </div>
       </div>
-
-
 
       {/* Modal Modificare Status */}
       {selectedTicket && (
@@ -433,7 +513,9 @@ export default function AdminPanel() {
                 type="text"
                 placeholder="Titlu Incident"
                 value={newTicket.incident_title}
-                onChange={(e) => setNewTicket({ ...newTicket, incident_title: e.target.value })}
+                onChange={(e) =>
+                  setNewTicket({ ...newTicket, incident_title: e.target.value })
+                }
                 required
                 className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
               />
@@ -441,13 +523,17 @@ export default function AdminPanel() {
                 type="text"
                 placeholder="Proiect"
                 value={newTicket.project}
-                onChange={(e) => setNewTicket({ ...newTicket, project: e.target.value })}
+                onChange={(e) =>
+                  setNewTicket({ ...newTicket, project: e.target.value })
+                }
                 required
                 className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
               />
               <select
                 value={newTicket.priority_id}
-                onChange={(e) => setNewTicket({ ...newTicket, priority_id: e.target.value })}
+                onChange={(e) =>
+                  setNewTicket({ ...newTicket, priority_id: e.target.value })
+                }
                 required
                 className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
               >
@@ -461,7 +547,12 @@ export default function AdminPanel() {
                 type="text"
                 placeholder="Assigned Person"
                 value={newTicket.assigned_person}
-                onChange={(e) => setNewTicket({ ...newTicket, assigned_person: e.target.value })}
+                onChange={(e) =>
+                  setNewTicket({
+                    ...newTicket,
+                    assigned_person: e.target.value,
+                  })
+                }
                 required
                 className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
               />

@@ -2,9 +2,6 @@ import React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
-  if (totalPages === 0) {
-    return null
-  }
   return (
     <div className="flex items-center justify-center space-x-2 mt-4">
       <button

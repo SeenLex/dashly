@@ -2,7 +2,6 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Register from './pages/authentication/Register';
 import Login from './pages/authentication/Login';
 
-import AdminPage from './pages/home/AdminPage';
 import Home2 from './Home2';
 import AdminPanel from './components/AdminPanel';
 import AuditPage from './pages/audit/AuditPage';

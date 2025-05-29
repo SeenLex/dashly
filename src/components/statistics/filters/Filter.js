@@ -1,6 +1,12 @@
 import React from "react";
 
-function Filter({ labelTitle, value, onChangeCallback, allValues, type = "select" }) {
+function Filter({
+  labelTitle,
+  value,
+  onChangeCallback,
+  allValues,
+  type = "select",
+}) {
   const safeValues = Array.isArray(allValues) ? allValues : [];
 
   return (

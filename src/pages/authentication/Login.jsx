@@ -13,27 +13,27 @@ const Login = () => {
     e.preventDefault();
     setError('');
 
-    try {
-      const res = await fetch('http://localhost/login.php', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ mail, parola }),
-      });
+    // try {
+    //   const res = await fetch('http://localhost/login.php', {
+    //     method: 'POST',
+    //     headers: {
+    //       'Content-Type': 'application/json',
+    //     },
+    //     body: JSON.stringify({ mail, parola }),
+    //   });
 
-      const data = await res.json();
+    //   const data = await res.json();
 
-      if (res.ok) {
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('role', data.role);
+    //   if (res.ok) {
+    //     localStorage.setItem('token', data.token);
+    //     localStorage.setItem('role', data.role);
         navigate('/home');
-      } else {
-        alert(data.error || 'Login failed');
-      }
-    } catch (err) {
-      alert('Network error');
-    }
+    //   } else {
+    //     alert(data.error || 'Login failed');
+    //   }
+    // } catch (err) {
+    //   alert('Network error');
+    // }
   };
 
   return (
@@ -88,7 +88,7 @@ const Login = () => {
                   value={mail}
                   onChange={(e) => setMail(e.target.value)}
                   placeholder="Enter your email"
-                  required
+                  //required
                   className="flex-1 bg-transparent outline-none text-gray-800"
                 />
               </div>
@@ -109,7 +109,7 @@ const Login = () => {
                   value={parola}
                   onChange={(e) => setParola(e.target.value)}
                   placeholder="Enter your password"
-                  required
+                  //required
                   className="flex-1 bg-transparent outline-none text-gray-800"
                 />
                 <button

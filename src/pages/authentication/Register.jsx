@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Eye,
   EyeOff,
@@ -20,14 +20,13 @@ const Register = () => {
     password: '',
     confirmPassword: '',
     projectId: '',
-    isAdmin: false, // ← add this
+    isAdmin: false,
   });
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
   const [projectOptions, setProjectOptions] = useState([]);
 
   useEffect(() => {
-    // Dropdown outside click
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsDropdownOpen(false);
@@ -35,7 +34,6 @@ const Register = () => {
     };
     document.addEventListener('mousedown', handleClickOutside);
 
-    // Fetch projects
     const fetchProjects = async () => {
       try {
         const res = await fetch('http://localhost/get_projects.php');

@@ -1,5 +1,6 @@
 // src/pages/Audit/AuditPage.jsx
 import React, { useState, useEffect } from 'react';
+import * as XLSX from 'xlsx';
 import AuditTable from '../../components/AuditTable';
 import Pagination from '../../components/ui/Pagination';
 import Navbar from '../../components/Navbar';
@@ -102,22 +103,55 @@ const AuditPage = () => {
       });
   }, [currentPage, teamId, startDate, endDate, projectId, userId, ticketId]);
 
+  // generate Excel
+  const exportToExcel = () => {
+    const wsData = logs.map(
+      ({
+        id,
+        timestamp,
+        user,
+        project,
+        echipa,
+        entity,
+        actiune,
+        previousValue,
+        newValue,
+      }) => ({
+        '#': id,
+        Timestamp: typeof timp === 'object' ? timestamp.date : timestamp,
+        User: user,
+        echipa: echipa,
+        Project: project,
+        entity: id,
+        Action: actiune,
+        'Previous Value': previousValue ?? '-',
+        'New Value': newValue ?? '-',
+      })
+    );
+    const ws = XLSX.utils.json_to_sheet(wsData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Audit');
+    XLSX.writeFile(wb, 'audit_logs.xlsx');
+  };
+
   const totalPages = Math.ceil(totalRows / logsPerPage);
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
       <Navbar />
       <div className="flex-1 p-4">
-        {/* Filters */}
+        {/* Filters & Export */}
         <div className="max-w-4xl mx-auto bg-white p-4 rounded-lg shadow-md mb-6">
           <div className="flex flex-wrap justify-center gap-4 items-end">
-            {/* Team filter shown if teams exist */}
             {teams.length > 0 && (
               <div>
                 <label className="block text-sm font-medium">Team</label>
                 <select
                   value={teamId}
-                  onChange={(e) => setTeamId(e.target.value)}
+                  onChange={(e) => {
+                    setTeamId(e.target.value);
+                    setCurrentPage(1);
+                  }}
                   className="mt-1 block w-full border-gray-300 rounded-md"
                 >
                   <option value="">All</option>
@@ -135,7 +169,10 @@ const AuditPage = () => {
               <input
                 type="date"
                 value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
+                onChange={(e) => {
+                  setStartDate(e.target.value);
+                  setCurrentPage(1);
+                }}
                 className="mt-1 block w-full border-gray-300 rounded-md"
               />
             </div>
@@ -145,7 +182,10 @@ const AuditPage = () => {
               <input
                 type="date"
                 value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
+                onChange={(e) => {
+                  setEndDate(e.target.value);
+                  setCurrentPage(1);
+                }}
                 className="mt-1 block w-full border-gray-300 rounded-md"
               />
             </div>
@@ -154,7 +194,10 @@ const AuditPage = () => {
               <label className="block text-sm font-medium">Project</label>
               <select
                 value={projectId}
-                onChange={(e) => setProjectId(e.target.value)}
+                onChange={(e) => {
+                  setProjectId(e.target.value);
+                  setCurrentPage(1);
+                }}
                 className="mt-1 block w-full border-gray-300 rounded-md"
               >
                 <option value="">All</option>
@@ -170,7 +213,10 @@ const AuditPage = () => {
               <label className="block text-sm font-medium">User</label>
               <select
                 value={userId}
-                onChange={(e) => setUserId(e.target.value)}
+                onChange={(e) => {
+                  setUserId(e.target.value);
+                  setCurrentPage(1);
+                }}
                 className="mt-1 block w-full border-gray-300 rounded-md"
               >
                 <option value="">All</option>
@@ -186,7 +232,10 @@ const AuditPage = () => {
               <label className="block text-sm font-medium">Ticket</label>
               <select
                 value={ticketId}
-                onChange={(e) => setTicketId(e.target.value)}
+                onChange={(e) => {
+                  setTicketId(e.target.value);
+                  setCurrentPage(1);
+                }}
                 className="mt-1 block w-full border-gray-300 rounded-md"
               >
                 <option value="">All</option>
@@ -197,6 +246,15 @@ const AuditPage = () => {
                 ))}
               </select>
             </div>
+
+            <div className="self-center">
+              <button
+                onClick={exportToExcel}
+                className="mt-6 px-4 py-2 bg-green-600 text-white rounded-md shadow hover:bg-green-700"
+              >
+                Generate Excel
+              </button>
+            </div>
           </div>
         </div>
 
@@ -204,10 +262,11 @@ const AuditPage = () => {
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
-          onPageChange={setCurrentPage}
+          onPageChange={(page) => setCurrentPage(page)}
         />
       </div>
     </div>
   );
 };
+
 export default AuditPage;

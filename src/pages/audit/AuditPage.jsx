@@ -90,6 +90,7 @@ const AuditPage = () => {
                 typeof row.timp === 'object' ? row.timp.date : row.timp,
               user: row.nume_utilizator,
               project: row.provider,
+              echipa: row.echipa,
               entity: row.id ?? `Ticket #${row.id_ticket}`,
               actiune: row.actiune,
               previousValue: row.stare_trecuta ?? '-',

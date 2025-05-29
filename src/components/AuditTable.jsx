@@ -19,6 +19,9 @@ const AuditTable = ({ logs = [] }) => {
             Project
           </div>
           <div className="flex-1 py-2 px-4 border border-gray-300 font-semibold">
+            Team
+          </div>
+          <div className="flex-1 py-2 px-4 border border-gray-300 font-semibold">
             Ticket
           </div>
           <div className="flex-1 py-2 px-4 border border-gray-300 font-semibold">
@@ -49,6 +52,9 @@ const AuditTable = ({ logs = [] }) => {
               </div>
               <div className="flex-1 py-2 px-4 border border-gray-300">
                 {log.project}
+              </div>
+              <div className="flex-1 py-2 px-4 border border-gray-300">
+                {log.echipa}
               </div>
               <div className="flex-1 py-2 px-4 border border-gray-300">
                 {log.entity}

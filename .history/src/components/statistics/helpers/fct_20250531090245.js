@@ -1,0 +1,445 @@
+import { mapSLAToMinutes } from "./const";
+function parseSafeDate(dateStr) {
+  try {
+    const parsed = new Date(dateStr);
+    if (!isNaN(parsed.getTime())) return parsed;
+  } catch (e) {
+    console.error("Invalid date:", dateStr);
+  }
+  return null;
+}
+
+export function countBySlaStatus(data) {
+  const today = new Date();
+
+  const grouped = {
+    "In progress": 0,
+    Met: 0,
+    Exceeded: 0,
+  };
+
+  data.forEach((ticket) => {
+    const startDate = new Date(ticket.start_date.date.slice(0, -4));
+
+    const slaHours = ticket.duration_hours;
+    let slaMinutes = mapSLAToMinutes[slaHours];
+
+    const closedDate = ticket.closed_date
+      ? new Date(ticket.closed_date.date.slice(0, -4))
+      : null;
+
+    const diffMinutes = closedDate
+      ? (closedDate - startDate) / 60000
+      : (today - startDate) / 60000;
+
+    if (!closedDate && diffMinutes < slaMinutes) {
+      grouped["In progress"] += 1;
+    } else if (closedDate && diffMinutes <= slaMinutes) {
+      grouped["Met"] += 1;
+    } else {
+      grouped["Exceeded"] += 1;
+    }
+  });
+
+  return Object.entries(grouped).map(([status, count]) => ({
+    status,
+    count,
+  }));
+}
+
+export function countByTeamAssigned(tickets, SLAResolutionMandatory = false) {
+  if (!Array.isArray(tickets)) {
+    console.error("❌ countByTeamAssigned: expected array, got:", tickets);
+    return [];
+  }
+
+  if (SLAResolutionMandatory) {
+    tickets = tickets.filter(ticket => getSLAResolution(ticket));
+  }
+
+  const groupedDataNum = tickets.reduce((acc, ticket) => {
+    const team = ticket.team_assigned_person_name || ticket.team_assigned_person || "Unassigned";
+    acc[team] = (acc[team] || 0) + 1;
+    return acc;
+  }, {});
+
+  return Object.entries(groupedDataNum).map(([team, count]) => ({
+    team,
+    count,
+  }));
+}
+
+
+export function ticketsBySLA(tickets) {
+  let slaCount = {
+    8: 0,
+    40: 0,
+    132: 0,
+    4: 0,
+  };
+
+  tickets.forEach((ticket) => {
+    if (
+      ticket.duration_hours &&
+      slaCount.hasOwnProperty(ticket.duration_hours)
+    ) {
+      slaCount[ticket.duration_hours] += 1;
+    }
+  });
+
+  return Object.entries(slaCount).map(([status, count]) => ({
+    status: status + "h",
+    count,
+  }));
+}
+
+export function getSLAResolution(ticket) {
+  const today = new Date();
+  const startDate = new Date(ticket.start_date.date.slice(0, -4));
+
+  const slaHours = ticket.duration_hours;
+  let slaMinutes = mapSLAToMinutes[slaHours];
+
+  const closedDate = ticket.closed_date
+    ? new Date(ticket.closed_date.date.slice(0, -4))
+    : null;
+
+  const diffMinutes = closedDate
+    ? (closedDate - startDate) / 60000
+    : (today - startDate) / 60000;
+
+  if (closedDate && diffMinutes <= slaMinutes) {
+    return true;
+  }
+  return false;
+}
+
+export function countByPriority(data, SLAResolutionMandatory = false) {
+  if (!Array.isArray(data)) {
+    console.error("❌ countByPriority: expected array, got:", data);
+    return [];
+  }
+
+  if (SLAResolutionMandatory) {
+    data = data.filter(ticket => getSLAResolution(ticket) === true);
+  }
+
+  const groupedDataNum = data.reduce((acc, ticket) => {
+    const priority = ticket.priority_name || ticket.priority || "Unknown";
+    acc[priority] = (acc[priority] || 0) + 1;
+    return acc;
+  }, {});
+
+  const counted = Object.entries(groupedDataNum).map(([priority, count]) => ({
+    priority,
+    count,
+  }));
+
+  const priorityOrder = ["Low", "Medium", "High", "Critical"];
+  counted.sort(
+    (a, b) =>
+      priorityOrder.indexOf(a.priority) - priorityOrder.indexOf(b.priority)
+  );
+
+  return counted;
+}
+
+
+export function getPercentsFromCounted(countedData, totalCount = null, key = "priority") {
+  if (!Array.isArray(countedData)) {
+    console.error("❌ getPercentsFromCounted: expected array, got:", countedData);
+    return [];
+  }
+
+  if (!totalCount) {
+    totalCount = countedData.reduce((sum, item) => sum + (item.count || 0), 0);
+  }
+
+  return countedData.map(entry => {
+    if (entry[key] && entry.count != null) {
+      return {
+        [key]: entry[key],
+        perc: (entry.count / totalCount) * 100,
+      };
+    }
+    return {};
+  });
+}
+
+
+export function countByCreatedDateDaily(data) {
+  const groupedDataDate = data.reduce((acc, ticket) => {
+    if ("start_date" in ticket) {
+      const start_date = ticket.start_date.date;
+      const key = start_date.slice(0, 10);
+      acc[key] = (acc[key] || 0) + 1;
+    }
+    return acc;
+  }, {});
+
+  const counted = Object.entries(groupedDataDate)
+    .sort(([a], [b]) => new Date(a) - new Date(b))
+    .map(([createdDate, count]) => {
+      const date = new Date(createdDate);
+
+      const formatted = date.toLocaleDateString("en-US", {
+        weekday: "long",
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      });
+
+      return {
+        createdDate: formatted,
+        count,
+      };
+    });
+
+  return counted;
+}
+
+export function countByStatus(data) {
+  const groupedDataStatus = data.reduce((acc, ticket) => {
+    if ("status" in ticket) {
+      const st = ticket.status;
+      acc[st] = (acc[st] || 0) + 1;
+    } else {
+      acc = [];
+    }
+    return acc;
+  }, {});
+  const counted = Object.entries(groupedDataStatus).map(([status, count]) => ({
+    status: status.charAt(0).toUpperCase() + status.slice(1),
+    count,
+  }));
+
+  return counted;
+}
+
+export function calculateDiffMinutes(startDate, closedDate) {
+  const diffMs = closedDate - startDate;
+
+  const diffMinutes = Math.floor(diffMs / 60000);
+  return diffMinutes;
+}
+
+export function countByCreatedDateWeekly(data) {
+  if (!Array.isArray(data)) return [];
+
+  const grouped = {};
+
+  data.forEach((ticket) => {
+    const dateStr = ticket?.start_date?.date;
+    const date = parseSafeDate(dateStr);
+    if (!date) return;
+
+    const startOfWeek = new Date(date);
+    startOfWeek.setDate(date.getDate() - date.getDay());
+
+    const key = startOfWeek.toISOString().split("T")[0];
+    grouped[key] = (grouped[key] || 0) + 1;
+  });
+
+  return Object.entries(grouped)
+    .sort(([a], [b]) => new Date(a) - new Date(b))
+    .map(([key, count]) => {
+      const start = new Date(key);
+      const end = new Date(start);
+      end.setDate(start.getDate() + 6);
+
+      return {
+        createdDate: `${start.toLocaleDateString("en-US", { month: "short", day: "numeric" })}–${end.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`,
+        count,
+      };
+    });
+}
+
+
+export function countByCreatedDateMonthly(data) {
+  const groupedDataDate = new Map();
+
+  data.forEach((ticket) => {
+    if ("start_date" in ticket) {
+      const start_date = ticket.start_date.date;
+      const crDate = new Date(start_date.slice(0, -4));
+
+      const key = crDate.toISOString().slice(0, 7);
+      const display = crDate.toLocaleDateString("en-US", {
+        month: "short",
+        year: "numeric",
+      });
+
+      if (!groupedDataDate.has(key)) {
+        groupedDataDate.set(key, { count: 0, display });
+      }
+      groupedDataDate.get(key).count += 1;
+    }
+  });
+
+  const counted = Array.from(groupedDataDate.entries())
+    .sort(([a], [b]) => new Date(a) - new Date(b))
+    .map(([_, { count, display }]) => ({
+      createdDate: display,
+      count,
+    }));
+
+  return counted;
+}
+
+export const getSLAStatus = (ticket) => {
+  const startDate = parseSafeDate(ticket?.start_date?.date);
+  const closedDate = parseSafeDate(ticket?.closed_date?.date);
+  const slaMinutes = mapSLAToMinutes[ticket?.duration_hours] || 0;
+
+  if (!startDate) return "Unknown";
+  if (!closedDate) return "Exceeded";
+
+  const diffMinutes = (closedDate - startDate) / 60000;
+  return diffMinutes <= slaMinutes ? "Met" : "Exceeded";
+};
+
+
+export const countSLAOverTime = (
+  tickets,
+  timeUnit,
+  filterKey = null,
+  filterValue = null
+) => {
+  const filteredTickets =
+    filterKey && filterValue
+      ? tickets.filter((ticket) => ticket[filterKey] === filterValue)
+      : tickets;
+
+  const groupedData = {};
+
+  filteredTickets.forEach((ticket) => {
+    const ticketDate = new Date(ticket.start_date.date.slice(0, -4));
+    let timeKey;
+
+    if (timeUnit === "daily") {
+      timeKey = ticketDate.toISOString().split("T")[0];
+    } else if (timeUnit === "weekly") {
+      const startOfWeek = new Date(ticketDate);
+      startOfWeek.setDate(ticketDate.getDate() - ticketDate.getDay());
+      timeKey = startOfWeek.toISOString().split("T")[0];
+    } else if (timeUnit === "monthly") {
+      timeKey = ticketDate.toISOString().slice(0, 7);
+    }
+
+    if (!groupedData[timeKey]) {
+      groupedData[timeKey] = { Met: 0, Exceeded: 0, date: timeKey };
+    }
+    const status = getSLAStatus(ticket);
+    groupedData[timeKey][status]++;
+  });
+
+  const result = Object.values(groupedData).sort(
+    (a, b) => new Date(a.date) - new Date(b.date)
+  );
+
+  result.forEach((item) => {
+    if (!item.Met) item.Met = 0;
+    if (!item.Exceeded) item.Exceeded = 0;
+  });
+
+  if (timeUnit === "daily") {
+    result.forEach((item) => {
+      const date = new Date(item.date);
+      item.date = date.toLocaleDateString("en-US", {
+        weekday: "short",
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      });
+    });
+  } else if (timeUnit === "weekly") {
+    result.forEach((item) => {
+      const startDate = new Date(item.date);
+      const endDate = new Date(startDate);
+      endDate.setDate(startDate.getDate() + 6);
+      const start = startDate.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      });
+      const end = endDate.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
+      item.date = `${start} - ${end}`;
+    });
+  } else if (timeUnit === "monthly") {
+    result.forEach((item) => {
+      const date = new Date(item.date);
+      item.date = date.toLocaleDateString("en-US", {
+        month: "short",
+        year: "numeric",
+      });
+    });
+  }
+  return result;
+};
+// --------------------------------
+
+// Additional helper functions for fct.js
+export function countByProject(tickets, slaOnly = false) {
+  const counts = {};
+
+  tickets.forEach((ticket) => {
+    if (!slaOnly || (ticket.closed_date && ticket.duration_hours)) {
+      const project = ticket.project || "Unassigned";
+      counts[project] = (counts[project] || 0) + 1;
+    }
+  });
+
+  return Object.entries(counts).map(([project, count]) => ({
+    project,
+    count,
+  }));
+}
+
+// Add these functions to your existing fct.js helpers
+
+/**
+ * Calculate SLA status (Met/Exceeded) for tickets grouped by specified field
+ */
+export function calculateSlaStatus(tickets, groupByField) {
+  const result = {};
+
+  tickets.forEach((ticket) => {
+    if (!ticket.closed_date || !ticket.duration_hours) return;
+
+    const groupValue = ticket[groupByField] || "Unassigned";
+    const created = new Date(ticket.start_date.date);
+    const closed = new Date(ticket.closed_date.date);
+    const hoursToResolve = (closed - created) / (1000 * 60 * 60);
+    const status = hoursToResolve <= ticket.duration_hours ? "Met" : "Exceeded";
+
+    if (!result[groupValue]) {
+      result[groupValue] = { Met: 0, Exceeded: 0 };
+    }
+    result[groupValue][status]++;
+  });
+
+  return Object.entries(result).map(([name, counts]) => ({
+    name,
+    ...counts,
+  }));
+}
+
+/**
+ * Convert counts to percentages for SLA status data
+ */
+export function convertSlaStatusToPercentages(data) {
+  return Array.isArray(data)
+    ? data.map((item) => {
+        const total = (item.Met || 0) + (item.Exceeded || 0);
+        return {
+          name: item.name || "Unknown",
+          Met: total > 0 ? Math.round((item.Met / total) * 100) : 0,
+          Exceeded: total > 0 ? Math.round((item.Exceeded / total) * 100) : 0,
+        };
+      })
+    : [];
+}
+

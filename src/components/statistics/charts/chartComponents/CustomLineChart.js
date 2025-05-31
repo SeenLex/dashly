@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   AreaChart,
   Area,
@@ -8,9 +8,7 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-} from "recharts";
-
-import { format, parseISO } from "date-fns";
+} from 'recharts';
 
 const CustomLineChart = ({
   title,
@@ -26,9 +24,7 @@ const CustomLineChart = ({
 
   return (
     <div>
-      <p className="text-lg font-semibold text-white mb-4 text-center">
-        {title}
-      </p>
+      <p className="text-lg font-semibold text-black dark:text-white mb-4 text-center">{title}</p>
       <ResponsiveContainer width="100%" height={400}>
         <AreaChart
           data={data}
@@ -40,33 +36,14 @@ const CustomLineChart = ({
           }}
         >
           <CartesianGrid strokeDasharray="3 3" stroke="var(--card-border)" />
-          <XAxis
-            dataKey="label"
-            stroke="var(--text-color-secondary)"
-            tickFormatter={(str) => {
-              try {
-                const date = parseISO(str);
-                return format(date, "dd MMM"); // 29 May
-              } catch {
-                return str;
-              }
-            }}
-          />
-
-          <YAxis
-            stroke="var(--text-color-secondary)"
-            tickFormatter={(value) => value.toLocaleString()}
-          />
+          <XAxis dataKey="date" stroke="var(--text-color-secondary)" />
+          <YAxis stroke="var(--text-color-secondary)" />
           <Tooltip
             labelFormatter={(label) => `${labelName}${label}`}
-            contentStyle={{
-              backgroundColor: "var(--secondary-bg)",
-              border: "1px solid var(--card-border)",
-              color: "var(--text-color-primary)",
-            }}
-            itemStyle={{ color: "var(--text-color-primary)" }}
+            contentStyle={{ backgroundColor: 'var(--secondary-bg)', border: '1px solid var(--card-border)', color: 'var(--text-color-primary)' }}
+            itemStyle={{ color: 'var(--text-color-primary)' }}
           />
-          <Legend wrapperStyle={{ color: "var(--text-color-primary)" }} />
+          <Legend wrapperStyle={{ color: 'var(--text-color-primary)' }} />
           <Area
             type="monotone"
             dataKey={dataKey}

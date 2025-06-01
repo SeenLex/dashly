@@ -74,18 +74,21 @@ function LineChartSection({ tickets }) {
             title={"Ticket Creation Trend - Daily"}
             data={createdDateDataDaily}
             dataKey={"count"}
+            labelDataKey={"createdDate"}
             labelName={"Day: "}
           />,
           <CustomLineChart
             title={"Ticket Creation Trend - Weekly"}
             data={createdDateDataWeekly}
             dataKey={"count"}
+            labelDataKey={"createdDate"}
             labelName={"Week: "}
           />,
           <CustomLineChart
             title={"Ticket Creation Trend - Monthly"}
             data={createdDateDataMonthly}
             dataKey={"count"}
+            labelDataKey={"createdDate"}
             labelName={"Month: "}
           />,
           slaOverallData && slaOverallData.length > 0 ? (
@@ -93,6 +96,7 @@ function LineChartSection({ tickets }) {
               title={"Overall SLA Performance (Monthly)"}
               data={slaOverallData}
               labelName={"Month: "}
+              labelDataKey={"date"}
               dataKey="Met"
               secondDataKey="Exceeded"
               secondStroke="#ffc658"
@@ -108,6 +112,7 @@ function LineChartSection({ tickets }) {
                 title={`Team: ${team} SLA Performance (Monthly)`}
                 data={data}
                 labelName={"Month: "}
+                labelDataKey={"date"}
                 dataKey="Met"
                 secondDataKey="Exceeded"
                 secondStroke="#ffc658"
@@ -125,6 +130,7 @@ function LineChartSection({ tickets }) {
                 data={data}
                 labelName={"Month: "}
                 dataKey="Met"
+                labelDataKey={"date"}
                 secondDataKey="Exceeded"
                 secondStroke="#ffc658"
                 secondLabel="Exceeded"

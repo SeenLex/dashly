@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   AreaChart,
   Area,
@@ -9,12 +9,14 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
+import CustomTooltip from '../../customComponents/CustomToolTip';
 
 const CustomLineChart = ({
   title,
   data,
   labelName = "",
   dataKey,
+  labelDataKey,
   secondDataKey,
   secondStroke,
   secondLabel,
@@ -36,14 +38,10 @@ const CustomLineChart = ({
           }}
         >
           <CartesianGrid strokeDasharray="3 3" stroke="var(--card-border)" />
-          <XAxis dataKey="date" stroke="var(--text-color-secondary)" />
+          <XAxis dataKey={labelDataKey} stroke="var(--text-color-secondary)" />
           <YAxis stroke="var(--text-color-secondary)" />
-          <Tooltip
-            labelFormatter={(label) => `${labelName}${label}`}
-            contentStyle={{ backgroundColor: 'var(--secondary-bg)', border: '1px solid var(--card-border)', color: 'var(--text-color-primary)' }}
-            itemStyle={{ color: 'var(--text-color-primary)' }}
-          />
-          <Legend wrapperStyle={{ color: 'var(--text-color-primary)' }} />
+          <Tooltip labelFormatter={(label) => `${labelName}${label}`} content={<CustomTooltip />} />
+          <Legend wrapperStyle={{ color: 'black' }} />
           <Area
             type="monotone"
             dataKey={dataKey}

@@ -69,9 +69,6 @@ function CustomBarChart({
             content={
               <CustomTooltip
                 displayLabel={title + ": "}
-                teamsByCategory={teamsByCategory}
-                slaStatusByTeam={slaStatusByTeam}
-                slaStatusByProject={slaStatusByProject}
                 buttonCallback={() => { setTooltipState(false); }}
               />}
           />

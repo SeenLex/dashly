@@ -15,7 +15,7 @@ function ticketItem(ticket) {
             ? "blue"
             : "red"
         }`,
-        marginBottom: "20px"
+      marginBottom: "20px"
     }}
   >
     <div
@@ -199,7 +199,7 @@ function CustomTooltip({ active, payload, displayLabel, label, showPercentage, c
         transform: "scale(1)",
         transition: "transform 0.3s ease-in-out",
       }}
-      //onWheel={handleWheel}
+    //onWheel={handleWheel}
     >
       {/* Header Section */}
       <div
@@ -218,7 +218,7 @@ function CustomTooltip({ active, payload, displayLabel, label, showPercentage, c
               color: "#222",
             }}
           >
-            {displayLabel}{" "}{label}
+            {displayLabel}{" "}{label ?? payload[0].name ?? ""}
           </p>
           <button style={{ fontWeight: "bold", fontSize: "16px", color: "red" }} onClick={() => { buttonCallback() }}>X</button>
         </div>
@@ -379,24 +379,24 @@ function CustomTooltip({ active, payload, displayLabel, label, showPercentage, c
                     : <></>}
                 </>
                 ) : (
-                  metTickets.length || exceededTickets.length ?(<>
-                  {metTickets.length ?
-                    <div>
-                      <p className="text-md font-bold" style={{ marginBottom: "20px" }}>Met SLA tickets:</p>
-                      {metTickets.map((ticket) => (
-                        ticketItem(ticket)
-                      ))}
-                    </div> : <></>}
-                  {exceededTickets.length ?
-                    <div>
-                      <p className="text-md font-bold" style={{ marginBottom: "20px" }}>Exceeded SLA tickets:</p>
-                      {exceededTickets.map((ticket) => (
-                        ticketItem(ticket)
-                      ))}
-                    </div>
-                    : <></>}
-                </>
-                ) 
+                  metTickets.length || exceededTickets.length ? (<>
+                    {metTickets.length ?
+                      <div>
+                        <p className="text-md font-bold" style={{ marginBottom: "20px" }}>Met SLA tickets:</p>
+                        {metTickets.map((ticket) => (
+                          ticketItem(ticket)
+                        ))}
+                      </div> : <></>}
+                    {exceededTickets.length ?
+                      <div>
+                        <p className="text-md font-bold" style={{ marginBottom: "20px" }}>Exceeded SLA tickets:</p>
+                        {exceededTickets.map((ticket) => (
+                          ticketItem(ticket)
+                        ))}
+                      </div>
+                      : <></>}
+                  </>
+                  )
                     : <></>
                 )
               )

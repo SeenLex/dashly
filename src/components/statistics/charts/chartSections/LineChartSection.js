@@ -1,43 +1,51 @@
 import { useEffect, useState } from "react";
 import {
-  countByStartedDateDaily,
-  countByStartedDateWeekly,
-  countByStartedDateMonthly,
+  countByStartedClosedDateDaily,
+  countByStartedClosedDateWeekly,
+  countByStartedClosedDateMonthly,
   countSLAOverTime,
 } from "../../helpers/fct.js";
 import CustomLineChart from "../chartComponents/CustomLineChart.js";
 import CustomHorizontalContainer from "../../customContainers/CustomHorizontalContainer.js";
+import { normalizeTickets } from "../../helpers/fct.js";
 
 function LineChartSection({ tickets }) {
-  const [startedDateDataDaily, setStartedDateDataDaily] = useState([]);
-  const [startedDateDataWeekly, setStartedDateDataWeekly] = useState([]);
-  const [startedDateDataMonthly, setStartedDateDataMonthly] = useState([]);
+  const [startedClosedDateDataDaily, setStartedClosedDateDataDaily] = useState([]);
+  const [startedClosedDateDataWeekly, setStartedClosedDateDataWeekly] = useState([]);
+  const [startedClosedDateDataMonthly, setStartedClosedDateDataMonthly] = useState([]);
 
   const [slaOverallData, setSlaOverallData] = useState([]);
   const [slaTeamData, setSlaTeamData] = useState({});
   const [slaProjectData, setSlaProjectData] = useState({});
+  const [normalizedTickets, setNormalizedTickets] = useState([])
+
 
   useEffect(() => {
-    if (tickets) {
-      const countedByStartedDateDailyData = countByStartedDateDaily(tickets);
-      const countedByStartedDateWeeklyData = countByStartedDateWeekly(tickets);
-      const countedByStartedDateMonthlyData =
-        countByStartedDateMonthly(tickets);
+    const normalizedTickets = normalizeTickets(tickets)
+    setNormalizedTickets(normalizedTickets)
+  }, [tickets])
 
-      setStartedDateDataDaily(countedByStartedDateDailyData);
-      setStartedDateDataWeekly(countedByStartedDateWeeklyData);
-      setStartedDateDataMonthly(countedByStartedDateMonthlyData);
+  useEffect(() => {
+    if (normalizedTickets) {
+      const countedByStartedClosedDateDailyData = countByStartedClosedDateDaily(normalizedTickets);
+      const countedByStartedClosedDateWeeklyData = countByStartedClosedDateWeekly(normalizedTickets);
+      const countedByStartedClosedDateMonthlyData =
+        countByStartedClosedDateMonthly(normalizedTickets);
 
-      const overallSLAData = countSLAOverTime(tickets, "monthly");
+      setStartedClosedDateDataDaily(countedByStartedClosedDateDailyData);
+      setStartedClosedDateDataWeekly(countedByStartedClosedDateWeeklyData);
+      setStartedClosedDateDataMonthly(countedByStartedClosedDateMonthlyData);
+
+      const overallSLAData = countSLAOverTime(normalizedTickets, "monthly");
       setSlaOverallData(overallSLAData);
 
       const teams = [
-        ...new Set(tickets.map((t) => t.team_assigned_person).filter(Boolean)),
+        ...new Set(normalizedTickets.map((t) => t.team_assigned_person).filter(Boolean)),
       ];
       const teamData = {};
       teams.forEach((team) => {
         const teamSLAData = countSLAOverTime(
-          tickets,
+          normalizedTickets,
           "monthly",
           "team_assigned_person",
           team
@@ -52,7 +60,7 @@ function LineChartSection({ tickets }) {
       const projectData = {};
       projects.forEach((project) => {
         const projectSLAData = countSLAOverTime(
-          tickets,
+          normalizedTickets,
           "monthly",
           "project",
           project
@@ -61,7 +69,7 @@ function LineChartSection({ tickets }) {
       });
       setSlaProjectData(projectData);
     }
-  }, [tickets]);
+  }, [normalizedTickets]);
 
   return (
     <>
@@ -72,7 +80,7 @@ function LineChartSection({ tickets }) {
         components={[
           <CustomLineChart
             title={"Ticket Trend - Daily"}
-            data={startedDateDataDaily}
+            data={startedClosedDateDataDaily}
             tooltipLabelName="Day"
             dataKey={"startCount"}
             labelDataKey={"date"}
@@ -83,7 +91,7 @@ function LineChartSection({ tickets }) {
           />,
           <CustomLineChart
             title={"Ticket Trend - Weekly"}
-            data={startedDateDataWeekly}
+            data={startedClosedDateDataWeekly}
             tooltipLabelName="Week"
             dataKey={"startCount"}
             labelDataKey={"date"}
@@ -94,7 +102,7 @@ function LineChartSection({ tickets }) {
           />,
           <CustomLineChart
             title={"Ticket Trend - Monthly"}
-            data={startedDateDataMonthly}
+            data={startedClosedDateDataMonthly}
             tooltipLabelName="Month"
             dataKey={"startCount"}
             labelDataKey={"date"}

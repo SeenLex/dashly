@@ -82,7 +82,7 @@ export function ticketsBySLA(tickets) {
 
   return Object.entries(slaCount).map(([status, count]) => ({
     status: status + "h",
-      value: count,
+    value: count,
   }));
 }
 
@@ -159,7 +159,7 @@ export function getPercentsFromCounted(
 export function countByStatus(tickets) {
   // Lista completă de statusuri dorite
   const statuses = ["Open", "In Progress", "Closed", "Pending", "Resolved"];
-  
+
   // Obiect pentru contorizare
   const count = {};
   statuses.forEach(status => count[status] = 0);
@@ -185,23 +185,34 @@ export function calculateDiffMinutes(startDate, closedDate) {
   return diffMinutes;
 }
 
-export function countByStartedDateDaily(data) {
+export function countByStartedClosedDateDaily(data) {
   const startMap = {};
   const closedMap = {};
 
   data.forEach(ticket => {
     if (ticket.start_date?.date) {
       const date = ticket.start_date.date.slice(0, 10);
-      startMap[date] = (startMap[date] || 0) + 1;
+      if (!startMap[date]) {
+        startMap[date] = { count: 0, tickets: [] };
+      }
+      startMap[date].count += 1;
+      startMap[date].tickets.push(ticket);
     }
 
     if (ticket.closed_date?.date) {
       const date = ticket.closed_date.date.slice(0, 10);
-      closedMap[date] = (closedMap[date] || 0) + 1;
+      if (!closedMap[date]) {
+        closedMap[date] = { count: 0, tickets: [] };
+      }
+      closedMap[date].count += 1;
+      closedMap[date].tickets.push(ticket);
     }
   });
 
-  const allDates = new Set([...Object.keys(startMap), ...Object.keys(closedMap)]);
+  const allDates = new Set([
+    ...Object.keys(startMap),
+    ...Object.keys(closedMap),
+  ]);
 
   const counted = Array.from(allDates)
     .sort((a, b) => new Date(a) - new Date(b))
@@ -216,42 +227,45 @@ export function countByStartedDateDaily(data) {
 
       return {
         date: formatted,
-        startCount: startMap[dateStr] || 0,
-        closedCount: closedMap[dateStr] || 0,
+        startCount: startMap[dateStr]?.count || 0,
+        startedTickets: startMap[dateStr]?.tickets || [],
+        closedCount: closedMap[dateStr]?.count || 0,
+        closedTickets: closedMap[dateStr]?.tickets || [],
       };
     });
 
   return counted;
 }
 
-export function countByStartedDateWeekly(data) {
+export function countByStartedClosedDateWeekly(data) {
   const startMap = {};
   const closedMap = {};
 
   const getWeekKey = (rawDate) => {
     const date = new Date(rawDate.slice(0, -4));
     const startOfWeek = new Date(date);
-    startOfWeek.setDate(date.getDate() - date.getDay());
+    startOfWeek.setDate(date.getDate() - date.getDay()); // Sunday start
     return startOfWeek.toISOString().split("T")[0];
   };
 
-  data.forEach(ticket => {
+  for (const ticket of data) {
     if (ticket.start_date?.date) {
       const key = getWeekKey(ticket.start_date.date);
-      startMap[key] = (startMap[key] || 0) + 1;
+      startMap[key] = startMap[key] || [];
+      startMap[key].push(ticket);
     }
-
     if (ticket.closed_date?.date) {
       const key = getWeekKey(ticket.closed_date.date);
-      closedMap[key] = (closedMap[key] || 0) + 1;
+      closedMap[key] = closedMap[key] || [];
+      closedMap[key].push(ticket);
     }
-  });
+  }
 
   const allWeeks = new Set([...Object.keys(startMap), ...Object.keys(closedMap)]);
 
-  const counted = Array.from(allWeeks)
+  return Array.from(allWeeks)
     .sort((a, b) => new Date(a) - new Date(b))
-    .map(weekStart => {
+    .map((weekStart) => {
       const startDate = new Date(weekStart);
       const endDate = new Date(startDate);
       endDate.setDate(startDate.getDate() + 6);
@@ -259,56 +273,63 @@ export function countByStartedDateWeekly(data) {
       const options = { month: "short", day: "numeric" };
       const formatted = `${startDate.toLocaleDateString("en-US", options)}–${endDate.toLocaleDateString("en-US", options)}, ${startDate.getFullYear()}`;
 
+      const startedTickets = startMap[weekStart] || [];
+      const closedTickets = closedMap[weekStart] || [];
+
       return {
         date: formatted,
-        startCount: startMap[weekStart] || 0,
-        closedCount: closedMap[weekStart] || 0,
+        startCount: startedTickets.length,
+        closedCount: closedTickets.length,
+        startedTickets,
+        closedTickets,
       };
     });
-
-  return counted;
 }
 
-export function countByStartedDateMonthly(data) {
+export function countByStartedClosedDateMonthly(data) {
   const startMap = new Map();
   const closedMap = new Map();
 
   const getMonthKey = (rawDate) => {
     const date = new Date(rawDate.slice(0, -4));
-    return date.toISOString().slice(0, 7); // YYYY-MM
+    return date.toISOString().slice(0, 7); // "YYYY-MM"
   };
 
-  data.forEach(ticket => {
+  for (const ticket of data) {
     if (ticket.start_date?.date) {
       const key = getMonthKey(ticket.start_date.date);
-      startMap.set(key, (startMap.get(key) || 0) + 1);
+      if (!startMap.has(key)) startMap.set(key, []);
+      startMap.get(key).push(ticket);
     }
-
     if (ticket.closed_date?.date) {
       const key = getMonthKey(ticket.closed_date.date);
-      closedMap.set(key, (closedMap.get(key) || 0) + 1);
+      if (!closedMap.has(key)) closedMap.set(key, []);
+      closedMap.get(key).push(ticket);
     }
-  });
+  }
 
   const allMonths = new Set([...startMap.keys(), ...closedMap.keys()]);
 
-  const counted = Array.from(allMonths)
+  return Array.from(allMonths)
     .sort((a, b) => new Date(a) - new Date(b))
-    .map(monthKey => {
-      const date = new Date(monthKey + "-01");
+    .map((monthKey) => {
+      const date = new Date(`${monthKey}-01`);
       const formatted = date.toLocaleDateString("en-US", {
         month: "short",
         year: "numeric",
       });
 
+      const startedTickets = startMap.get(monthKey) || [];
+      const closedTickets = closedMap.get(monthKey) || [];
+
       return {
         date: formatted,
-        startCount: startMap.get(monthKey) || 0,
-        closedCount: closedMap.get(monthKey) || 0,
+        startCount: startedTickets.length,
+        closedCount: closedTickets.length,
+        startedTickets,
+        closedTickets,
       };
     });
-
-  return counted;
 }
 
 export const getSLAStatus = (data) => {
@@ -354,21 +375,30 @@ export const countSLAOverTime = (
     }
 
     if (!groupedData[timeKey]) {
-      groupedData[timeKey] = { Met: 0, Exceeded: 0, date: timeKey };
+      groupedData[timeKey] = {
+        Met: 0,
+        Exceeded: 0,
+        metTickets: [],
+        exceededTickets: [],
+        date: timeKey,
+      };
     }
+
     const status = getSLAStatus(ticket);
-    groupedData[timeKey][status]++;
+    if (status === "Met") {
+      groupedData[timeKey].Met++;
+      groupedData[timeKey].metTickets.push(ticket);
+    } else if (status === "Exceeded") {
+      groupedData[timeKey].Exceeded++;
+      groupedData[timeKey].exceededTickets.push(ticket);
+    }
   });
 
   const result = Object.values(groupedData).sort(
     (a, b) => new Date(a.date) - new Date(b.date)
   );
 
-  result.forEach((item) => {
-    if (!item.Met) item.Met = 0;
-    if (!item.Exceeded) item.Exceeded = 0;
-  });
-
+  // Formatting dates based on time unit
   if (timeUnit === "daily") {
     result.forEach((item) => {
       const date = new Date(item.date);
@@ -404,8 +434,10 @@ export const countSLAOverTime = (
       });
     });
   }
+
   return result;
 };
+
 // --------------------------------
 
 // Additional helper functions for fct.js
@@ -466,4 +498,37 @@ export function convertSlaStatusToPercentages(data) {
       Exceeded: total > 0 ? Math.round((item.Exceeded / total) * 100) : 0,
     };
   });
+}
+
+// Funcție generică care grupează ticket-urile după orice categorie
+export function prepareDataWithTicketsByCategory(tickets, categoryKey) {
+  const grouped = {};
+
+  tickets.forEach((ticket) => {
+    const categoryValue = ticket[categoryKey] || "N/A";
+    if (!grouped[categoryValue])
+      grouped[categoryValue] = {
+        [categoryKey]: categoryValue,
+        count: 0,
+        tickets: [],
+      };
+    grouped[categoryValue].count += 1;
+    grouped[categoryValue].tickets.push(ticket);
+  });
+
+  return Object.values(grouped);
+}
+
+export function normalizeTickets(tickets) {
+  const normalizedTickets = tickets.map(ticket => ({
+    priority: ticket.priority || "N/A",
+    team_assigned_person: ticket.team_assigned_person || "Unassigned",
+    project: ticket.project || "Unassigned",
+    response_time: ticket.response_time, // poate fi null
+    closed_date: ticket.closed_date,
+    duration_hours: ticket.duration_hours || 0, // asigură-te că ai acest câmp din backend, altfel pune 0
+    // Păstrează și celelalte câmpuri dacă e nevoie
+    ...ticket,
+  }));
+  return normalizedTickets
 }

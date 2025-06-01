@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   AreaChart,
   Area,
@@ -24,6 +24,7 @@ const CustomLineChart = ({
 }) => {
   const primaryColor = "#4299e1"; // Accent blue
   const secondaryColor = secondStroke || "#f56565"; // Accent red
+  const [tooltipState, setTooltipState] = useState(false);
 
   return (
     <div>
@@ -37,11 +38,17 @@ const CustomLineChart = ({
             left: 20,
             bottom: 5,
           }}
+          onClick={(e) => {
+            setTooltipState(
+              !tooltipState
+            );
+          }}
         >
           <CartesianGrid strokeDasharray="3 3" stroke="var(--card-border)" />
           <XAxis dataKey={labelDataKey} stroke="var(--text-color-secondary)" tick={false} />
           <YAxis stroke="var(--text-color-secondary)" />
-          <Tooltip labelFormatter={(label) => `${labelName}${label}`} content={<CustomTooltip labelName={tooltipLabelName}/>} />
+          <Tooltip trigger="click"
+            active={tooltipState} labelFormatter={(label) => `${labelName}${label}`} content={<CustomTooltip buttonCallback={() => { setTooltipState(false); }} labelName={tooltipLabelName} />} />
           <Legend wrapperStyle={{ color: 'black' }} />
           <Area
             type="monotone"

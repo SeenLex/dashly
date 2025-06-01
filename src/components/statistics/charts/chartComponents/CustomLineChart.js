@@ -20,6 +20,7 @@ const CustomLineChart = ({
   secondDataKey,
   secondStroke,
   secondLabel,
+  tooltipLabelName = ""
 }) => {
   const primaryColor = "#4299e1"; // Accent blue
   const secondaryColor = secondStroke || "#f56565"; // Accent red
@@ -40,7 +41,7 @@ const CustomLineChart = ({
           <CartesianGrid strokeDasharray="3 3" stroke="var(--card-border)" />
           <XAxis dataKey={labelDataKey} stroke="var(--text-color-secondary)" tick={false} />
           <YAxis stroke="var(--text-color-secondary)" />
-          <Tooltip labelFormatter={(label) => `${labelName}${label}`} content={<CustomTooltip />} />
+          <Tooltip labelFormatter={(label) => `${labelName}${label}`} content={<CustomTooltip labelName={tooltipLabelName}/>} />
           <Legend wrapperStyle={{ color: 'black' }} />
           <Area
             type="monotone"
@@ -48,7 +49,7 @@ const CustomLineChart = ({
             stroke={primaryColor}
             fill={primaryColor}
             fillOpacity={0.3}
-            name={dataKey}
+            name={labelName}
           />
           {secondDataKey && secondLabel && (
             <Area
@@ -56,7 +57,7 @@ const CustomLineChart = ({
               dataKey={secondDataKey}
               stroke={secondaryColor}
               fill={secondaryColor}
-              fillOpacity={0.3}
+              fillOpacity={0.2}
               name={secondLabel}
             />
           )}

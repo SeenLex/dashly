@@ -156,37 +156,6 @@ export function getPercentsFromCounted(
   return dataPerc;
 }
 
-export function countByCreatedDateDaily(data) {
-  const groupedDataDate = data.reduce((acc, ticket) => {
-    if ("start_date" in ticket) {
-      const start_date = ticket.start_date.date;
-      const key = start_date.slice(0, 10);
-      acc[key] = (acc[key] || 0) + 1;
-    }
-    return acc;
-  }, {});
-
-  const counted = Object.entries(groupedDataDate)
-    .sort(([a], [b]) => new Date(a) - new Date(b))
-    .map(([createdDate, count]) => {
-      const date = new Date(createdDate);
-
-      const formatted = date.toLocaleDateString("en-US", {
-        weekday: "long",
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      });
-
-      return {
-        createdDate: formatted,
-        count,
-      };
-    });
-
-  return counted;
-}
-
 export function countByStatus(tickets) {
   // Lista completă de statusuri dorite
   const statuses = ["Open", "In Progress", "Closed", "Pending", "Resolved"];
@@ -216,71 +185,128 @@ export function calculateDiffMinutes(startDate, closedDate) {
   return diffMinutes;
 }
 
-export function countByCreatedDateWeekly(data) {
-  const groupedDataDate = data.reduce((acc, ticket) => {
-    if ("start_date" in ticket) {
-      const start_date = ticket.start_date.date;
-      const crDate = new Date(start_date.slice(0, -4));
+export function countByStartedDateDaily(data) {
+  const startMap = {};
+  const closedMap = {};
 
-      const startOfWeek = new Date(crDate);
-      startOfWeek.setDate(crDate.getDate() - crDate.getDay());
-
-      const weekKey = startOfWeek.toISOString().split("T")[0];
-
-      acc[weekKey] = (acc[weekKey] || 0) + 1;
+  data.forEach(ticket => {
+    if (ticket.start_date?.date) {
+      const date = ticket.start_date.date.slice(0, 10);
+      startMap[date] = (startMap[date] || 0) + 1;
     }
-    return acc;
-  }, {});
 
-  const counted = Object.entries(groupedDataDate)
-    .sort(([a], [b]) => new Date(a) - new Date(b))
-    .map(([createdDate, count]) => {
-      const startDate = new Date(createdDate);
-      const endDate = new Date(startDate);
-      endDate.setDate(startDate.getDate() + 6);
+    if (ticket.closed_date?.date) {
+      const date = ticket.closed_date.date.slice(0, 10);
+      closedMap[date] = (closedMap[date] || 0) + 1;
+    }
+  });
 
-      const year = startDate.getFullYear();
-      const options = { month: "short", day: "numeric" };
+  const allDates = new Set([...Object.keys(startMap), ...Object.keys(closedMap)]);
 
-      const start = startDate.toLocaleDateString("en-US", options);
-      const end = endDate.toLocaleDateString("en-US", options);
+  const counted = Array.from(allDates)
+    .sort((a, b) => new Date(a) - new Date(b))
+    .map(dateStr => {
+      const date = new Date(dateStr);
+      const formatted = date.toLocaleDateString("en-US", {
+        weekday: "long",
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      });
 
       return {
-        createdDate: `${start}–${end}, ${year}`,
-        count,
+        date: formatted,
+        startCount: startMap[dateStr] || 0,
+        closedCount: closedMap[dateStr] || 0,
       };
     });
 
   return counted;
 }
 
-export function countByCreatedDateMonthly(data) {
-  const groupedDataDate = new Map();
+export function countByStartedDateWeekly(data) {
+  const startMap = {};
+  const closedMap = {};
 
-  data.forEach((ticket) => {
-    if ("start_date" in ticket) {
-      const start_date = ticket.start_date.date;
-      const crDate = new Date(start_date.slice(0, -4));
+  const getWeekKey = (rawDate) => {
+    const date = new Date(rawDate.slice(0, -4));
+    const startOfWeek = new Date(date);
+    startOfWeek.setDate(date.getDate() - date.getDay());
+    return startOfWeek.toISOString().split("T")[0];
+  };
 
-      const key = crDate.toISOString().slice(0, 7);
-      const display = crDate.toLocaleDateString("en-US", {
+  data.forEach(ticket => {
+    if (ticket.start_date?.date) {
+      const key = getWeekKey(ticket.start_date.date);
+      startMap[key] = (startMap[key] || 0) + 1;
+    }
+
+    if (ticket.closed_date?.date) {
+      const key = getWeekKey(ticket.closed_date.date);
+      closedMap[key] = (closedMap[key] || 0) + 1;
+    }
+  });
+
+  const allWeeks = new Set([...Object.keys(startMap), ...Object.keys(closedMap)]);
+
+  const counted = Array.from(allWeeks)
+    .sort((a, b) => new Date(a) - new Date(b))
+    .map(weekStart => {
+      const startDate = new Date(weekStart);
+      const endDate = new Date(startDate);
+      endDate.setDate(startDate.getDate() + 6);
+
+      const options = { month: "short", day: "numeric" };
+      const formatted = `${startDate.toLocaleDateString("en-US", options)}–${endDate.toLocaleDateString("en-US", options)}, ${startDate.getFullYear()}`;
+
+      return {
+        date: formatted,
+        startCount: startMap[weekStart] || 0,
+        closedCount: closedMap[weekStart] || 0,
+      };
+    });
+
+  return counted;
+}
+
+export function countByStartedDateMonthly(data) {
+  const startMap = new Map();
+  const closedMap = new Map();
+
+  const getMonthKey = (rawDate) => {
+    const date = new Date(rawDate.slice(0, -4));
+    return date.toISOString().slice(0, 7); // YYYY-MM
+  };
+
+  data.forEach(ticket => {
+    if (ticket.start_date?.date) {
+      const key = getMonthKey(ticket.start_date.date);
+      startMap.set(key, (startMap.get(key) || 0) + 1);
+    }
+
+    if (ticket.closed_date?.date) {
+      const key = getMonthKey(ticket.closed_date.date);
+      closedMap.set(key, (closedMap.get(key) || 0) + 1);
+    }
+  });
+
+  const allMonths = new Set([...startMap.keys(), ...closedMap.keys()]);
+
+  const counted = Array.from(allMonths)
+    .sort((a, b) => new Date(a) - new Date(b))
+    .map(monthKey => {
+      const date = new Date(monthKey + "-01");
+      const formatted = date.toLocaleDateString("en-US", {
         month: "short",
         year: "numeric",
       });
 
-      if (!groupedDataDate.has(key)) {
-        groupedDataDate.set(key, { count: 0, display });
-      }
-      groupedDataDate.get(key).count += 1;
-    }
-  });
-
-  const counted = Array.from(groupedDataDate.entries())
-    .sort(([a], [b]) => new Date(a) - new Date(b))
-    .map(([_, { count, display }]) => ({
-      createdDate: display,
-      count,
-    }));
+      return {
+        date: formatted,
+        startCount: startMap.get(monthKey) || 0,
+        closedCount: closedMap.get(monthKey) || 0,
+      };
+    });
 
   return counted;
 }
@@ -411,9 +437,9 @@ export function calculateSlaStatus(tickets, groupByField) {
     if (!ticket.closed_date || !ticket.duration_hours) return;
 
     const groupValue = ticket[groupByField] || "Unassigned";
-    const created = new Date(ticket.start_date.date);
+    const started = new Date(ticket.start_date.date);
     const closed = new Date(ticket.closed_date.date);
-    const hoursToResolve = (closed - created) / (1000 * 60 * 60);
+    const hoursToResolve = (closed - started) / (1000 * 60 * 60);
     const status = hoursToResolve <= ticket.duration_hours ? "Met" : "Exceeded";
 
     if (!result[groupValue]) {

@@ -71,21 +71,21 @@ function LineChartSection({ tickets }) {
       <CustomHorizontalContainer
         components={[
           <CustomLineChart
-            title={"Ticket Creation Trend - Daily"}
+            title={"Ticket Start Trend - Daily"}
             data={createdDateDataDaily}
             dataKey={"count"}
             labelDataKey={"createdDate"}
             labelName={"Day: "}
           />,
           <CustomLineChart
-            title={"Ticket Creation Trend - Weekly"}
+            title={"Ticket Start Trend - Weekly"}
             data={createdDateDataWeekly}
             dataKey={"count"}
             labelDataKey={"createdDate"}
             labelName={"Week: "}
           />,
           <CustomLineChart
-            title={"Ticket Creation Trend - Monthly"}
+            title={"Ticket Start Trend - Monthly"}
             data={createdDateDataMonthly}
             dataKey={"count"}
             labelDataKey={"createdDate"}

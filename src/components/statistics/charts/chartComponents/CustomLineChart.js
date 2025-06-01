@@ -38,7 +38,7 @@ const CustomLineChart = ({
           }}
         >
           <CartesianGrid strokeDasharray="3 3" stroke="var(--card-border)" />
-          <XAxis dataKey={labelDataKey} stroke="var(--text-color-secondary)" />
+          <XAxis dataKey={labelDataKey} stroke="var(--text-color-secondary)" tick={false} />
           <YAxis stroke="var(--text-color-secondary)" />
           <Tooltip labelFormatter={(label) => `${labelName}${label}`} content={<CustomTooltip />} />
           <Legend wrapperStyle={{ color: 'black' }} />

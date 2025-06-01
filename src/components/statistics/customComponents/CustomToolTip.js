@@ -158,21 +158,21 @@ function CustomTooltip({ active, payload, displayLabel, label, showPercentage, c
   //   };
   // });
 
-  const handleWheel = (e) => {
-    const el = scrollRef.current;
-    if (!el) return;
+  // const handleWheel = (e) => {
+  //   const el = scrollRef.current;
+  //   if (!el) return;
 
-    const { scrollTop, scrollHeight, clientHeight } = el;
-    const delta = e.deltaY;
+  //   const { scrollTop, scrollHeight, clientHeight } = el;
+  //   const delta = e.deltaY;
 
-    if (
-      (delta > 0 && scrollTop + clientHeight >= scrollHeight) ||
-      (delta < 0 && scrollTop <= 0)
-    ) {
-      e.preventDefault();
-    }
-    e.stopPropagation();
-  };
+  //   if (
+  //     (delta > 0 && scrollTop + clientHeight >= scrollHeight) ||
+  //     (delta < 0 && scrollTop <= 0)
+  //   ) {
+  //     //e.preventDefault();
+  //   }
+  //   e.stopPropagation();
+  // };
 
   return (
     <div
@@ -199,7 +199,7 @@ function CustomTooltip({ active, payload, displayLabel, label, showPercentage, c
         transform: "scale(1)",
         transition: "transform 0.3s ease-in-out",
       }}
-      onWheel={handleWheel}
+      //onWheel={handleWheel}
     >
       {/* Header Section */}
       <div
@@ -337,7 +337,7 @@ function CustomTooltip({ active, payload, displayLabel, label, showPercentage, c
       {startedTickets.length > 0 || closedTickets.length > 0 || tickets.length > 0 || metTickets.length > 0 || exceededTickets.length > 0 ? (
         <div
           ref={scrollRef}
-          onWheel={handleWheel}
+          //onWheel={handleWheel}
           style={{
             overflowY: "auto",
             maxHeight: "600px",

@@ -6,6 +6,7 @@ import { countByTeamAssigned } from "../../helpers/fct.js";
 import { ticketsBySLA } from "../../helpers/fct.js";
 import CustomPieChart from "../chartComponents/CustomPieChart.js";
 import CustomHorizontalContainer from "../../customContainers/CustomHorizontalContainer.js";
+import { normalizeTickets } from "../../helpers/fct.js";
 
 function PieChartSection({ tickets }) {
   const [statusData, setStatusData] = useState([]);
@@ -13,6 +14,13 @@ function PieChartSection({ tickets }) {
   const [pData, setPriorityData] = useState([]);
   const [teamAssignedData, setTeamAssignedData] = useState([]);
   const [ticketsSLA, setTicketsSLA] = useState([]);
+
+  const [normalizedTickets, setNormalizedTickets] = useState([])
+  
+  useEffect(() => {
+    const normalizedTickets = normalizeTickets(tickets)
+    setNormalizedTickets(normalizedTickets)
+  }, [tickets])
 
   useEffect(() => {
     if (tickets && tickets.length > 0) {
@@ -56,7 +64,6 @@ function PieChartSection({ tickets }) {
             data={statusData}
             dataKey="count"
             nameKey="status"
-   
             colors={['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8']}
           />,
           <CustomPieChart

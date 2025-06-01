@@ -27,7 +27,6 @@ function CustomBarChart({
 }) {
   const isEmpty = !data || data.length === 0;
   const defaultColors = ["#4299e1", "#48bb78", "#ed8936", "#f56565"];
-  console.log("CustomBarChart data:", data);
   const fallbackData = [
     {
       [categoryKey]: "No Data",

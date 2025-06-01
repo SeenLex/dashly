@@ -19,7 +19,6 @@ function LineChartSection({ tickets }) {
   const [slaProjectData, setSlaProjectData] = useState({});
   const [normalizedTickets, setNormalizedTickets] = useState([])
 
-
   useEffect(() => {
     const normalizedTickets = normalizeTickets(tickets)
     setNormalizedTickets(normalizedTickets)

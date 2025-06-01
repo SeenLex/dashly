@@ -1,3 +1,11 @@
+.recharts-layer.recharts-pie,
+.recharts-sector:focus {
+    outline: none !important;
+    outline-color: none;
+    outline-style: none;
+    outline-width: none;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

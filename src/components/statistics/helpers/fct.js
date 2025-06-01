@@ -4,9 +4,9 @@ export function countBySlaStatus(data) {
   const today = new Date();
 
   const grouped = {
-    "In progress": 0,
-    Met: 0,
-    Exceeded: 0,
+    "In progress": { count: 0, tickets: [] },
+    Met: { count: 0, tickets: [] },
+    Exceeded: { count: 0, tickets: [] },
   };
 
   data.forEach((ticket) => {
@@ -23,66 +23,69 @@ export function countBySlaStatus(data) {
       ? (closedDate - startDate) / 60000
       : (today - startDate) / 60000;
 
+    let status;
     if (!closedDate && diffMinutes < slaMinutes) {
-      grouped["In progress"] += 1;
+      status = "In progress";
     } else if (closedDate && diffMinutes <= slaMinutes) {
-      grouped["Met"] += 1;
+      status = "Met";
     } else {
-      grouped["Exceeded"] += 1;
+      status = "Exceeded";
     }
+
+    grouped[status].count += 1;
+    grouped[status].tickets.push(ticket);
   });
 
-  return Object.entries(grouped).map(([status, count]) => ({
+  return Object.entries(grouped).map(([status, { count, tickets }]) => ({
     status,
     count,
+    tickets,
   }));
 }
 
 export function countByTeamAssigned(tickets, SLAResolutionMandatory = false) {
   if (SLAResolutionMandatory) {
-    const resolvedTickets = tickets.filter(
-      (ticket) => getSLAResolution(ticket) === true
-    );
-    tickets = resolvedTickets;
+    tickets = tickets.filter(ticket => getSLAResolution(ticket) === true);
   }
 
-
-  const groupedDataNum = tickets.reduce((acc, ticket) => {
+  const groupedData = tickets.reduce((acc, ticket) => {
     if ("team_assigned_person" in ticket) {
       const team = ticket.team_assigned_person || "Neatribuit";
-      acc[team] = (acc[team] || 0) + 1;
-    } else {
-      acc = [];
+      if (!acc[team]) {
+        acc[team] = { count: 0, tickets: [] };
+      }
+      acc[team].count += 1;
+      acc[team].tickets.push(ticket);
     }
     return acc;
   }, {});
 
-  return Object.entries(groupedDataNum).map(([team, count]) => ({
+  return Object.entries(groupedData).map(([team, { count, tickets }]) => ({
     team,
     count,
+    tickets,
   }));
 }
 
 export function ticketsBySLA(tickets) {
   let slaCount = {
-    8: 0,
-    40: 0,
-    132: 0,
-    4: 0,
+    8: { count: 0, tickets: [] },
+    40: { count: 0, tickets: [] },
+    132: { count: 0, tickets: [] },
+    4: { count: 0, tickets: [] },
   };
 
-  tickets.forEach((ticket) => {
-    if (
-      ticket.duration_hours &&
-      slaCount.hasOwnProperty(ticket.duration_hours)
-    ) {
-      slaCount[ticket.duration_hours] += 1;
+  tickets.forEach(ticket => {
+    if (ticket.duration_hours && slaCount.hasOwnProperty(ticket.duration_hours)) {
+      slaCount[ticket.duration_hours].count += 1;
+      slaCount[ticket.duration_hours].tickets.push(ticket);
     }
   });
 
-  return Object.entries(slaCount).map(([status, count]) => ({
+  return Object.entries(slaCount).map(([status, { count, tickets }]) => ({
     status: status + "h",
     value: count,
+    tickets,
   }));
 }
 
@@ -114,19 +117,25 @@ export function countByPriority(data, SLAResolutionMandatory = false) {
     );
     data = resolvedTickets;
   }
-  const groupedDataNum = data.reduce((acc, ticket) => {
+
+  const groupedData = data.reduce((acc, ticket) => {
     if ("priority" in ticket) {
       const priority = ticket.priority;
-      acc[priority] = (acc[priority] || 0) + 1;
-    } else {
-      acc = [];
+      if (!acc[priority]) {
+        acc[priority] = { count: 0, tickets: [] };
+      }
+      acc[priority].count += 1;
+      acc[priority].tickets.push(ticket);
     }
     return acc;
   }, {});
-  const counted = Object.entries(groupedDataNum).map(([priority, count]) => ({
+
+  const counted = Object.entries(groupedData).map(([priority, { count, tickets }]) => ({
     priority,
     count,
+    tickets,
   }));
+
   const priorityOrder = ["Low", "Medium", "High", "Critical"];
   counted.sort(
     (a, b) =>
@@ -135,6 +144,7 @@ export function countByPriority(data, SLAResolutionMandatory = false) {
 
   return counted;
 }
+
 
 export function getPercentsFromCounted(
   countedData,
@@ -160,23 +170,33 @@ export function countByStatus(tickets) {
   // Lista completă de statusuri dorite
   const statuses = ["Open", "In Progress", "Closed", "Pending", "Resolved"];
 
-  // Obiect pentru contorizare
+  // Obiect pentru contorizare și colectare ticket-uri
   const count = {};
-  statuses.forEach(status => count[status] = 0);
+  const ticketsByStatus = {};
+
+  statuses.forEach(status => {
+    count[status] = 0;
+    ticketsByStatus[status] = [];
+  });
 
   tickets.forEach(ticket => {
     const status = ticket.status || "Unknown";
-    if (count.hasOwnProperty(status)) {
-      count[status] += 1;
-    } else {
-      // dacă apare un status nou necunoscut, îl adaugă
-      count[status] = 1;
+    if (!count.hasOwnProperty(status)) {
+      count[status] = 0;
+      ticketsByStatus[status] = [];
     }
+    count[status] += 1;
+    ticketsByStatus[status].push(ticket);
   });
 
-  // Transformă în array pentru grafice
-  return Object.entries(count).map(([status, count]) => ({ status, count }));
+  // Transformă în array pentru grafice, adăugând și lista de tickets
+  return Object.entries(count).map(([status, count]) => ({
+    status,
+    count,
+    tickets: ticketsByStatus[status],
+  }));
 }
+
 
 export function calculateDiffMinutes(startDate, closedDate) {
   const diffMs = closedDate - startDate;

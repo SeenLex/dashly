@@ -8,18 +8,29 @@ function ChartSwitcher() {
   const [chartType, setChartType] = useState("bar");
   const [showFilters, setShowFilters] = useState(false);
 
+  const formatDate = (date) => {
+    const d = new Date(date);
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    const year = d.getFullYear();
+    return `${year}-${month}-${day}`;
+  };
+
+  const today = new Date();
+  const oneYearAgo = new Date();
+  oneYearAgo.setFullYear(today.getFullYear() - 1);
+
   const [filters, setFilters] = useState({
-    team_assigned_person_name: "", // Schimbat de la team_assigned_person
-    team_created_by_name: "",     // Schimbat de la team_created_by
+    team_assigned_person_name: "",
+    team_created_by_name: "",
     priority: "",
     project: "",
     status: "",
     slaStatus: "",
     sla: "",
-    startDate: "",
-    endDate: "",
+    startDate: formatDate(oneYearAgo),
+    endDate: formatDate(today),
   });
-
 
   const [filteredTickets, setFilteredTickets] = useState([]);
   const [allTeams_assigned, setAllTeams_assigned] = useState([]);
@@ -28,25 +39,24 @@ function ChartSwitcher() {
   const [allProjects, setAllProjects] = useState([]);
   const [allStatuses, setAllStatuses] = useState([]);
 
-
-  // Fetch tickets filtered by backend
-  useEffect(() => {
-    const params = new URLSearchParams(filters).toString();
-    fetch(`http://localhost/api/tickets.php?${params}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setFilteredTickets(data);
-      })
-      .catch((err) => console.error("Error fetching filtered tickets:", err));
-  }, [filters]);
+  // // Fetch tickets filtered by backend
+  // useEffect(() => {
+  //   const params = new URLSearchParams(filters).toString();
+  //   fetch(`http://localhost/api/tickets.php?${params}`)
+  //     .then((res) => res.json())
+  //     .then((data) => {
+  //       setFilteredTickets(data);
+  //     })
+  //     .catch((err) => console.error("Error fetching filtered tickets:", err));
+  // }, [filters]);
 
   // Fetch all values for filters
   useEffect(() => {
     fetch("http://localhost/api/tickets.php")
       .then((res) => res.json())
       .then((data) => {
-         setAllTeams_assigned([...new Set(data.map(t => t.team_assigned_person_name).filter(Boolean))]);
-      setAllTeams_created([...new Set(data.map(t => t.team_created_by_name).filter(Boolean))]);
+        setAllTeams_assigned([...new Set(data.map(t => t.team_assigned_person).filter(Boolean))]);
+        setAllTeams_created([...new Set(data.map(t => t.team_created_by).filter(Boolean))]);
         setAllPriorities([...new Set(data.map(t => t.priority).filter(Boolean))]);
         setAllProjects([...new Set(data.map(t => t.project).filter(Boolean))]);
         setAllStatuses([...new Set(data.map(t => t.status).filter(Boolean))]);
@@ -56,7 +66,6 @@ function ChartSwitcher() {
 
   return (
     <div>
-      {/* "Show Filters" Button */}
       <div className="flex justify-start mb-6">
         <button
           onClick={() => setShowFilters(!showFilters)}
@@ -73,11 +82,11 @@ function ChartSwitcher() {
             filters={filters}
             setFilters={setFilters}
             allValues={{
-                 team_assigned_person_name: allTeams_assigned, // Nume actualizat
-    team_created_by_name: allTeams_created, 
-              priority: allPriorities, // Use allPriorities here
-              project: allProjects, // Use allProjects here
-              status: allStatuses, // Use allStatuses here
+              team_assigned_person_name: allTeams_assigned,
+              team_created_by_name: allTeams_created,
+              priority: allPriorities,
+              project: allProjects,
+              status: allStatuses,
             }}
           />
         </div>
@@ -107,9 +116,9 @@ function ChartSwitcher() {
 
       {/* Render Chart Section based on chartType */}
       <div>
-        {chartType === "bar" && <BarChartSection tickets={filteredTickets} totalCount={filteredTickets.length} />}
-        {chartType === "line" && <LineChartSection tickets={filteredTickets} />}
-        {chartType === "pie" && <PieChartSection tickets={filteredTickets} />}
+        {chartType === "bar" && <BarChartSection tickets={filteredTickets} totalCount={filteredTickets.length} filters={filters}/>}
+        {chartType === "line" && <LineChartSection tickets={filteredTickets} filters={filters}/>}
+        {chartType === "pie" && <PieChartSection tickets={filteredTickets} filters={filters}/>}
       </div>
     </div>
   );

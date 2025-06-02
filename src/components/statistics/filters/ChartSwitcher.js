@@ -32,23 +32,22 @@ function ChartSwitcher() {
     endDate: formatDate(today),
   });
 
-  const [allTeams_assigned, setAllTeams_assigned] = useState([]);
-  const [allTeams_created, setAllTeams_created] = useState([]);
+  const [allTeamsAssigned, setAllTeamsAssigned] = useState([]);
+  const [allTeamsCreated, setAllTeamsCreated] = useState([]);
   const [allPriorities, setAllPriorities] = useState([]);
   const [allProjects, setAllProjects] = useState([]);
   const [allStatuses, setAllStatuses] = useState([]);
 
   // Fetch all values for filters
-  // TODO ... poate
   useEffect(() => {
-    fetch("http://localhost/api/tickets.php")
+    fetch("http://localhost/api/get_filter_values.php")
       .then((res) => res.json())
       .then((data) => {
-        setAllTeams_assigned([...new Set(data.map(t => t.team_assigned_person).filter(Boolean))]);
-        setAllTeams_created([...new Set(data.map(t => t.team_created_by).filter(Boolean))]);
-        setAllPriorities([...new Set(data.map(t => t.priority).filter(Boolean))]);
-        setAllProjects([...new Set(data.map(t => t.project).filter(Boolean))]);
-        setAllStatuses([...new Set(data.map(t => t.status).filter(Boolean))]);
+        setAllTeamsAssigned(data["assignedTeams"]);
+        setAllTeamsCreated(data["createdTeams"]);
+        setAllPriorities(data["priorities"]);
+        setAllProjects(data["projects"]);
+        setAllStatuses(data["statuses"]);
       })
       .catch((err) => console.error("Error fetching all values:", err));
   }, []);
@@ -58,7 +57,9 @@ function ChartSwitcher() {
       <div className="flex justify-start mb-6">
         <button
           onClick={() => setShowFilters(!showFilters)}
-          className={`custom-button ${showFilters ? 'custom-button-active' : 'custom-button-inactive'}`}
+          className={`custom-button ${
+            showFilters ? "custom-button-active" : "custom-button-inactive"
+          }`}
         >
           {showFilters ? "Hide Filters" : "Show Filters"}
         </button>
@@ -66,13 +67,15 @@ function ChartSwitcher() {
 
       {showFilters && (
         <div className="bg-blue-200 dark:bg-gray-700 border border-gray-600 rounded-lg p-6 mb-6 shadow-inner">
-          <h3 className="text-lg font-semibold text-black dark:text-white mb-4">Advanced Filters</h3>
+          <h3 className="text-lg font-semibold text-black dark:text-white mb-4">
+            Advanced Filters
+          </h3>
           <Filters
             filters={filters}
             setFilters={setFilters}
             allValues={{
-              team_assigned_person_name: allTeams_assigned,
-              team_created_by_name: allTeams_created,
+              team_assigned_person_name: allTeamsAssigned,
+              team_created_by_name: allTeamsCreated,
               priority: allPriorities,
               project: allProjects,
               status: allStatuses,
@@ -82,33 +85,43 @@ function ChartSwitcher() {
         </div>
       )}
 
-      {/* Chart Type Selector */}
       <div className="flex justify-center space-x-4 mb-6">
         <button
           onClick={() => setChartType("bar")}
-          className={`custom-button ${chartType === "bar" ? "custom-button-active" : "custom-button-inactive"}`}
+          className={`custom-button ${
+            chartType === "bar"
+              ? "custom-button-active"
+              : "custom-button-inactive"
+          }`}
         >
           Bar Chart
         </button>
         <button
           onClick={() => setChartType("line")}
-          className={`custom-button ${chartType === "line" ? "custom-button-active" : "custom-button-inactive"}`}
+          className={`custom-button ${
+            chartType === "line"
+              ? "custom-button-active"
+              : "custom-button-inactive"
+          }`}
         >
           Line Chart
         </button>
         <button
           onClick={() => setChartType("pie")}
-          className={`custom-button ${chartType === "pie" ? "custom-button-active" : "custom-button-inactive"}`}
+          className={`custom-button ${
+            chartType === "pie"
+              ? "custom-button-active"
+              : "custom-button-inactive"
+          }`}
         >
           Pie Chart
         </button>
       </div>
 
-      {/* Render Chart Section based on chartType */}
       <div>
-        {chartType === "bar" && <BarChartSection filters={filters}/>}
-        {chartType === "line" && <LineChartSection filters={filters}/>}
-        {chartType === "pie" && <PieChartSection filters={filters}/>}
+        {chartType === "bar" && <BarChartSection filters={filters} />}
+        {chartType === "line" && <LineChartSection filters={filters} />}
+        {chartType === "pie" && <PieChartSection filters={filters} />}
       </div>
     </div>
   );

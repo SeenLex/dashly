@@ -17,45 +17,57 @@ function BarChartSection({ filters }) {
 
   useEffect(() => {
     const params = new URLSearchParams(filters).toString();
-    fetch(`http://localhost/api/barcharts/get_tickets_by_priority.php?${params}`)
+    fetch(
+      `http://localhost/api/barcharts/get_tickets_by_priority.php?${params}`
+    )
       .then((res) => res.json())
       .then((data) => {
-        setNumByPriority(data.filter(e => e.count > 0));
+        setNumByPriority(data.filter((e) => e.count > 0));
       })
       .catch((err) => console.error("Error fetching filtered tickets:", err));
 
-    fetch(`http://localhost/api/barcharts/get_tickets_by_priority_and_sla_met.php?${params}`)
+    fetch(
+      `http://localhost/api/barcharts/get_tickets_by_priority_and_sla_met.php?${params}`
+    )
       .then((res) => res.json())
       .then((data) => {
-        setResolutionSLANumByPriority(data.filter(e => e.count > 0));
+        setResolutionSLANumByPriority(data.filter((e) => e.count > 0));
       })
       .catch((err) => console.error("Error fetching filtered tickets:", err));
 
-    fetch(`http://localhost/api/barcharts/get_tickets_by_team_assigned_person_and_sla_met.php?${params}`)
+    fetch(
+      `http://localhost/api/barcharts/get_tickets_by_team_assigned_person_and_sla_met.php?${params}`
+    )
       .then((res) => res.json())
       .then((data) => {
-        setResolutionSLANumByTeam(data.filter(e => e.count > 0));
+        setResolutionSLANumByTeam(data.filter((e) => e.count > 0));
       })
       .catch((err) => console.error("Error fetching filtered tickets:", err));
 
-    fetch(`http://localhost/api/barcharts/get_tickets_by_project_and_sla_met.php?${params}`)
+    fetch(
+      `http://localhost/api/barcharts/get_tickets_by_project_and_sla_met.php?${params}`
+    )
       .then((res) => res.json())
       .then((data) => {
-        setResolutionSLANumByProject(data.filter(e => e.count > 0));
+        setResolutionSLANumByProject(data.filter((e) => e.count > 0));
       })
       .catch((err) => console.error("Error fetching filtered tickets:", err));
 
-     fetch(`http://localhost/api/barcharts/get_tickets_sla_compliance_by_team.php?${params}`)
+    fetch(
+      `http://localhost/api/barcharts/get_tickets_sla_compliance_by_team.php?${params}`
+    )
       .then((res) => res.json())
       .then((data) => {
-        setSlaStatusByTeam(data.filter(e => e.name != null));
+        setSlaStatusByTeam(data.filter((e) => e.name != null));
       })
       .catch((err) => console.error("Error fetching filtered tickets:", err));
 
-    fetch(`http://localhost/api/barcharts/get_tickets_sla_compliance_by_project.php?${params}`)
+    fetch(
+      `http://localhost/api/barcharts/get_tickets_sla_compliance_by_project.php?${params}`
+    )
       .then((res) => res.json())
       .then((data) => {
-        setSlaStatusByProject(data.filter(e => e.name != null));
+        setSlaStatusByProject(data.filter((e) => e.name != null));
       })
       .catch((err) => console.error("Error fetching filtered tickets:", err));
   }, [filters]);

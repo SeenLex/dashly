@@ -3,9 +3,13 @@ import CustomLineChart from "../chartComponents/CustomLineChart.js";
 import CustomHorizontalContainer from "../../customContainers/CustomHorizontalContainer.js";
 
 function LineChartSection({ filters }) {
-  const [startedClosedDateDataDaily, setStartedClosedDateDataDaily] = useState([]);
-  const [startedClosedDateDataWeekly, setStartedClosedDateDataWeekly] = useState([]);
-  const [startedClosedDateDataMonthly, setStartedClosedDateDataMonthly] = useState([]);
+  const [startedClosedDateDataDaily, setStartedClosedDateDataDaily] = useState(
+    []
+  );
+  const [startedClosedDateDataWeekly, setStartedClosedDateDataWeekly] =
+    useState([]);
+  const [startedClosedDateDataMonthly, setStartedClosedDateDataMonthly] =
+    useState([]);
 
   const [slaOverallData, setSlaOverallData] = useState([]);
   const [slaTeamData, setSlaTeamData] = useState({});
@@ -13,25 +17,33 @@ function LineChartSection({ filters }) {
 
   useEffect(() => {
     const params = new URLSearchParams(filters);
-    fetch(`http://localhost/api/linecharts/get_ticket_trend_daily.php?${params.toString()}`)
+    fetch(
+      `http://localhost/api/linecharts/get_ticket_trend_daily.php?${params.toString()}`
+    )
       .then((res) => res.json())
       .then((data) => {
         setStartedClosedDateDataDaily(data);
       })
       .catch((err) => console.error("Error fetching filtered tickets:", err));
-    fetch(`http://localhost/api/linecharts/get_ticket_trend_weekly.php?${params.toString()}`)
+    fetch(
+      `http://localhost/api/linecharts/get_ticket_trend_weekly.php?${params.toString()}`
+    )
       .then((res) => res.json())
       .then((data) => {
         setStartedClosedDateDataWeekly(data);
       })
       .catch((err) => console.error("Error fetching filtered tickets:", err));
-    fetch(`http://localhost/api/linecharts/get_ticket_trend_monthly.php?${params.toString()}`)
+    fetch(
+      `http://localhost/api/linecharts/get_ticket_trend_monthly.php?${params.toString()}`
+    )
       .then((res) => res.json())
       .then((data) => {
         setStartedClosedDateDataMonthly(data);
       })
       .catch((err) => console.error("Error fetching filtered tickets:", err));
-    fetch(`http://localhost/api/linecharts/get_sla_performance_monthly.php?${params.toString()}`)
+    fetch(
+      `http://localhost/api/linecharts/get_sla_performance_monthly.php?${params.toString()}`
+    )
       .then((res) => res.json())
       .then((data) => {
         setSlaOverallData(data);
@@ -42,10 +54,13 @@ function LineChartSection({ filters }) {
       .then(async (team_names_data) => {
         const teamParams = new URLSearchParams(params);
         teamParams.delete("team_assigned_person_name");
-        const teamDataPromises = team_names_data.map(teamName =>
-          fetch(`http://localhost/api/linecharts/get_sla_performance_monthly.php?team_assigned_person_name=${encodeURIComponent(teamName)}&${teamParams.toString()}`)
-            .then(res => res.json())
-        )
+        const teamDataPromises = team_names_data.map((teamName) =>
+          fetch(
+            `http://localhost/api/linecharts/get_sla_performance_monthly.php?team_assigned_person_name=${encodeURIComponent(
+              teamName
+            )}&${teamParams.toString()}`
+          ).then((res) => res.json())
+        );
 
         const results = await Promise.all(teamDataPromises);
         let slaDataByTeam = {};
@@ -62,10 +77,13 @@ function LineChartSection({ filters }) {
       .then(async (project_names_data) => {
         const projectParams = new URLSearchParams(params);
         projectParams.delete("project");
-        const projectNamePromises = project_names_data.map(projectName =>
-          fetch(`http://localhost/api/linecharts/get_sla_performance_monthly.php?project=${encodeURIComponent(projectName)}&${projectParams.toString()}`)
-            .then(res => res.json())
-        )
+        const projectNamePromises = project_names_data.map((projectName) =>
+          fetch(
+            `http://localhost/api/linecharts/get_sla_performance_monthly.php?project=${encodeURIComponent(
+              projectName
+            )}&${projectParams.toString()}`
+          ).then((res) => res.json())
+        );
 
         const results = await Promise.all(projectNamePromises);
 
@@ -83,7 +101,9 @@ function LineChartSection({ filters }) {
   return (
     <>
       <div style={{ display: "flex", justifyContent: "center" }}>
-        <h1 className="text-2xl font-bold text-black dark:text-white">Line charts</h1>
+        <h1 className="text-2xl font-bold text-black dark:text-white">
+          Line charts
+        </h1>
       </div>
       <CustomHorizontalContainer
         components={[

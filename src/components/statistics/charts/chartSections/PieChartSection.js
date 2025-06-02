@@ -1,61 +1,66 @@
 import { useEffect, useState } from "react";
-import { countByStatus } from "../../helpers/fct.js";
-import { countBySlaStatus } from "../../helpers/fct.js";
-import { countByPriority } from "../../helpers/fct.js";
-import { countByTeamAssigned } from "../../helpers/fct.js";
-import { ticketsBySLA } from "../../helpers/fct.js";
 import CustomPieChart from "../chartComponents/CustomPieChart.js";
 import CustomHorizontalContainer from "../../customContainers/CustomHorizontalContainer.js";
-import { normalizeTickets } from "../../helpers/fct.js";
 
-function PieChartSection({ tickets = [] }) {
+function PieChartSection({ filters }) {
   const [statusData, setStatusData] = useState([]);
   const [slaData, setSlaData] = useState([]);
   const [pData, setPriorityData] = useState([]);
   const [teamAssignedData, setTeamAssignedData] = useState([]);
   const [ticketsSLA, setTicketsSLA] = useState([]);
 
-  const [normalizedTickets, setNormalizedTickets] = useState([])
-  
   useEffect(() => {
-    const normalizedTickets = normalizeTickets(tickets)
-    setNormalizedTickets(normalizedTickets)
-  }, [tickets])
+    const params = new URLSearchParams(filters).toString();
+    fetch(`http://localhost/api/piecharts/get_tickets_by_status.php?${params}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setStatusData(data);
+      })
+      .catch((err) => console.error("Error fetching filtered tickets:", err));
 
-  useEffect(() => {
-    if (tickets && tickets.length > 0) {
-      const stData = countByStatus(tickets);
-      setStatusData(stData);
+    fetch(
+      `http://localhost/api/piecharts/get_tickets_by_sla_status.php?${params}`
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        setSlaData(data);
+      })
+      .catch((err) => console.error("Error fetching filtered tickets:", err));
 
-      const slaData = countBySlaStatus(tickets);
-      setSlaData(slaData);
+    fetch(
+      `http://localhost/api/piecharts/get_tickets_by_priority.php?${params}`
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        setPriorityData(data);
+      })
+      .catch((err) => console.error("Error fetching filtered tickets:", err));
 
-      const pData = countByPriority(tickets);
-      setPriorityData(pData);
+    fetch(
+      `http://localhost/api/piecharts/get_tickets_by_team_assigned.php?${params}`
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        setTeamAssignedData(data);
+      })
+      .catch((err) => console.error("Error fetching filtered tickets:", err));
 
-      const teamData = countByTeamAssigned(tickets);
-      setTeamAssignedData(teamData);
-
-      const ticketsSLA = ticketsBySLA(tickets);
-      setTicketsSLA(ticketsSLA);
-    } else {
-      // Reset data when no tickets
-      setStatusData([]);
-      setSlaData([]);
-      setPriorityData([]);
-      setTeamAssignedData([]);
-      setTicketsSLA([]);
-    }
-  }, [tickets]);
-
-
+    fetch(`http://localhost/api/piecharts/get_tickets_by_sla.php?${params}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setTicketsSLA(data);
+      })
+      .catch((err) => console.error("Error fetching filtered tickets:", err));
+  }, [filters]);
 
   return (
     <div className="pie-chart-section">
       <div className="text-center mb-8">
-        <h1 className="text-2xl font-bold text-black dark:text-white">Pie Charts Analysis</h1>
+        <h1 className="text-2xl font-bold text-black dark:text-white">
+          Pie Charts Analysis
+        </h1>
       </div>
-      
+
       <CustomHorizontalContainer
         components={[
           <CustomPieChart
@@ -64,7 +69,7 @@ function PieChartSection({ tickets = [] }) {
             data={statusData}
             dataKey="count"
             nameKey="status"
-            colors={['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8']}
+            colors={["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"]}
           />,
           <CustomPieChart
             key="slaChart"
@@ -72,8 +77,7 @@ function PieChartSection({ tickets = [] }) {
             data={slaData}
             dataKey="count"
             nameKey="status"
-        
-            colors={['#FF6B6B', '#4ECDC4', '#FFE66D']}
+            colors={["#FF6B6B", "#4ECDC4", "#FFE66D"]}
           />,
           <CustomPieChart
             key="priorityChart"
@@ -81,8 +85,7 @@ function PieChartSection({ tickets = [] }) {
             data={pData}
             dataKey="count"
             nameKey="priority"
-      
-            colors={['#FF0000', '#FFA500', '#FFFF00', '#008000']}
+            colors={["#FF0000", "#FFA500", "#FFFF00", "#008000"]}
           />,
           <CustomPieChart
             key="teamAssignedChart"
@@ -90,8 +93,7 @@ function PieChartSection({ tickets = [] }) {
             data={teamAssignedData}
             dataKey="count"
             nameKey="team"
-    
-            colors={['#8884D8', '#83A6ED', '#8DD1E1', '#82CA9D', '#A4DE6C']}
+            colors={["#8884D8", "#83A6ED", "#8DD1E1", "#82CA9D", "#A4DE6C"]}
           />,
           <CustomPieChart
             key="slaStatusChart"
@@ -99,8 +101,7 @@ function PieChartSection({ tickets = [] }) {
             data={ticketsSLA}
             dataKey="value"
             nameKey="status"
-
-            colors={['#FF7F50', '#6495ED', '#DC143C']}
+            colors={["#FF7F50", "#6495ED", "#DC143C"]}
           />,
         ]}
       />

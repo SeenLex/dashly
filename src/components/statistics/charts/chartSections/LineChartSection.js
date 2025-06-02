@@ -1,15 +1,8 @@
 import { useEffect, useState } from "react";
-import {
-  countByStartedClosedDateDaily,
-  countByStartedClosedDateWeekly,
-  countByStartedClosedDateMonthly,
-  countSLAOverTime,
-} from "../../helpers/fct.js";
 import CustomLineChart from "../chartComponents/CustomLineChart.js";
 import CustomHorizontalContainer from "../../customContainers/CustomHorizontalContainer.js";
-import { normalizeTickets } from "../../helpers/fct.js";
 
-function LineChartSection({ tickets }) {
+function LineChartSection({ filters }) {
   const [startedClosedDateDataDaily, setStartedClosedDateDataDaily] = useState([]);
   const [startedClosedDateDataWeekly, setStartedClosedDateDataWeekly] = useState([]);
   const [startedClosedDateDataMonthly, setStartedClosedDateDataMonthly] = useState([]);
@@ -17,58 +10,75 @@ function LineChartSection({ tickets }) {
   const [slaOverallData, setSlaOverallData] = useState([]);
   const [slaTeamData, setSlaTeamData] = useState({});
   const [slaProjectData, setSlaProjectData] = useState({});
-  const [normalizedTickets, setNormalizedTickets] = useState([])
 
   useEffect(() => {
-    const normalizedTickets = normalizeTickets(tickets)
-    setNormalizedTickets(normalizedTickets)
-  }, [tickets])
+    const params = new URLSearchParams(filters);
+    fetch(`http://localhost/api/linecharts/get_ticket_trend_daily.php?${params.toString()}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setStartedClosedDateDataDaily(data);
+      })
+      .catch((err) => console.error("Error fetching filtered tickets:", err));
+    fetch(`http://localhost/api/linecharts/get_ticket_trend_weekly.php?${params.toString()}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setStartedClosedDateDataWeekly(data);
+      })
+      .catch((err) => console.error("Error fetching filtered tickets:", err));
+    fetch(`http://localhost/api/linecharts/get_ticket_trend_monthly.php?${params.toString()}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setStartedClosedDateDataMonthly(data);
+      })
+      .catch((err) => console.error("Error fetching filtered tickets:", err));
+    fetch(`http://localhost/api/linecharts/get_sla_performance_monthly.php?${params.toString()}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setSlaOverallData(data);
+      })
+      .catch((err) => console.error("Error fetching filtered tickets:", err));
+    fetch(`http://localhost/api/linecharts/get_team_names.php`)
+      .then((res) => res.json())
+      .then(async (team_names_data) => {
+        const teamParams = new URLSearchParams(params);
+        teamParams.delete("team_assigned_person_name");
+        const teamDataPromises = team_names_data.map(teamName =>
+          fetch(`http://localhost/api/linecharts/get_sla_performance_monthly.php?team_assigned_person_name=${encodeURIComponent(teamName)}&${teamParams.toString()}`)
+            .then(res => res.json())
+        )
 
-  useEffect(() => {
-    if (normalizedTickets) {
-      const countedByStartedClosedDateDailyData = countByStartedClosedDateDaily(normalizedTickets);
-      const countedByStartedClosedDateWeeklyData = countByStartedClosedDateWeekly(normalizedTickets);
-      const countedByStartedClosedDateMonthlyData =
-        countByStartedClosedDateMonthly(normalizedTickets);
+        const results = await Promise.all(teamDataPromises);
+        let slaDataByTeam = {};
+        team_names_data.forEach((team, idx) => {
+          if (results[idx].length > 0) {
+            slaDataByTeam[team] = results[idx];
+          }
+        });
+        setSlaTeamData(slaDataByTeam);
+      })
+      .catch((err) => console.error("Error:", err));
+    fetch(`http://localhost/api/linecharts/get_project_names.php`)
+      .then((res) => res.json())
+      .then(async (project_names_data) => {
+        const projectParams = new URLSearchParams(params);
+        projectParams.delete("project");
+        const projectNamePromises = project_names_data.map(projectName =>
+          fetch(`http://localhost/api/linecharts/get_sla_performance_monthly.php?project=${encodeURIComponent(projectName)}&${projectParams.toString()}`)
+            .then(res => res.json())
+        )
 
-      setStartedClosedDateDataDaily(countedByStartedClosedDateDailyData);
-      setStartedClosedDateDataWeekly(countedByStartedClosedDateWeeklyData);
-      setStartedClosedDateDataMonthly(countedByStartedClosedDateMonthlyData);
+        const results = await Promise.all(projectNamePromises);
 
-      const overallSLAData = countSLAOverTime(normalizedTickets, "monthly");
-      setSlaOverallData(overallSLAData);
-
-      const teams = [
-        ...new Set(normalizedTickets.map((t) => t.team_assigned_person).filter(Boolean)),
-      ];
-      const teamData = {};
-      teams.forEach((team) => {
-        const teamSLAData = countSLAOverTime(
-          normalizedTickets,
-          "monthly",
-          "team_assigned_person",
-          team
-        );
-        teamData[team] = teamSLAData;
-      });
-      setSlaTeamData(teamData);
-
-      const projects = [
-        ...new Set(tickets.map((t) => t.project).filter(Boolean)),
-      ];
-      const projectData = {};
-      projects.forEach((project) => {
-        const projectSLAData = countSLAOverTime(
-          normalizedTickets,
-          "monthly",
-          "project",
-          project
-        );
-        projectData[project] = projectSLAData;
-      });
-      setSlaProjectData(projectData);
-    }
-  }, [normalizedTickets]);
+        let slaDataByProject = {};
+        project_names_data.forEach((project, idx) => {
+          if (results[idx].length > 0) {
+            slaDataByProject[project] = results[idx];
+          }
+        });
+        setSlaProjectData(slaDataByProject);
+      })
+      .catch((err) => console.error("Error:", err));
+  }, [filters]);
 
   return (
     <>

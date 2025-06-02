@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import CustomBarChart from "../chartComponents/CustomBarChart.js";
 import CustomHorizontalContainer from "../../customContainers/CustomHorizontalContainer.js";
 
-function BarChartSection({ tickets, totalCount, filters }) {
+function BarChartSection({ filters }) {
   const [numByPriority, setNumByPriority] = useState([]);
   const [resolutionSLANumByPriority, setResolutionSLANumByPriority] = useState(
     []
@@ -17,42 +17,42 @@ function BarChartSection({ tickets, totalCount, filters }) {
 
   useEffect(() => {
     const params = new URLSearchParams(filters).toString();
-    fetch(`http://localhost/api/get_tickets_by_priority.php?${params}`)
+    fetch(`http://localhost/api/barcharts/get_tickets_by_priority.php?${params}`)
       .then((res) => res.json())
       .then((data) => {
         setNumByPriority(data.filter(e => e.count > 0));
       })
       .catch((err) => console.error("Error fetching filtered tickets:", err));
 
-    fetch(`http://localhost/api/get_tickets_by_priority_and_sla_met.php?${params}`)
+    fetch(`http://localhost/api/barcharts/get_tickets_by_priority_and_sla_met.php?${params}`)
       .then((res) => res.json())
       .then((data) => {
         setResolutionSLANumByPriority(data.filter(e => e.count > 0));
       })
       .catch((err) => console.error("Error fetching filtered tickets:", err));
 
-    fetch(`http://localhost/api/get_tickets_by_team_assigned_person_and_sla_met.php?${params}`)
+    fetch(`http://localhost/api/barcharts/get_tickets_by_team_assigned_person_and_sla_met.php?${params}`)
       .then((res) => res.json())
       .then((data) => {
         setResolutionSLANumByTeam(data.filter(e => e.count > 0));
       })
       .catch((err) => console.error("Error fetching filtered tickets:", err));
 
-    fetch(`http://localhost/api/get_tickets_by_project_and_sla_met.php?${params}`)
+    fetch(`http://localhost/api/barcharts/get_tickets_by_project_and_sla_met.php?${params}`)
       .then((res) => res.json())
       .then((data) => {
         setResolutionSLANumByProject(data.filter(e => e.count > 0));
       })
       .catch((err) => console.error("Error fetching filtered tickets:", err));
 
-     fetch(`http://localhost/api/get_tickets_sla_compliance_by_team.php?${params}`)
+     fetch(`http://localhost/api/barcharts/get_tickets_sla_compliance_by_team.php?${params}`)
       .then((res) => res.json())
       .then((data) => {
         setSlaStatusByTeam(data.filter(e => e.name != null));
       })
       .catch((err) => console.error("Error fetching filtered tickets:", err));
 
-    fetch(`http://localhost/api/get_tickets_sla_compliance_by_project.php?${params}`)
+    fetch(`http://localhost/api/barcharts/get_tickets_sla_compliance_by_project.php?${params}`)
       .then((res) => res.json())
       .then((data) => {
         setSlaStatusByProject(data.filter(e => e.name != null));
@@ -76,7 +76,6 @@ function BarChartSection({ tickets, totalCount, filters }) {
             categoryKey="priority"
             teamsByCategory={teamsByCategory}
             showBothValues={true}
-            totalCount={totalCount}
             colors={["#4299e1"]}
           />,
 
@@ -89,7 +88,6 @@ function BarChartSection({ tickets, totalCount, filters }) {
             categoryKey="priority"
             teamsByCategory={teamsByCategory}
             showBothValues={true}
-            totalCount={totalCount}
             colors={["#4299e1"]}
           />,
 
@@ -101,7 +99,6 @@ function BarChartSection({ tickets, totalCount, filters }) {
             categoryKey="team_assigned_person"
             teamsByCategory={teamsByCategory}
             showBothValues={true}
-            totalCount={totalCount}
             colors={["#4299e1"]}
             slaStatusByTeam={slaStatusByTeam}
           />,
@@ -114,7 +111,6 @@ function BarChartSection({ tickets, totalCount, filters }) {
             categoryKey="project"
             teamsByCategory={teamsByCategory}
             showBothValues={true}
-            totalCount={totalCount}
             colors={["#4299e1"]}
             slaStatusByProject={slaStatusByProject}
           />,

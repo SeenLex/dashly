@@ -26,6 +26,15 @@ const CustomLineChart = ({
   const secondaryColor = secondStroke || "#f56565"; // Accent red
   const [tooltipState, setTooltipState] = useState(false);
 
+  if (!data || data.length === 0) {
+    return (
+      <div className="text-center text-gray-500 dark:text-gray-400 p-10">
+        <p className="text-lg font-semibold">{title}</p>
+        <p>No data available</p>
+      </div>
+    );
+  }
+
   return (
     <div>
       <p className="text-lg font-semibold text-black dark:text-white mb-4 text-center">{title}</p>
@@ -38,17 +47,17 @@ const CustomLineChart = ({
             left: 20,
             bottom: 5,
           }}
-          onClick={(e) => {
-            setTooltipState(
-              !tooltipState
-            );
-          }}
+          onClick={() => setTooltipState(!tooltipState)}
         >
           <CartesianGrid strokeDasharray="3 3" stroke="var(--card-border)" />
           <XAxis dataKey={labelDataKey} stroke="var(--text-color-secondary)" tick={false} />
           <YAxis stroke="var(--text-color-secondary)" />
-          <Tooltip trigger="click"
-            active={tooltipState} labelFormatter={(label) => `${labelName}${label}`} content={<CustomTooltip buttonCallback={() => { setTooltipState(false); }} labelName={tooltipLabelName} />} />
+          <Tooltip 
+            trigger="click"
+            active={tooltipState} 
+            labelFormatter={(label) => `${labelName}${label}`} 
+            content={<CustomTooltip buttonCallback={() => setTooltipState(false)} labelName={tooltipLabelName} />} 
+          />
           <Legend wrapperStyle={{ color: 'black' }} />
           <Area
             type="monotone"
@@ -73,5 +82,6 @@ const CustomLineChart = ({
     </div>
   );
 };
+
 
 export default CustomLineChart;

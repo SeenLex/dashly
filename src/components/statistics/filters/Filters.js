@@ -1,6 +1,6 @@
 import Filter from "./Filter";
 
-function Filters({ filters, setFilters, allValues }) {
+function Filters({ filters, setFilters, allValues, isLineChart = false }) {
   const formatDate = (date) => {
     const d = new Date(date);
     const month = String(d.getMonth() + 1).padStart(2, "0");
@@ -24,14 +24,14 @@ function Filters({ filters, setFilters, allValues }) {
           allValues={allValues.team_created_by_name || []}
         />
 
-        <Filter
+        {!isLineChart && <Filter
           labelTitle="Team assigned to:"
           value={filters.team_assigned_person_name}
           onChangeCallback={(e) =>
             setFilters({ ...filters, team_assigned_person_name: e.target.value })
           }
           allValues={allValues.team_assigned_person_name || []}
-        />
+        />}
 
 
         <Filter
@@ -43,14 +43,14 @@ function Filters({ filters, setFilters, allValues }) {
           allValues={allValues.priority || ["Low", "High", "Medium", "Critical"]}
         />
 
-        <Filter
+        {!isLineChart && <Filter
           labelTitle="Project:"
           value={filters.project}
           onChangeCallback={(e) =>
             setFilters({ ...filters, project: e.target.value })
           }
           allValues={allValues.project || []}
-        />
+        />}
 
         <Filter
           labelTitle="Status:"

@@ -32,25 +32,14 @@ function ChartSwitcher() {
     endDate: formatDate(today),
   });
 
-  const [filteredTickets, setFilteredTickets] = useState([]);
   const [allTeams_assigned, setAllTeams_assigned] = useState([]);
   const [allTeams_created, setAllTeams_created] = useState([]);
   const [allPriorities, setAllPriorities] = useState([]);
   const [allProjects, setAllProjects] = useState([]);
   const [allStatuses, setAllStatuses] = useState([]);
 
-  // // Fetch tickets filtered by backend
-  // useEffect(() => {
-  //   const params = new URLSearchParams(filters).toString();
-  //   fetch(`http://localhost/api/tickets.php?${params}`)
-  //     .then((res) => res.json())
-  //     .then((data) => {
-  //       setFilteredTickets(data);
-  //     })
-  //     .catch((err) => console.error("Error fetching filtered tickets:", err));
-  // }, [filters]);
-
   // Fetch all values for filters
+  // TODO ... poate
   useEffect(() => {
     fetch("http://localhost/api/tickets.php")
       .then((res) => res.json())
@@ -88,6 +77,7 @@ function ChartSwitcher() {
               project: allProjects,
               status: allStatuses,
             }}
+            isLineChart={chartType === "line"}
           />
         </div>
       )}
@@ -116,9 +106,9 @@ function ChartSwitcher() {
 
       {/* Render Chart Section based on chartType */}
       <div>
-        {chartType === "bar" && <BarChartSection tickets={filteredTickets} totalCount={filteredTickets.length} filters={filters}/>}
-        {chartType === "line" && <LineChartSection tickets={filteredTickets} filters={filters}/>}
-        {chartType === "pie" && <PieChartSection tickets={filteredTickets} filters={filters}/>}
+        {chartType === "bar" && <BarChartSection filters={filters}/>}
+        {chartType === "line" && <LineChartSection filters={filters}/>}
+        {chartType === "pie" && <PieChartSection filters={filters}/>}
       </div>
     </div>
   );

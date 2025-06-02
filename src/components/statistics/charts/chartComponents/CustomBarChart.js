@@ -17,13 +17,8 @@ function CustomBarChart({
   data,
   dataKey,
   categoryKey = "priority",
-  stacked = false,
   colors = [],
   showBothValues = false,
-  totalCount,
-  teamsByCategory = {},
-  slaStatusByTeam = [],
-  slaStatusByProject = [],
 }) {
   const isEmpty = !data || data.length === 0;
   const defaultColors = ["#4299e1", "#48bb78", "#ed8936", "#f56565"];
@@ -106,9 +101,7 @@ function CustomBarChart({
                   dataKey={dataKey}
                   position="top"
                   formatter={(value) => {
-                    const total =
-                      totalCount ||
-                      data.reduce((sum, item) => sum + (item[dataKey] || 0), 0);
+                    const total = data.reduce((sum, item) => sum + (item[dataKey] || 0), 0);
                     const percentage = total
                       ? Math.round((value / total) * 100)
                       : 0;

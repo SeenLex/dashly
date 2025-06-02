@@ -1,8 +1,8 @@
-import React, { useRef } from "react";
+import { useRef } from "react";
 
 function ticketItem(ticket) {
   return <li
-    key={ticket.ticket_id}
+    key={ticket.id}
     style={{
       padding: "10px",
       backgroundColor: "#f9f9f9",

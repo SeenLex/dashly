@@ -8,7 +8,7 @@ import CustomPieChart from "../chartComponents/CustomPieChart.js";
 import CustomHorizontalContainer from "../../customContainers/CustomHorizontalContainer.js";
 import { normalizeTickets } from "../../helpers/fct.js";
 
-function PieChartSection({ tickets }) {
+function PieChartSection({ tickets = [] }) {
   const [statusData, setStatusData] = useState([]);
   const [slaData, setSlaData] = useState([]);
   const [pData, setPriorityData] = useState([]);

@@ -1,6 +1,8 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import TicketList from './TicketList';
-import RequestsTable from './RequestsTable';
+// AdminPanel.jsx
+
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import TicketList from './TicketList'; // Assumes you have a separate TicketList.jsx
+import RequestsTable from './RequestsTable'; // Assumes you have a separate RequestsTable.jsx
 
 export default function AdminPanel() {
   const [tickets, setTickets] = useState([]);
@@ -108,10 +110,13 @@ export default function AdminPanel() {
   return (
     <div className="p-6">
       <h1 className="text-xl font-bold mb-4">Admin Panel - Tickete</h1>
+
+      {/* Registration Requests Table (with team dropdown) */}
       <div className="mt-12">
         <RequestsTable />
       </div>
 
+      {/* Tickets List + Filters */}
       {loading ? (
         <p>Se încarcă...</p>
       ) : (

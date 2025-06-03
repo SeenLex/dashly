@@ -84,54 +84,69 @@ const AuditPage = () => {
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
-          setLogs(
-            data.rows.map((row) => ({
-              id: row.row_number,
-              timestamp:
-                typeof row.timp === 'object' ? row.timp.date : row.timp,
-              user: row.nume_utilizator,
-              project: row.provider,
-              echipa: row.echipa,
-              entity: row.id ?? `Ticket #${row.id_ticket}`,
-              actiune: row.actiune,
-              previousValue: row.stare_trecuta ?? '-',
-              newValue: row.stare_curenta ?? '-',
-            })),
-            setTotalRows(data.total || 0)
-          );
+          // map rows to desired shape and update totalRows separately
+          const mapped = data.rows.map((row) => ({
+            id: row.row_number,
+            timestamp: typeof row.timp === 'object' ? row.timp.date : row.timp,
+            user: row.nume_utilizator,
+            project: row.provider,
+            echipa: row.echipa,
+            entity: row.id ?? `Ticket #${row.id_ticket}`,
+            actiune: row.actiune,
+            previousValue: row.stare_trecuta ?? '-',
+            newValue: row.stare_curenta ?? '-',
+          }));
+          setLogs(mapped);
+          setTotalRows(data.total || 0);
         }
       });
   }, [currentPage, teamId, startDate, endDate, projectId, userId, ticketId]);
 
-  // generate Excel
+  // generate Excel for all filtered logs (not just current page)
   const exportToExcel = () => {
-    const wsData = logs.map(
-      ({
-        id,
-        timestamp,
-        user,
-        project,
-        echipa,
-        entity,
-        actiune,
-        previousValue,
-        newValue,
-      }) => ({
-        '#': id,
-        Timestamp: typeof timp === 'object' ? timestamp.date : timestamp,
-        User: user,
-        echipa: echipa,
-        Project: project,
-        entity: id,
-        Action: actiune,
-        'Previous Value': previousValue ?? '-',
-        'New Value': newValue ?? '-',
+    // Build the same filter params but request all rows (per_page = totalRows)
+    const params = new URLSearchParams({
+      page: 1,
+      per_page: totalRows || 1, // if totalRows is 0, at least request 1 to avoid per_page=0
+    });
+    if (teamId) params.append('team_id', teamId);
+    if (startDate) params.append('start_date', startDate);
+    if (endDate) params.append('end_date', endDate);
+    if (projectId) params.append('project_id', projectId);
+    if (userId) params.append('user_id', userId);
+    if (ticketId) params.append('ticket_id', ticketId);
+
+    const token = localStorage.getItem('token');
+    fetch(`http://localhost/get_audit_stare.php?${params}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data.success) {
+          throw new Error(data.error || 'Failed to fetch all logs');
+        }
+        // Transform allRows using the same mapping logic
+        const allRows = data.rows.map((row) => ({
+          '#': row.row_number,
+          Timestamp: typeof row.timp === 'object' ? row.timp.date : row.timp,
+          User: row.nume_utilizator,
+          Team: row.echipa,
+          Project: row.provider,
+          Entity: row.id ?? `Ticket #${row.id_ticket}`,
+          Action: row.actiune,
+          'Previous Value': row.stare_trecuta ?? '-',
+          'New Value': row.stare_curenta ?? '-',
+        }));
+
+        const ws = XLSX.utils.json_to_sheet(allRows);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Audit Logs');
+        XLSX.writeFile(wb, 'audit_logs.xlsx');
       })
-    );
-    const ws = XLSX.utils.json_to_sheet(wsData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Audit');
-    XLSX.writeFile(wb, 'audit_logs.xlsx');
+      .catch((err) => {
+        console.error('Export error:', err);
+        alert(err.message || 'Failed to export');
+      });
   };
 
   const totalPages = Math.ceil(totalRows / logsPerPage);

@@ -1,26 +1,51 @@
-import { YAxis, XAxis, CartesianGrid, BarChart, Bar, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { LabelList } from "recharts";
+import {
+  YAxis,
+  XAxis,
+  CartesianGrid,
+  BarChart,
+  Bar,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  LabelList,
+} from "recharts";
+import { useState } from "react";
+import CustomTooltip from "../../customComponents/CustomToolTip";
+
 function CustomBarChart({
   title,
   data,
   dataKey,
-  perc = false,
   categoryKey = "priority",
-  stacked = false,
-  colors = []
+  colors = [],
+  showBothValues = false,
 }) {
   const isEmpty = !data || data.length === 0;
-  const fallbackData = [{ [categoryKey]: "No Data", ...(Array.isArray(dataKey) ? dataKey.reduce((acc, key) => ({ ...acc, [key]: 0 }), {}) : { [dataKey]: 0 }) }];
-
-  const defaultColors = ["#4299e1", "#48bb78", "#ed8936", "#f56565"]; // Aligned with the new palette
+  const defaultColors = ["#4299e1", "#48bb78", "#ed8936", "#f56565"];
+  const fallbackData = [
+    {
+      [categoryKey]: "No Data",
+      ...(Array.isArray(dataKey)
+        ? dataKey.reduce((acc, key) => ({ ...acc, [key]: 0 }), {})
+        : { [dataKey]: 0 }),
+    },
+  ];
+  const [tooltipState, setTooltipState] = useState(false);
 
   return (
-    <div >
-      <p className="text-lg font-semibold text-black dark:text-white mb-4 text-center">{title}</p>
+    <div style={{ position: "relative" }}>
+      <p className="text-lg font-semibold text-black dark:text-white mb-4 text-center">
+        {title}
+      </p>
       <ResponsiveContainer width="100%" height={300}>
         <BarChart
           data={isEmpty ? fallbackData : data}
-          margin={{ top: 5, right: 30, left: 20, bottom: 40 }}
+          margin={{ top: 20, right: 30, left: 20, bottom: 40 }}
+          onClick={(e) => {
+            setTooltipState(
+              !tooltipState
+            );
+          }}
         >
           <CartesianGrid strokeDasharray="3 3" stroke="var(--card-border)" />
           <XAxis
@@ -28,30 +53,67 @@ function CustomBarChart({
             angle={-45}
             textAnchor="end"
             height={70}
-            tick={{ fontSize: 12, fill: 'var(--text-color-secondary)' }}
+            tick={{ fontSize: 12, fill: "var(--text-color-secondary)" }}
             stroke="var(--text-color-secondary)"
           />
-          {perc ? <YAxis tickFormatter={(value) => `${value}%`} stroke="var(--text-color-secondary)" /> : <YAxis stroke="var(--text-color-secondary)" />}
+          <YAxis stroke="var(--text-color-secondary)" />
+
           <Tooltip
-            contentStyle={{ backgroundColor: 'var(--secondary-bg)', border: '1px solid var(--card-border)', color: 'var(--text-color-primary)' }}
-            itemStyle={{ color: 'var(--text-color-primary)' }}
+            trigger="click"
+            active={tooltipState}
+            content={
+              <CustomTooltip
+                displayLabel={title + ": "}
+                buttonCallback={() => { setTooltipState(false); }}
+              />}
           />
-          <Legend wrapperStyle={{ color: 'var(--text-color-primary)' }} />
+
+          <Legend wrapperStyle={{ color: "var(--text-color-primary)" }} />
 
           {Array.isArray(dataKey) ? (
+            // Afișare pentru graficele stacked (SLA Compliance)
             dataKey.map((key, index) => (
               <Bar
                 key={key}
                 dataKey={key}
-                stackId={stacked ? "a" : undefined}
-                fill={colors[index] || defaultColors[index % defaultColors.length]}
+                stackId="a"
+                fill={
+                  key === "Met"
+                    ? "#4CAF50"
+                    : key === "In Progress"
+                      ? "#FF9800"
+                      : "#F44336" // Exceeded
+                }
               >
-                {perc && <LabelList dataKey={key} position="top" formatter={(value) => `${value}%`} />}
+                <LabelList
+                  dataKey={key}
+                  position="top"
+                  formatter={(value) => `${value}`}
+                  style={{ fill: "#333", fontSize: 12, fontWeight: "bold" }}
+                />
               </Bar>
             ))
           ) : (
+            // Afișare pentru graficele simple (count/percentage)
             <Bar dataKey={dataKey} fill={colors[0] || defaultColors[0]}>
-              {perc && <LabelList dataKey={dataKey} position="top" formatter={(value) => `${value}%`} />}
+              {showBothValues && (
+                <LabelList
+                  dataKey={dataKey}
+                  position="top"
+                  formatter={(value) => {
+                    const total = data.reduce((sum, item) => sum + (item[dataKey] || 0), 0);
+                    const percentage = total
+                      ? Math.round((value / total) * 100)
+                      : 0;
+                    return `${value} (${percentage}%)`;
+                  }}
+                  style={{
+                    fill: "#333",
+                    fontSize: 12,
+                    fontWeight: "bold",
+                  }}
+                />
+              )}
             </Bar>
           )}
         </BarChart>
@@ -59,5 +121,4 @@ function CustomBarChart({
     </div>
   );
 }
-
 export default CustomBarChart;

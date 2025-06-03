@@ -1,88 +1,76 @@
 import { useEffect, useState } from "react";
-import {
-  countByPriority,
-  getPercentsFromCounted,
-  countByTeamAssigned,
-  countByProject,
-  calculateSlaStatus,
-  convertSlaStatusToPercentages,
-} from "../../helpers/fct.js";
 import CustomBarChart from "../chartComponents/CustomBarChart.js";
 import CustomHorizontalContainer from "../../customContainers/CustomHorizontalContainer.js";
 
-function BarChartSection({ tickets, totalCount }) {
+function BarChartSection({ filters }) {
   const [numByPriority, setNumByPriority] = useState([]);
-  const [percByPriority, setPercByPriority] = useState([]);
   const [resolutionSLANumByPriority, setResolutionSLANumByPriority] = useState(
     []
   );
-  const [resolutionSLAPercByPriority, setResolutionSLAPercByPriority] =
-    useState([]);
   const [resolutionSLANumByTeam, setResolutionSLANumByTeam] = useState([]);
-  const [resolutionSLAPercByTeam, setResolutionSLAPercByTeam] = useState([]);
   const [resolutionSLANumByProject, setResolutionSLANumByProject] = useState(
     []
   );
-  const [resolutionSLAPercByProject, setResolutionSLAPercByProject] = useState(
-    []
-  );
   const [slaStatusByTeam, setSlaStatusByTeam] = useState([]);
-  const [slaStatusByTeamPercent, setSlaStatusByTeamPercent] = useState([]);
   const [slaStatusByProject, setSlaStatusByProject] = useState([]);
-  const [slaStatusByProjectPercent, setSlaStatusByProjectPercent] = useState(
-    []
-  );
+  const [teamsByCategory, setTeamsByCategory] = useState({});
 
   useEffect(() => {
-    if (tickets) {
-      // Basic ticket counts
-      const ticketsNumByPriority = countByPriority(tickets);
-      const percByPriority = getPercentsFromCounted(
-        ticketsNumByPriority,
-        totalCount
-      );
+    const params = new URLSearchParams(filters).toString();
+    fetch(
+      `http://localhost/api/barcharts/get_tickets_by_priority.php?${params}`
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        setNumByPriority(data.filter((e) => e.count > 0));
+      })
+      .catch((err) => console.error("Error fetching filtered tickets:", err));
 
-      // SLA resolution counts
-      const ticketsResolutionSLANumByPriority = countByPriority(tickets, true);
-      const ticketsResolutionSLAPercByPriority = getPercentsFromCounted(
-        ticketsResolutionSLANumByPriority,
-        totalCount
-      );
-      const ticketsResolutionSLANumByTeam = countByTeamAssigned(tickets, true);
-      const ticketsResolutionSLAPercByTeam = getPercentsFromCounted(
-        ticketsResolutionSLANumByTeam,
-        totalCount,
-        "team"
-      );
-      const ticketsResolutionSLANumByProject = countByProject(tickets, true);
-      const ticketsResolutionSLAPercByProject = getPercentsFromCounted(
-        ticketsResolutionSLANumByProject,
-        totalCount,
-        "project"
-      );
+    fetch(
+      `http://localhost/api/barcharts/get_tickets_by_priority_and_sla_met.php?${params}`
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        setResolutionSLANumByPriority(data.filter((e) => e.count > 0));
+      })
+      .catch((err) => console.error("Error fetching filtered tickets:", err));
 
-      // SLA compliance data
-      const teamSlaStatus = calculateSlaStatus(tickets, "team_assigned_person");
-      const teamSlaStatusPercent = convertSlaStatusToPercentages(teamSlaStatus);
-      const projectSlaStatus = calculateSlaStatus(tickets, "project");
-      const projectSlaStatusPercent =
-        convertSlaStatusToPercentages(projectSlaStatus);
+    fetch(
+      `http://localhost/api/barcharts/get_tickets_by_team_assigned_person_and_sla_met.php?${params}`
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        setResolutionSLANumByTeam(data.filter((e) => e.count > 0));
+      })
+      .catch((err) => console.error("Error fetching filtered tickets:", err));
 
-      // Setting state after inspection
-      setNumByPriority(ticketsNumByPriority);
-      setPercByPriority(percByPriority);
-      setResolutionSLANumByPriority(ticketsResolutionSLANumByPriority);
-      setResolutionSLAPercByPriority(ticketsResolutionSLAPercByPriority);
-      setResolutionSLANumByTeam(ticketsResolutionSLANumByTeam);
-      setResolutionSLAPercByTeam(ticketsResolutionSLAPercByTeam);
-      setResolutionSLANumByProject(ticketsResolutionSLANumByProject);
-      setResolutionSLAPercByProject(ticketsResolutionSLAPercByProject);
-      setSlaStatusByTeam(teamSlaStatus);
-      setSlaStatusByTeamPercent(teamSlaStatusPercent);
-      setSlaStatusByProject(projectSlaStatus);
-      setSlaStatusByProjectPercent(projectSlaStatusPercent);
-    }
-  }, [tickets, totalCount]);
+    fetch(
+      `http://localhost/api/barcharts/get_tickets_by_project_and_sla_met.php?${params}`
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        setResolutionSLANumByProject(data.filter((e) => e.count > 0));
+      })
+      .catch((err) => console.error("Error fetching filtered tickets:", err));
+
+    fetch(
+      `http://localhost/api/barcharts/get_tickets_sla_compliance_by_team.php?${params}`
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        setSlaStatusByTeam(data.filter((e) => e.name != null));
+      })
+      .catch((err) => console.error("Error fetching filtered tickets:", err));
+
+    fetch(
+      `http://localhost/api/barcharts/get_tickets_sla_compliance_by_project.php?${params}`
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        setSlaStatusByProject(data.filter((e) => e.name != null));
+      })
+      .catch((err) => console.error("Error fetching filtered tickets:", err));
+  }, [filters]);
 
   return (
     <>
@@ -98,84 +86,69 @@ function BarChartSection({ tickets, totalCount }) {
             data={numByPriority}
             dataKey="count"
             categoryKey="priority"
-          />,
-          <CustomBarChart
-            key="perc-priority"
-            title="Ticket % by priority"
-            data={percByPriority}
-            dataKey="perc"
-            perc={true}
-            categoryKey="priority"
+            teamsByCategory={teamsByCategory}
+            showBothValues={true}
+            colors={["#4299e1"]}
           />,
 
           // SLA resolution metrics
           <CustomBarChart
             key="sla-num-priority"
-            title="Resolution SLA number by priority"
+            title="Resolution SLA by priority"
             data={resolutionSLANumByPriority}
             dataKey="count"
             categoryKey="priority"
+            teamsByCategory={teamsByCategory}
+            showBothValues={true}
+            colors={["#4299e1"]}
           />,
-          <CustomBarChart
-            key="sla-perc-priority"
-            title="Resolution SLA % by priority"
-            data={resolutionSLAPercByPriority}
-            dataKey="perc"
-            categoryKey="priority"
-            perc={true}
-          />,
+
           <CustomBarChart
             key="sla-num-team"
-            title="Resolution SLA number by team"
+            title="Resolution SLA by team"
             data={resolutionSLANumByTeam}
             dataKey="count"
-            categoryKey="team"
+            categoryKey="team_assigned_person"
+            teamsByCategory={teamsByCategory}
+            showBothValues={true}
+            colors={["#4299e1"]}
+            slaStatusByTeam={slaStatusByTeam}
           />,
-          <CustomBarChart
-            key="sla-perc-team"
-            title="Resolution SLA % by team"
-            data={resolutionSLAPercByTeam}
-            dataKey="perc"
-            categoryKey="team"
-            perc={true}
-          />,
+
           <CustomBarChart
             key="sla-num-project"
-            title="Resolution SLA number by project"
+            title="Resolution SLA by project"
             data={resolutionSLANumByProject}
             dataKey="count"
             categoryKey="project"
-          />,
-          <CustomBarChart
-            key="sla-perc-project"
-            title="Resolution SLA % by project"
-            data={resolutionSLAPercByProject}
-            dataKey="perc"
-            categoryKey="project"
-            perc={true}
+            teamsByCategory={teamsByCategory}
+            showBothValues={true}
+            colors={["#4299e1"]}
+            slaStatusByProject={slaStatusByProject}
           />,
 
-          // SLA Met vs Exceeded charts
+          // SLA Compliance charts
           <CustomBarChart
             key="sla-team-count"
-            title="SLA Compliance by Team (Count)"
+            title="SLA Compliance by Team"
             data={slaStatusByTeam}
-            dataKey={["Met", "Exceeded"]}
+            dataKey={["Met", "In Progress", "Exceeded"]}
             categoryKey="name"
             stacked={true}
-            colors={["#4CAF50", "#F44336"]}
+            teamsByCategory={teamsByCategory}
+            slaStatusByTeam={slaStatusByTeam}
           />,
-        
+
           <CustomBarChart
             key="sla-project-count"
-            title="SLA Compliance by Project (Count)"
+            title="SLA Compliance by Project"
             data={slaStatusByProject}
-            dataKey={["Met", "Exceeded"]}
+            dataKey={["Met", "In Progress", "Exceeded"]}
             categoryKey="name"
             stacked={true}
-            colors={["#4CAF50", "#F44336"]}
+            teamsByCategory={teamsByCategory}
+            slaStatusByProject={slaStatusByProject}
           />,
-          
         ]}
       />
     </>

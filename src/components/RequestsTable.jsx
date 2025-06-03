@@ -77,9 +77,7 @@ const RequestsTable = () => {
             <div className="flex-1 py-2 px-4 border border-gray-300 font-semibold">
               Email
             </div>
-            <div className="flex-1 py-2 px-4 border border-gray-300 font-semibold">
-              Project Name
-            </div>
+
             <div className="flex-1 py-2 px-4 border border-gray-300 font-semibold">
               Role
             </div>
@@ -88,7 +86,7 @@ const RequestsTable = () => {
             </div>
             <div
               className="py-2 px-4 border border-gray-300 text-center font-semibold"
-              style={{ width: '150px' }}
+              style={{ width: '200px' }}
             >
               Actions
             </div>
@@ -106,9 +104,7 @@ const RequestsTable = () => {
                 <div className="flex-1 py-2 px-4 border border-gray-300">
                   {req.email}
                 </div>
-                <div className="flex-1 py-2 px-4 border border-gray-300">
-                  {req.projectName}
-                </div>
+
                 <div className="flex-1 py-2 px-4 border border-gray-300">
                   {req.rol}
                 </div>
@@ -117,7 +113,7 @@ const RequestsTable = () => {
                 </div>
                 <div
                   className="py-2 px-4 border border-gray-300 flex justify-center space-x-2"
-                  style={{ width: '150px' }}
+                  style={{ width: '200px' }}
                 >
                   {req.status === 'pending' ? (
                     <>

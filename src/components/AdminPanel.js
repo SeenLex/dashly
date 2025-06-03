@@ -241,15 +241,15 @@ export default function AdminPanel() {
   const [totalPages, setTotalPages] = useState(1);
   const [ticketsPerPage, setTicketsPerPage] = useState(10);
   const [filters, setFilters] = useState({
-    search: "",
-    priority: "",
-    status: "",
-    project: "",
-    assigned_person: "",
-    dateFrom: "",
-    dateTo: "",
-    ticket_id: "",
-    created_by: ""
+    search: '',
+    priority: '',
+    status: '',
+    project: '',
+    assigned_person: '',
+    dateFrom: '',
+    dateTo: '',
+    ticket_id: '',
+    created_by: '',
   });
 
   const fetchController = useRef(null);
@@ -314,7 +314,7 @@ export default function AdminPanel() {
   }, [filters, currentPage, ticketsPerPage, fetchData]);
 
   const handleDeleteTicket = (id) => {
-    if (!window.confirm("Sigur dorești să ștergi acest ticket?")) return;
+    if (!window.confirm('Sigur dorești să ștergi acest ticket?')) return;
 
     fetch(`http://localhost/tickets-api/delete_ticket.php?id=${id}`, {
       method: "DELETE",
@@ -325,15 +325,15 @@ export default function AdminPanel() {
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
-          alert("Ticket șters!");
+          alert('Ticket șters!');
           fetchData();
         } else {
-          alert("Eroare la ștergere.");
+          alert('Eroare la ștergere.');
         }
       })
       .catch((err) => {
-        console.error("Eroare la ștergere:", err);
-        alert("Eroare server!");
+        console.error('Eroare la ștergere:', err);
+        alert('Eroare server!');
       });
   };
 
@@ -349,15 +349,15 @@ export default function AdminPanel() {
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
-          alert("Ticket actualizat!");
+          alert('Ticket actualizat!');
           fetchData();
         } else {
-          alert("Eroare la actualizare.");
+          alert('Eroare la actualizare.');
         }
       })
       .catch((err) => {
-        console.error("Eroare actualizare:", err);
-        alert("Eroare server edit ticket!");
+        console.error('Eroare actualizare:', err);
+        alert('Eroare server edit ticket!');
       });
   };
 

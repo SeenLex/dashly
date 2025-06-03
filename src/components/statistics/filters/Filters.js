@@ -1,27 +1,38 @@
 import Filter from "./Filter";
 
-function Filters({ filters, setFilters, allValues }) {
+function Filters({ filters, setFilters, allValues, isLineChart = false }) {
+  const formatDate = (date) => {
+    const d = new Date(date);
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    const year = d.getFullYear();
+    return `${year}-${month}-${day}`;
+  };
+
+  const today = new Date();
+  const oneYearAgo = new Date();
+  oneYearAgo.setFullYear(today.getFullYear() - 1);
   return (
     <div className="space-y-6">
-      {/* Filter Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         <Filter
           labelTitle="Team created by:"
-          value={filters.team_created_by}
+          value={filters.team_created_by_name}
           onChangeCallback={(e) =>
-            setFilters({ ...filters, team_created_by: e.target.value })
+            setFilters({ ...filters, team_created_by_name: e.target.value })
           }
-          allValues={allValues.team_created_by || []}
+          allValues={allValues.team_created_by_name || []}
         />
 
-        <Filter
+        {!isLineChart && <Filter
           labelTitle="Team assigned to:"
-          value={filters.team_assigned_person}
+          value={filters.team_assigned_person_name}
           onChangeCallback={(e) =>
-            setFilters({ ...filters, team_assigned_person: e.target.value })
+            setFilters({ ...filters, team_assigned_person_name: e.target.value })
           }
-          allValues={allValues.team_assigned_person || []}
-        />
+          allValues={allValues.team_assigned_person_name || []}
+        />}
+
 
         <Filter
           labelTitle="Priority:"
@@ -32,14 +43,14 @@ function Filters({ filters, setFilters, allValues }) {
           allValues={allValues.priority || ["Low", "High", "Medium", "Critical"]}
         />
 
-        <Filter
+        {!isLineChart && <Filter
           labelTitle="Project:"
           value={filters.project}
           onChangeCallback={(e) =>
             setFilters({ ...filters, project: e.target.value })
           }
-          allValues={allValues.projects || []}
-        />
+          allValues={allValues.project || []}
+        />}
 
         <Filter
           labelTitle="Status:"
@@ -65,14 +76,14 @@ function Filters({ filters, setFilters, allValues }) {
           onChangeCallback={(e) =>
             setFilters({ ...filters, sla: e.target.value })
           }
-          allValues={["4h", "8h", "40h", "132h"]}
+          allValues={["2h", "4h", "8h", "24h"]}
         />
       </div>
 
       {/* Date Filters */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Filter
-          labelTitle="Start Date:"
+          labelTitle="Assigned from:"
           type="date"
           value={filters.startDate}
           onChangeCallback={(e) =>
@@ -81,7 +92,7 @@ function Filters({ filters, setFilters, allValues }) {
         />
 
         <Filter
-          labelTitle="End Date:"
+          labelTitle="Assigned to:"
           type="date"
           value={filters.endDate}
           onChangeCallback={(e) =>
@@ -94,15 +105,6 @@ function Filters({ filters, setFilters, allValues }) {
       <div className="flex justify-end space-x-4 mt-6">
         <button
           onClick={() => {
-            // Implement search functionality here
-            console.log("Searching with filters:", filters);
-          }}
-          className="custom-button custom-button-active"
-        >
-          Search
-        </button>
-        <button
-          onClick={() => {
             setFilters({
               team_assigned_person: "",
               team_created_by: "",
@@ -111,10 +113,9 @@ function Filters({ filters, setFilters, allValues }) {
               status: "",
               slaStatus: "",
               sla: "",
-              startDate: "",
-              endDate: "",
+              startDate: formatDate(oneYearAgo),
+              endDate: formatDate(today),
             });
-            console.log("Filters cleared");
           }}
           className="custom-button custom-button-inactive"
         >

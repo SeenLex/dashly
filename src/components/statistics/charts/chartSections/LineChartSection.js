@@ -1,101 +1,155 @@
 import { useEffect, useState } from "react";
-import {
-  countByCreatedDateDaily,
-  countByCreatedDateWeekly,
-  countByCreatedDateMonthly,
-  countSLAOverTime,
-} from "../../helpers/fct.js";
 import CustomLineChart from "../chartComponents/CustomLineChart.js";
 import CustomHorizontalContainer from "../../customContainers/CustomHorizontalContainer.js";
 
-function LineChartSection({ tickets }) {
-  const [createdDateDataDaily, setCreatedDateDataDaily] = useState([]);
-  const [createdDateDataWeekly, setCreatedDateDataWeekly] = useState([]);
-  const [createdDateDataMonthly, setCreatedDateDataMonthly] = useState([]);
+function LineChartSection({ filters }) {
+  const [startedClosedDateDataDaily, setStartedClosedDateDataDaily] = useState(
+    []
+  );
+  const [startedClosedDateDataWeekly, setStartedClosedDateDataWeekly] =
+    useState([]);
+  const [startedClosedDateDataMonthly, setStartedClosedDateDataMonthly] =
+    useState([]);
 
   const [slaOverallData, setSlaOverallData] = useState([]);
   const [slaTeamData, setSlaTeamData] = useState({});
   const [slaProjectData, setSlaProjectData] = useState({});
 
   useEffect(() => {
-    if (tickets) {
-      const countedByCreatedDateDailyData = countByCreatedDateDaily(tickets);
-      const countedByCreatedDateWeeklyData = countByCreatedDateWeekly(tickets);
-      const countedByCreatedDateMonthlyData =
-        countByCreatedDateMonthly(tickets);
-
-      setCreatedDateDataDaily(countedByCreatedDateDailyData);
-      setCreatedDateDataWeekly(countedByCreatedDateWeeklyData);
-      setCreatedDateDataMonthly(countedByCreatedDateMonthlyData);
-
-      const overallSLAData = countSLAOverTime(tickets, "monthly");
-      setSlaOverallData(overallSLAData);
-
-      const teams = [
-        ...new Set(tickets.map((t) => t.team_assigned_person).filter(Boolean)),
-      ];
-      const teamData = {};
-      teams.forEach((team) => {
-        const teamSLAData = countSLAOverTime(
-          tickets,
-          "monthly",
-          "team_assigned_person",
-          team
+    const params = new URLSearchParams(filters);
+    fetch(
+      `http://localhost/api/linecharts/get_ticket_trend_daily.php?${params.toString()}`
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        setStartedClosedDateDataDaily(data);
+      })
+      .catch((err) => console.error("Error fetching filtered tickets:", err));
+    fetch(
+      `http://localhost/api/linecharts/get_ticket_trend_weekly.php?${params.toString()}`
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        setStartedClosedDateDataWeekly(data);
+      })
+      .catch((err) => console.error("Error fetching filtered tickets:", err));
+    fetch(
+      `http://localhost/api/linecharts/get_ticket_trend_monthly.php?${params.toString()}`
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        setStartedClosedDateDataMonthly(data);
+      })
+      .catch((err) => console.error("Error fetching filtered tickets:", err));
+    fetch(
+      `http://localhost/api/linecharts/get_sla_performance_monthly.php?${params.toString()}`
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        setSlaOverallData(data);
+      })
+      .catch((err) => console.error("Error fetching filtered tickets:", err));
+    fetch(`http://localhost/api/linecharts/get_team_names.php`)
+      .then((res) => res.json())
+      .then(async (team_names_data) => {
+        const teamParams = new URLSearchParams(params);
+        teamParams.delete("team_assigned_person_name");
+        const teamDataPromises = team_names_data.map((teamName) =>
+          fetch(
+            `http://localhost/api/linecharts/get_sla_performance_monthly.php?team_assigned_person_name=${encodeURIComponent(
+              teamName
+            )}&${teamParams.toString()}`
+          ).then((res) => res.json())
         );
-        teamData[team] = teamSLAData;
-      });
-      setSlaTeamData(teamData);
 
-      const projects = [
-        ...new Set(tickets.map((t) => t.project).filter(Boolean)),
-      ];
-      const projectData = {};
-      projects.forEach((project) => {
-        const projectSLAData = countSLAOverTime(
-          tickets,
-          "monthly",
-          "project",
-          project
+        const results = await Promise.all(teamDataPromises);
+        let slaDataByTeam = {};
+        team_names_data.forEach((team, idx) => {
+          if (results[idx].length > 0) {
+            slaDataByTeam[team] = results[idx];
+          }
+        });
+        setSlaTeamData(slaDataByTeam);
+      })
+      .catch((err) => console.error("Error:", err));
+    fetch(`http://localhost/api/linecharts/get_project_names.php`)
+      .then((res) => res.json())
+      .then(async (project_names_data) => {
+        const projectParams = new URLSearchParams(params);
+        projectParams.delete("project");
+        const projectNamePromises = project_names_data.map((projectName) =>
+          fetch(
+            `http://localhost/api/linecharts/get_sla_performance_monthly.php?project=${encodeURIComponent(
+              projectName
+            )}&${projectParams.toString()}`
+          ).then((res) => res.json())
         );
-        projectData[project] = projectSLAData;
-      });
-      setSlaProjectData(projectData);
-    }
-  }, [tickets]);
+
+        const results = await Promise.all(projectNamePromises);
+
+        let slaDataByProject = {};
+        project_names_data.forEach((project, idx) => {
+          if (results[idx].length > 0) {
+            slaDataByProject[project] = results[idx];
+          }
+        });
+        setSlaProjectData(slaDataByProject);
+      })
+      .catch((err) => console.error("Error:", err));
+  }, [filters]);
 
   return (
     <>
       <div style={{ display: "flex", justifyContent: "center" }}>
-        <h1 className="text-black dark:text-white">Line charts</h1>
+        <h1 className="text-2xl font-bold text-black dark:text-white">
+          Line charts
+        </h1>
       </div>
       <CustomHorizontalContainer
         components={[
           <CustomLineChart
-            title={"Ticket Creation Trend - Daily"}
-            data={createdDateDataDaily}
-            dataKey={"count"}
-            labelName={"Day: "}
+            title={"Ticket Trend - Daily"}
+            data={startedClosedDateDataDaily}
+            tooltipLabelName="Day"
+            dataKey={"startCount"}
+            labelDataKey={"date"}
+            labelName={"Started"}
+            secondDataKey="closedCount"
+            secondLabel={"Closed"}
+            secondStroke="#b254ff"
           />,
           <CustomLineChart
-            title={"Ticket Creation Trend - Weekly"}
-            data={createdDateDataWeekly}
-            dataKey={"count"}
-            labelName={"Week: "}
+            title={"Ticket Trend - Weekly"}
+            data={startedClosedDateDataWeekly}
+            tooltipLabelName="Week"
+            dataKey={"startCount"}
+            labelDataKey={"date"}
+            labelName={"Started"}
+            secondDataKey="closedCount"
+            secondLabel={"Closed"}
+            secondStroke="#b254ff"
           />,
           <CustomLineChart
-            title={"Ticket Creation Trend - Monthly"}
-            data={createdDateDataMonthly}
-            dataKey={"count"}
-            labelName={"Month: "}
+            title={"Ticket Trend - Monthly"}
+            data={startedClosedDateDataMonthly}
+            tooltipLabelName="Month"
+            dataKey={"startCount"}
+            labelDataKey={"date"}
+            labelName={"Started"}
+            secondDataKey="closedCount"
+            secondLabel={"Closed"}
+            secondStroke="#b254ff"
           />,
           slaOverallData && slaOverallData.length > 0 ? (
             <CustomLineChart
               title={"Overall SLA Performance (Monthly)"}
               data={slaOverallData}
-              labelName={"Month: "}
+              tooltipLabelName="Month"
+              labelName={"Met"}
+              labelDataKey={"date"}
               dataKey="Met"
               secondDataKey="Exceeded"
-              secondStroke="#ffc658"
+              secondStroke="#b254ff"
               secondLabel="Exceeded"
             />
           ) : (
@@ -107,10 +161,12 @@ function LineChartSection({ tickets }) {
                 key={team}
                 title={`Team: ${team} SLA Performance (Monthly)`}
                 data={data}
-                labelName={"Month: "}
+                tooltipLabelName="Month"
+                labelName={"Met"}
+                labelDataKey={"date"}
                 dataKey="Met"
                 secondDataKey="Exceeded"
-                secondStroke="#ffc658"
+                secondStroke="#b254ff"
                 secondLabel="Exceeded"
               />
             ) : (
@@ -123,10 +179,12 @@ function LineChartSection({ tickets }) {
                 key={project}
                 title={`Project: ${project} SLA Performance (Monthly)`}
                 data={data}
-                labelName={"Month: "}
+                tooltipLabelName="Month"
+                labelName={"Met"}
                 dataKey="Met"
+                labelDataKey={"date"}
                 secondDataKey="Exceeded"
-                secondStroke="#ffc658"
+                secondStroke="#b254ff"
                 secondLabel="Exceeded"
               />
             ) : (

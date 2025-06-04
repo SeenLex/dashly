@@ -65,7 +65,7 @@ function PieChartSection({ filters }) {
         components={[
           <CustomPieChart
             key="statusChart"
-            title="Tickets by Status"
+            title="Tichete după Status"
             data={statusData}
             dataKey="count"
             nameKey="status"
@@ -73,15 +73,15 @@ function PieChartSection({ filters }) {
           />,
           <CustomPieChart
             key="slaChart"
-            title="Tickets by SLA Status"
+            title="Tichete după SLA"
             data={slaData}
-            dataKey="count"
+            dataKey="value"
             nameKey="status"
             colors={["#FF6B6B", "#4ECDC4", "#FFE66D"]}
           />,
           <CustomPieChart
             key="priorityChart"
-            title="Tickets by Priority"
+            title="Tichete după Prioritate"
             data={pData}
             dataKey="count"
             nameKey="priority"
@@ -89,20 +89,20 @@ function PieChartSection({ filters }) {
           />,
           <CustomPieChart
             key="teamAssignedChart"
-            title="Tickets by Team Assigned"
+            title="Tichete după Echipa Asignată"
             data={teamAssignedData}
             dataKey="count"
             nameKey="team"
             colors={["#8884D8", "#83A6ED", "#8DD1E1", "#82CA9D", "#A4DE6C"]}
           />,
-          <CustomPieChart
-            key="slaStatusChart"
-            title="Tickets by SLA"
-            data={ticketsSLA}
-            dataKey="value"
-            nameKey="status"
-            colors={["#FF7F50", "#6495ED", "#DC143C"]}
-          />,
+          // <CustomPieChart
+          //   key="slaStatusChart"
+          //   title="Tichete după SLA"
+          //   data={ticketsSLA}
+          //   dataKey="value"
+          //   nameKey="status"
+          //   colors={["#FF7F50", "#6495ED", "#DC143C"]}
+          // />,
         ]}
       />
     </div>

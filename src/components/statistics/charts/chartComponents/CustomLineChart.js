@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
+import { Brush } from "recharts";
 import {
   AreaChart,
   Area,
@@ -8,8 +9,8 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-} from 'recharts';
-import CustomTooltip from '../../customComponents/CustomToolTip';
+} from "recharts";
+import CustomTooltip from "../../customComponents/CustomToolTip";
 
 const CustomLineChart = ({
   title,
@@ -20,7 +21,7 @@ const CustomLineChart = ({
   secondDataKey,
   secondStroke,
   secondLabel,
-  tooltipLabelName = ""
+  tooltipLabelName = "",
 }) => {
   const primaryColor = "#4299e1"; // Accent blue
   const secondaryColor = secondStroke || "#f56565"; // Accent red
@@ -40,41 +41,39 @@ const CustomLineChart = ({
     // Assuming tickItem is a date string like 'YYYY-MM-DD' or a Date object
     const date = new Date(tickItem);
     // You can customize the date format as needed
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   };
 
   return (
     <div>
-      <p className="text-lg font-semibold text-black dark:text-white mb-4 text-center">{title}</p>
+      <p className="text-lg font-semibold text-black dark:text-white mb-4 text-center">
+        {title}
+      </p>
       <ResponsiveContainer width="100%" height={400}>
         <AreaChart
           data={data}
-          margin={{
-            top: 5,
-            right: 30,
-            left: 20,
-            bottom: 5,
-          }}
+          margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
           onClick={() => setTooltipState(!tooltipState)}
         >
           <CartesianGrid strokeDasharray="3 3" stroke="var(--card-border)" />
           <XAxis
             dataKey={labelDataKey}
             stroke="var(--text-color-secondary)"
-            // Use tickFormatter to display formatted dates
-            tickFormatter={formatXAxisTick}
-            // You might want to rotate labels if they overlap, or use interval="preserveStartEnd"
-            // angle={-45} // Example: rotate labels by -45 degrees
-            // textAnchor="end" // Example: align text to the end
+            tickFormatter={(value) => value}
           />
           <YAxis stroke="var(--text-color-secondary)" />
           <Tooltip
             trigger="click"
             active={tooltipState}
             labelFormatter={(label) => `${labelName}${label}`}
-            content={<CustomTooltip buttonCallback={() => setTooltipState(false)} labelName={tooltipLabelName} />}
+            content={
+              <CustomTooltip
+                buttonCallback={() => setTooltipState(false)}
+                labelName={tooltipLabelName}
+              />
+            }
           />
-          <Legend wrapperStyle={{ color: 'black' }} />
+          <Legend wrapperStyle={{ color: "black" }} />
           <Area
             type="monotone"
             dataKey={dataKey}
@@ -93,6 +92,14 @@ const CustomLineChart = ({
               name={secondLabel}
             />
           )}
+          {/* 👇 Add Brush here */}
+          <Brush
+            dataKey={labelDataKey}
+            height={30}
+            stroke="#8884d8"
+            travellerWidth={10}
+            tickFormatter={formatXAxisTick}
+          />
         </AreaChart>
       </ResponsiveContainer>
     </div>

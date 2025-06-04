@@ -75,14 +75,14 @@ function BarChartSection({ filters }) {
   return (
     <>
       <div style={{ display: "flex", justifyContent: "center" }}>
-        <h1 className="text-black dark:text-white">Bar charts</h1>
+         <h1 className="text-2xl font-bold text-black dark:text-white">Bar charts</h1>
       </div>
       <CustomHorizontalContainer
         components={[
           // Basic ticket metrics
           <CustomBarChart
             key="num-priority"
-            title="Ticket number by priority"
+            title="Număr de tichete pe prioritate"
             data={numByPriority}
             dataKey="count"
             categoryKey="priority"
@@ -94,7 +94,7 @@ function BarChartSection({ filters }) {
           // SLA resolution metrics
           <CustomBarChart
             key="sla-num-priority"
-            title="Resolution SLA by priority"
+            title="SLA de rezolvare pe prioritate"
             data={resolutionSLANumByPriority}
             dataKey="count"
             categoryKey="priority"
@@ -105,7 +105,7 @@ function BarChartSection({ filters }) {
 
           <CustomBarChart
             key="sla-num-team"
-            title="Resolution SLA by team"
+            title="SLA de rezolvare pe echipă"
             data={resolutionSLANumByTeam}
             dataKey="count"
             categoryKey="team_assigned_person"
@@ -117,7 +117,7 @@ function BarChartSection({ filters }) {
 
           <CustomBarChart
             key="sla-num-project"
-            title="Resolution SLA by project"
+            title="SLA de rezolvare pe proiect"
             data={resolutionSLANumByProject}
             dataKey="count"
             categoryKey="project"
@@ -130,7 +130,7 @@ function BarChartSection({ filters }) {
           // SLA Compliance charts
           <CustomBarChart
             key="sla-team-count"
-            title="SLA Compliance by Team"
+            title="Respectarea SLA-ului pe echipă"
             data={slaStatusByTeam}
             dataKey={["Met", "In Progress", "Exceeded"]}
             categoryKey="name"
@@ -141,7 +141,7 @@ function BarChartSection({ filters }) {
 
           <CustomBarChart
             key="sla-project-count"
-            title="SLA Compliance by Project"
+            title="Respectarea SLA-ului pe proiect"
             data={slaStatusByProject}
             dataKey={["Met", "In Progress", "Exceeded"]}
             categoryKey="name"

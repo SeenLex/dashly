@@ -108,7 +108,7 @@ function LineChartSection({ filters }) {
       <CustomHorizontalContainer
         components={[
           <CustomLineChart
-            title={"Ticket Trend - Daily"}
+            title={"Trend tichete - Zilnic"}
             data={startedClosedDateDataDaily}
             tooltipLabelName="Day"
             dataKey={"startCount"}
@@ -119,7 +119,7 @@ function LineChartSection({ filters }) {
             secondStroke="#b254ff"
           />,
           <CustomLineChart
-            title={"Ticket Trend - Weekly"}
+            title={"Trend tichete - Zilnic"}
             data={startedClosedDateDataWeekly}
             tooltipLabelName="Week"
             dataKey={"startCount"}
@@ -130,7 +130,7 @@ function LineChartSection({ filters }) {
             secondStroke="#b254ff"
           />,
           <CustomLineChart
-            title={"Ticket Trend - Monthly"}
+            title={"Trend tichete - Lunar"}
             data={startedClosedDateDataMonthly}
             tooltipLabelName="Month"
             dataKey={"startCount"}
@@ -142,7 +142,7 @@ function LineChartSection({ filters }) {
           />,
           slaOverallData && slaOverallData.length > 0 ? (
             <CustomLineChart
-              title={"Overall SLA Performance (Monthly)"}
+              title={"Performanță generală SLA (Lunar)"}
               data={slaOverallData}
               tooltipLabelName="Month"
               labelName={"Met"}
@@ -159,7 +159,7 @@ function LineChartSection({ filters }) {
             data && data.length > 0 ? (
               <CustomLineChart
                 key={team}
-                title={`Team: ${team} SLA Performance (Monthly)`}
+                title={`Echipă: ${team} - Performanță SLA (Lunar)`}
                 data={data}
                 tooltipLabelName="Month"
                 labelName={"Met"}
@@ -177,7 +177,7 @@ function LineChartSection({ filters }) {
             data && data.length > 0 ? (
               <CustomLineChart
                 key={project}
-                title={`Project: ${project} SLA Performance (Monthly)`}
+                title={`Proiect: ${project} - Performanță SLA (Lunar)`}
                 data={data}
                 tooltipLabelName="Month"
                 labelName={"Met"}
@@ -188,7 +188,7 @@ function LineChartSection({ filters }) {
                 secondLabel="Exceeded"
               />
             ) : (
-              <div key={project}>No {project} SLA Data</div>
+              <div key={project}>Nu există date SLA pentru proiectul {project}</div>
             )
           ),
         ]}

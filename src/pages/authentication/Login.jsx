@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, User, Lock, ArrowRight } from 'lucide-react';
+import { Eye, EyeOff, User, Lock, ArrowRight, Building } from 'lucide-react';
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -30,66 +30,66 @@ const Login = () => {
         navigate('/home');
       } else {
         alert(data.error || 'Login failed');
+        setError(data.error || 'Login failed');
       }
     } catch (err) {
       alert('Network error');
+      setError('Network error');
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col lg:flex-row">
-      <div className="bg-blue-800 lg:w-1/3 p-6 flex flex-col justify-between">
-        <div>
-          <div className="flex items-center mb-12">
-            <span className="text-white text-6xl font-bold">Dash</span>
-            <span className="text-red-400 text-5xl font-bold">ly</span>
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-slate-900 dark:to-indigo-950 transition-all duration-700 relative overflow-hidden">
+      <div className="absolute -top-40 -right-40 w-72 h-72 sm:w-96 sm:h-96 bg-gradient-to-br from-blue-400/10 to-purple-600/10 dark:from-blue-400/15 dark:to-purple-600/15 rounded-full blur-3xl opacity-60 pointer-events-none animate-pulse-slow"></div>
+      <div className="absolute -bottom-40 -left-40 w-72 h-72 sm:w-96 sm:h-96 bg-gradient-to-br from-indigo-400/10 to-pink-600/10 dark:from-indigo-400/15 dark:to-pink-600/15 rounded-full blur-3xl opacity-50 pointer-events-none animate-pulse-slow-delay"></div>
+      <div className="relative z-10 w-full max-w-md">
+        <div className="flex flex-col items-center mb-8">
+          <div className="w-16 h-16 mb-4 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg shadow-blue-500/30 flex items-center justify-center">
+            <Building className="w-8 h-8 text-white" />
           </div>
-          <div className="hidden sm:block">
-            <h1 className="text-2xl font-bold text-white mb-4">
-              Welcome to Dashly's Portal
-            </h1>
-            <p className="text-blue-100 mb-8">
-              Secure your company's tasks — all in one unified view!
-            </p>
-          </div>
+          <h1 className="text-4xl font-bold text-slate-800 dark:text-white">
+            Dash<span className="text-blue-500 dark:text-blue-400">ly</span>
+          </h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-1">
+            Acces securizat la platforma Dashly
+          </p>
         </div>
-        <div className="text-blue-200 text-sm pt-2">
-          <p>Join us in revolutionizing ticket management.</p>
-          <p>© 2025 AfriValley Corporation.</p>
-        </div>
-      </div>
 
-      <div className="lg:w-2/3 flex items-center justify-center p-8">
-        <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-2">Sign In</h2>
-          <p className="text-gray-500 text-sm mb-6">
-            Please enter your credentials to access your account
+        <div className="bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl rounded-2xl shadow-2xl shadow-blue-500/10 dark:shadow-indigo-900/30 p-8 sm:p-10">
+          <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-2 text-center">
+            Autentifică-te în cont
+          </h2>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mb-8 text-center">
+            Bine ai venit! Te rugăm să te autentifici pentru a accesa platforma Dashly.
           </p>
 
           {error && (
-            <div className="bg-red-100 text-red-700 px-4 py-2 rounded mb-4 text-sm">
+            <div className="bg-red-500/10 dark:bg-red-500/20 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg mb-6 text-sm border border-red-500/30 dark:border-red-500/40 text-center">
               {error}
             </div>
           )}
 
-          <form onSubmit={handleLogin} className="space-y-5">
+          <form onSubmit={handleLogin} className="space-y-6">
             <div>
               <label
                 htmlFor="email"
-                className="text-sm text-gray-700 block mb-1"
+                className="text-sm font-semibold text-slate-600 dark:text-slate-300 block mb-1.5"
               >
-                Email
+                Adresă de email
               </label>
-              <div className="flex items-center border border-gray-300 rounded-lg px-3 py-2 focus-within:ring-1">
-                <User size={16} className="text-gray-400 mr-2" />
+              <div className="flex items-center bg-white/80 dark:bg-slate-800/60 border border-slate-300/70 dark:border-slate-700/50 rounded-xl px-4 py-3 focus-within:ring-1 focus-within:ring-purple-500">
+                <User
+                  size={18}
+                  className="text-slate-400 dark:text-slate-500 mr-3"
+                />
                 <input
                   id="email"
                   type="email"
                   value={mail}
                   onChange={(e) => setMail(e.target.value)}
-                  placeholder="Enter your email"
+                  placeholder="you@example.com"
                   required
-                  className="flex-1 bg-transparent outline-none text-gray-800"
+                  className="flex-1 bg-transparent outline-none text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 text-sm"
                 />
               </div>
             </div>
@@ -97,12 +97,15 @@ const Login = () => {
             <div>
               <label
                 htmlFor="password"
-                className="text-sm text-gray-700 block mb-1"
+                className="text-sm font-semibold text-slate-600 dark:text-slate-300 block mb-1.5"
               >
-                Password
+                Parolă
               </label>
-              <div className="flex items-center border border-gray-300 rounded-lg px-3 py-2 focus-within:ring-1">
-                <Lock size={16} className="text-gray-400 mr-2" />
+              <div className="flex items-center bg-white/80 dark:bg-slate-800/60 border border-slate-300/70 dark:border-slate-700/50 rounded-xl px-4 py-3 focus-within:ring-1 focus-within:ring-purple-500">
+                <Lock
+                  size={18}
+                  className="text-slate-400 dark:text-slate-500 mr-3"
+                />
                 <input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
@@ -110,40 +113,52 @@ const Login = () => {
                   onChange={(e) => setParola(e.target.value)}
                   placeholder="Enter your password"
                   required
-                  className="flex-1 bg-transparent outline-none text-gray-800"
+                  className="flex-1 bg-transparent outline-none text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 text-sm"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 ml-2"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  {showPassword ? (
+                    <EyeOff size={18} />
+                  ) : (
+                    <Eye size={18} />
+                  )}
                 </button>
               </div>
             </div>
 
             <button
               type="submit"
-              className="w-full bg-blue-700 text-white py-2 px-4 rounded-lg hover:bg-blue-800 flex items-center justify-center"
+              className="w-full group relative overflow-hidden px-6 py-3.5 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 transition-all duration-300 transform hover:scale-[1.02] focus:outline-none focus:ring-4 focus:ring-blue-500/50 flex items-center justify-center text-sm"
             >
-              <span>Sign In</span>
-              <ArrowRight size={16} className="ml-2" />
+              <span className="relative z-10">Sign In</span>
+              <ArrowRight
+                size={18}
+                className="ml-2 relative z-10 transition-transform duration-300 group-hover:translate-x-1"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 transform -skew-x-12 translate-x-full group-hover:translate-x-0 transition-transform duration-700 opacity-50 group-hover:opacity-100"></div>
             </button>
           </form>
 
-          <div className="text-center mt-6 text-sm">
-            <p className="text-gray-600">
-              Don’t have an account?
+          <div className="text-center mt-8 text-sm">
+            <p className="text-slate-600 dark:text-slate-400">
+              Nu ai un cont?{' '}
               <Link
                 to="/register"
-                className="text-blue-700 font-medium ml-1 hover:underline"
+                className="text-purple-600 dark:text-purple-400 font-medium ml-1 hover:text-purple-800"
               >
-                Request Access
+                Înregistrează-te
               </Link>
             </p>
           </div>
         </div>
       </div>
+      <footer className="absolute bottom-6 text-center w-full text-xs text-slate-500 dark:text-slate-400 z-0">
+        © {new Date().getFullYear()} Dashly Corporation. All rights reserved.
+      </footer>
     </div>
   );
 };

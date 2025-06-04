@@ -1,37 +1,35 @@
-import React from 'react';
-
 const AuditTable = ({ logs = [] }) => {
   return (
     <div className="bg-gray-100 p-4 rounded-lg shadow-md mt-4">
-      <h2 className="text-xl font-semibold mb-4">Audit Logs</h2>
+      <h2 className="text-xl font-semibold mb-4">Jurnal Audit</h2>
       <div className="overflow-x-auto">
         <div className="flex bg-gray-200 text-gray-600 uppercase text-sm border border-gray-300 rounded-lg">
           <div className="flex-none w-12 py-2 px-4 border border-gray-300 font-semibold">
             #
           </div>
           <div className="flex-1 py-2 px-4 border border-gray-300 font-semibold">
-            Timestamp
+            Data și ora
           </div>
           <div className="flex-1 py-2 px-4 border border-gray-300 font-semibold">
-            User
+            Utilizator
           </div>
           <div className="flex-1 py-2 px-4 border border-gray-300 font-semibold">
-            Project
+            Proiect
           </div>
           <div className="flex-1 py-2 px-4 border border-gray-300 font-semibold">
-            Team
+            Echipă
           </div>
           <div className="flex-1 py-2 px-4 border border-gray-300 font-semibold">
-            Ticket
+            Tichet
           </div>
           <div className="flex-1 py-2 px-4 border border-gray-300 font-semibold">
-            Action
+            Acțiune
           </div>
           <div className="flex-1 py-2 px-4 border border-gray-300 font-semibold">
-            Previous Value
+            Valoare anterioară
           </div>
           <div className="flex-1 py-2 px-4 border border-gray-300 font-semibold">
-            New Value
+            Valoare nouă
           </div>
         </div>
 
@@ -72,7 +70,7 @@ const AuditTable = ({ logs = [] }) => {
           ))
         ) : (
           <div className="flex justify-center items-center py-4 border border-gray-300 rounded-lg text-gray-500">
-            No audit logs to display.
+            Nu există jurnale de audit de afișat.
           </div>
         )}
       </div>

@@ -1,18 +1,14 @@
-// src/pages/Audit/AuditPage.jsx
-
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import * as XLSX from 'xlsx';
 import AuditTable from '../../components/AuditTable';
 import Pagination from '../../components/ui/Pagination';
 
 export default function AuditPage() {
-  // ─── Table data & pagination ─────────────────────────────────────────────
   const [logs, setLogs] = useState([]);
   const [totalRows, setTotalRows] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const logsPerPage = 7;
 
-  // ─── Filter state ─────────────────────────────────────────────────────────
   const [teamId, setTeamId] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
@@ -20,13 +16,11 @@ export default function AuditPage() {
   const [userId, setUserId] = useState('');
   const [ticketId, setTicketId] = useState('');
 
-  // ─── Dropdown options (fetched from server) ───────────────────────────────
   const [teams, setTeams] = useState([]);
   const [projects, setProjects] = useState([]);
   const [users, setUsers] = useState([]);
   const [tickets, setTickets] = useState([]);
 
-  // ─── 1) Fetch Projects on mount ─────────────────────────────────────────────
   useEffect(() => {
     const token = localStorage.getItem('token');
     const headers = { Authorization: `Bearer ${token}` };
@@ -40,7 +34,6 @@ export default function AuditPage() {
       .catch(() => setProjects([]));
   }, []);
 
-  // ─── 2) Fetch Teams whenever projectId changes ──────────────────────────────
   useEffect(() => {
     const token = localStorage.getItem('token');
     const headers = { Authorization: `Bearer ${token}` };
@@ -51,7 +44,7 @@ export default function AuditPage() {
       .then((data) => {
         if (data.success) {
           setTeams(data.rows);
-          setTeamId(''); // clear previously selected team
+          setTeamId('');
         } else {
           setTeams([]);
         }
@@ -59,13 +52,11 @@ export default function AuditPage() {
       .catch(() => setTeams([]));
   }, [projectId]);
 
-  // ─── 3) Fetch Users & Tickets whenever projectId changes ───────────────────
   useEffect(() => {
     const token = localStorage.getItem('token');
     const headers = { Authorization: `Bearer ${token}` };
     const qs = projectId ? `?project_id=${projectId}` : '';
 
-    // Fetch users
     fetch(`http://localhost/get_users.php${qs}`, { headers })
       .then((res) => res.json())
       .then((data) => {
@@ -74,7 +65,6 @@ export default function AuditPage() {
       })
       .catch(() => setUsers([]));
 
-    // Fetch tickets
     fetch(`http://localhost/get_tickets.php${qs}`, { headers })
       .then((res) => res.json())
       .then((data) => {
@@ -84,7 +74,6 @@ export default function AuditPage() {
       .catch(() => setTickets([]));
   }, [projectId]);
 
-  // ─── 4) Fetch Audit Logs whenever any filter or page changes ───────────────
   useEffect(() => {
     const params = new URLSearchParams({
       page: currentPage,
@@ -111,7 +100,7 @@ export default function AuditPage() {
             user: row.nume_utilizator,
             project: row.provider,
             echipa: row.echipa,
-            entity: row.ticket_id ?? `Ticket #${row.id_ticket}`,
+            entity: row.ticket_id ?? `Tichet #${row.id_ticket}`,
             actiune: row.actiune,
             previousValue: row.stare_trecuta ?? '-',
             newValue: row.stare_curenta ?? '-',
@@ -129,7 +118,6 @@ export default function AuditPage() {
       });
   }, [currentPage, teamId, startDate, endDate, projectId, userId, ticketId]);
 
-  // ─── 5) Export all filtered logs to Excel ─────────────────────────────────
   const exportToExcel = () => {
     const params = new URLSearchParams({
       page: 1,
@@ -149,43 +137,40 @@ export default function AuditPage() {
       .then((res) => res.json())
       .then((data) => {
         if (!data.success) {
-          throw new Error(data.error || 'Failed to fetch all logs');
+          throw new Error(data.error || 'Nu s-au putut prelua logurile');
         }
         const allRows = data.rows.map((row) => ({
           '#': row.row_number,
-          Timestamp: typeof row.timp === 'object' ? row.timp.date : row.timp,
-          User: row.nume_utilizator,
-          Team: row.echipa,
-          Project: row.provider,
-          Entity: row.ticket_id ?? `Ticket #${row.id_ticket}`,
-          Action: row.actiune,
-          'Previous Value': row.stare_trecuta ?? '-',
-          'New Value': row.stare_curenta ?? '-',
+          'Data/Ora': typeof row.timp === 'object' ? row.timp.date : row.timp,
+          'Utilizator': row.nume_utilizator,
+          'Echipă': row.echipa,
+          'Proiect': row.provider,
+          'Entitate': row.ticket_id ?? `Tichet #${row.id_ticket}`,
+          'Acțiune': row.actiune,
+          'Valoare anterioară': row.stare_trecuta ?? '-',
+          'Valoare nouă': row.stare_curenta ?? '-',
         }));
 
         const ws = XLSX.utils.json_to_sheet(allRows);
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, 'Audit Logs');
-        XLSX.writeFile(wb, 'audit_logs.xlsx');
+        XLSX.utils.book_append_sheet(wb, ws, 'Loguri Audit');
+        XLSX.writeFile(wb, 'loguri_audit.xlsx');
       })
       .catch((err) => {
-        console.error('Export error:', err);
-        alert(err.message || 'Failed to export');
+        console.error('Eroare export:', err);
+        alert(err.message || 'Exportul a eșuat');
       });
   };
 
   const totalPages = Math.ceil(totalRows / logsPerPage);
 
-  // ─── JSX Rendering ────────────────────────────────────────────────────────
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
       <div className="flex-1 p-4">
-        {/* Filters & Export */}
         <div className="max-w-4xl mx-auto bg-white p-4 rounded-lg shadow-md mb-6">
           <div className="flex flex-wrap justify-center gap-4 items-end">
-            {/* Team Dropdown */}
             <div>
-              <label className="block text-sm font-medium">Team</label>
+              <label className="block text-sm font-medium">Echipă</label>
               <select
                 value={teamId}
                 onChange={(e) => {
@@ -194,7 +179,7 @@ export default function AuditPage() {
                 }}
                 className="mt-1 block w-full border-gray-300 rounded-md"
               >
-                <option value="">All</option>
+                <option value="">Toate</option>
                 {teams.map((t) => (
                   <option key={t.id_team} value={t.id_team}>
                     {t.name}
@@ -203,9 +188,8 @@ export default function AuditPage() {
               </select>
             </div>
 
-            {/* Start Date */}
             <div>
-              <label className="block text-sm font-medium">Start Date</label>
+              <label className="block text-sm font-medium">Data început</label>
               <input
                 type="date"
                 value={startDate}
@@ -217,9 +201,8 @@ export default function AuditPage() {
               />
             </div>
 
-            {/* End Date */}
             <div>
-              <label className="block text-sm font-medium">End Date</label>
+              <label className="block text-sm font-medium">Data sfârșit</label>
               <input
                 type="date"
                 value={endDate}
@@ -231,9 +214,8 @@ export default function AuditPage() {
               />
             </div>
 
-            {/* Project Dropdown */}
             <div>
-              <label className="block text-sm font-medium">Project</label>
+              <label className="block text-sm font-medium">Proiect</label>
               <select
                 value={projectId}
                 onChange={(e) => {
@@ -242,7 +224,7 @@ export default function AuditPage() {
                 }}
                 className="mt-1 block w-full border-gray-300 rounded-md"
               >
-                <option value="">All</option>
+                <option value="">Toate</option>
                 {projects.map((p) => (
                   <option key={p.id_project} value={p.id_project}>
                     {p.provider}
@@ -251,9 +233,8 @@ export default function AuditPage() {
               </select>
             </div>
 
-            {/* User Dropdown */}
             <div>
-              <label className="block text-sm font-medium">User</label>
+              <label className="block text-sm font-medium">Utilizator</label>
               <select
                 value={userId}
                 onChange={(e) => {
@@ -262,7 +243,7 @@ export default function AuditPage() {
                 }}
                 className="mt-1 block w-full border-gray-300 rounded-md"
               >
-                <option value="">All</option>
+                <option value="">Toți</option>
                 {users.map((u) => (
                   <option key={u.id_user} value={u.id_user}>
                     {u.nume}
@@ -271,9 +252,8 @@ export default function AuditPage() {
               </select>
             </div>
 
-            {/* Ticket Dropdown */}
             <div>
-              <label className="block text-sm font-medium">Ticket</label>
+              <label className="block text-sm font-medium">Tichet</label>
               <select
                 value={ticketId}
                 onChange={(e) => {
@@ -282,7 +262,7 @@ export default function AuditPage() {
                 }}
                 className="mt-1 block w-full border-gray-300 rounded-md"
               >
-                <option value="">All</option>
+                <option value="">Toate</option>
                 {tickets.map((t) => (
                   <option key={t.id} value={t.id}>
                     {t.ticket_id}
@@ -291,19 +271,17 @@ export default function AuditPage() {
               </select>
             </div>
 
-            {/* Export Button */}
             <div className="self-center">
               <button
                 onClick={exportToExcel}
                 className="mt-6 px-4 py-2 bg-green-600 text-white rounded-md shadow hover:bg-green-700"
               >
-                Generate Excel
+                Generează Excel
               </button>
             </div>
           </div>
         </div>
 
-        {/* Audit Table & Pagination */}
         <AuditTable logs={logs} />
         <Pagination
           currentPage={currentPage}

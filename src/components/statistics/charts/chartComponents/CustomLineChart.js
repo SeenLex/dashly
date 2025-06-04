@@ -35,6 +35,14 @@ const CustomLineChart = ({
     );
   }
 
+  // Function to format dates for XAxis
+  const formatXAxisTick = (tickItem) => {
+    // Assuming tickItem is a date string like 'YYYY-MM-DD' or a Date object
+    const date = new Date(tickItem);
+    // You can customize the date format as needed
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  };
+
   return (
     <div>
       <p className="text-lg font-semibold text-black dark:text-white mb-4 text-center">{title}</p>
@@ -50,13 +58,21 @@ const CustomLineChart = ({
           onClick={() => setTooltipState(!tooltipState)}
         >
           <CartesianGrid strokeDasharray="3 3" stroke="var(--card-border)" />
-          <XAxis dataKey={labelDataKey} stroke="var(--text-color-secondary)" tick={false} />
+          <XAxis
+            dataKey={labelDataKey}
+            stroke="var(--text-color-secondary)"
+            // Use tickFormatter to display formatted dates
+            tickFormatter={formatXAxisTick}
+            // You might want to rotate labels if they overlap, or use interval="preserveStartEnd"
+            // angle={-45} // Example: rotate labels by -45 degrees
+            // textAnchor="end" // Example: align text to the end
+          />
           <YAxis stroke="var(--text-color-secondary)" />
-          <Tooltip 
+          <Tooltip
             trigger="click"
-            active={tooltipState} 
-            labelFormatter={(label) => `${labelName}${label}`} 
-            content={<CustomTooltip buttonCallback={() => setTooltipState(false)} labelName={tooltipLabelName} />} 
+            active={tooltipState}
+            labelFormatter={(label) => `${labelName}${label}`}
+            content={<CustomTooltip buttonCallback={() => setTooltipState(false)} labelName={tooltipLabelName} />}
           />
           <Legend wrapperStyle={{ color: 'black' }} />
           <Area
@@ -82,6 +98,5 @@ const CustomLineChart = ({
     </div>
   );
 };
-
 
 export default CustomLineChart;

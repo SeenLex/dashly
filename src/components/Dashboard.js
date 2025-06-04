@@ -1,5 +1,12 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { ChevronLeft, ChevronRight, Calendar, Filter, Loader2, Download } from 'lucide-react';
+import {
+  ChevronLeft,
+  ChevronRight,
+  Calendar,
+  Filter,
+  Loader2,
+  Download,
+} from 'lucide-react';
 import StatsCards from './StatsCards';
 import TicketList from './TicketList';
 
@@ -42,7 +49,7 @@ export default function Dashboard() {
 
     const headers = {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
     };
 
     // Fetch statistics
@@ -61,7 +68,7 @@ export default function Dashboard() {
         };
 
         // Add only non-empty filters
-        Object.keys(filters).forEach(key => {
+        Object.keys(filters).forEach((key) => {
           if (filters[key] && filters[key].trim() !== '') {
             query[key] = filters[key];
           }
@@ -70,10 +77,13 @@ export default function Dashboard() {
         const queryParams = new URLSearchParams(query).toString();
 
         // Fetch tickets
-        return fetch(`http://localhost/tickets-api/tickets.php?${queryParams}`, {
-          signal: controller.signal,
-          headers,
-        });
+        return fetch(
+          `http://localhost/tickets-api/tickets.php?${queryParams}`,
+          {
+            signal: controller.signal,
+            headers,
+          }
+        );
       })
       .then((res) => {
         if (!res.ok) {
@@ -84,7 +94,9 @@ export default function Dashboard() {
       })
       .then((ticketsData) => {
         setTickets(ticketsData.tickets || []);
-        setTotalPages(Math.ceil((ticketsData.totalCount || 0) / ticketsPerPage));
+        setTotalPages(
+          Math.ceil((ticketsData.totalCount || 0) / ticketsPerPage)
+        );
       })
       .catch((err) => {
         if (err.name !== 'AbortError') {
@@ -103,12 +115,12 @@ export default function Dashboard() {
 
   const handleDeleteTicket = (ticketId) => {
     if (!window.confirm('Sigur dorești să ștergi acest ticket?')) return;
-    
+
     const token = localStorage.getItem('token');
     fetch(`http://localhost/tickets-api/delete_ticket.php?id=${ticketId}`, {
       method: 'DELETE',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
     })
       .then((res) => res.json())
@@ -126,24 +138,24 @@ export default function Dashboard() {
       });
   };
 
-const handleExportTickets = () => {
-  const visibleIds = tickets.map(t => t.ticket_id);
+  const handleExportTickets = () => {
+    const visibleIds = tickets.map((t) => t.ticket_id);
 
-  const form = document.createElement('form');
-  form.method = 'POST';
-  form.action = 'http://localhost/tickets-api/export_tickets.php';
-  form.target = '_blank';
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = 'http://localhost/tickets-api/export_tickets.php';
+    form.target = '_blank';
 
-  const input = document.createElement('input');
-  input.type = 'hidden';
-  input.name = 'ticket_ids';
-  input.value = JSON.stringify(visibleIds);
-  form.appendChild(input);
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'ticket_ids';
+    input.value = JSON.stringify(visibleIds);
+    form.appendChild(input);
 
-  document.body.appendChild(form);
-  form.submit();
-  document.body.removeChild(form);
-};
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+  };
 
   const handlePeriodChange = (p) => {
     setPeriod(p);
@@ -155,40 +167,46 @@ const handleExportTickets = () => {
     setCurrentPage(1);
   };
 
-    const handleDelete = async (id) => {
-    if (!window.confirm("Ești sigur că vrei să ștergi acest ticket?")) return;
+  const handleDelete = async (id) => {
+    if (!window.confirm('Ești sigur că vrei să ștergi acest ticket?')) return;
     try {
-      const response = await fetch(`http://localhost/tickets-api/delete_ticket.php`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id }),
-      });
+      const response = await fetch(
+        `http://localhost/tickets-api/delete_ticket.php`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id }),
+        }
+      );
       const data = await response.json();
       if (!data.error) {
         fetchData();
       } else {
-        alert("Eroare: " + data.error);
+        alert('Eroare: ' + data.error);
       }
     } catch (error) {
-      console.error("Eroare la ștergere:", error);
+      console.error('Eroare la ștergere:', error);
     }
   };
 
   const handleAdd = async (ticketData) => {
     try {
-      const response = await fetch(`http://localhost/tickets-api/create_ticket.php`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(ticketData),
-      });
+      const response = await fetch(
+        `http://localhost/tickets-api/create_ticket.php`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(ticketData),
+        }
+      );
       const data = await response.json();
       if (!data.error) {
         fetchData();
       } else {
-        alert("Eroare la creare: " + data.error);
+        alert('Eroare la creare: ' + data.error);
       }
     } catch (error) {
-      console.error("Eroare la creare ticket:", error);
+      console.error('Eroare la creare ticket:', error);
     }
   };
 
@@ -196,7 +214,7 @@ const handleExportTickets = () => {
   const getPageNumbers = () => {
     const delta = 1;
     const range = [];
-    
+
     if (totalPages <= 7) {
       for (let i = 1; i <= totalPages; i++) {
         range.push(i);
@@ -218,7 +236,7 @@ const handleExportTickets = () => {
         range.push(totalPages);
       }
     }
-    
+
     return range;
   };
 
@@ -228,7 +246,7 @@ const handleExportTickets = () => {
     day: 'Azi',
     week: 'Săptămână',
     month: 'Lună',
-    year: 'An'
+    year: 'An',
   };
 
   return (
@@ -242,7 +260,7 @@ const handleExportTickets = () => {
               Perioada selectată
             </h2>
           </div>
-          
+
           <div className="flex justify-center gap-2">
             {['day', 'week', 'month', 'year'].map((p) => (
               <button
@@ -260,9 +278,7 @@ const handleExportTickets = () => {
           </div>
         </div>
 
-        {role === 'super_admin' ? (
-          <StatsCards stats={stats} />
-        ) : null}
+        {role === 'super_admin' ? <StatsCards stats={stats} /> : null}
 
         {/* Tickets Section */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
@@ -294,14 +310,17 @@ const handleExportTickets = () => {
                              hover:border-gray-400 dark:hover:border-gray-500
                              transition-colors duration-200 cursor-pointer min-w-[70px]"
                   >
-                    {Array.from({ length: Math.min(10, totalPages) }, (_, i) => i + 1).map((num) => (
+                    {Array.from(
+                      { length: Math.min(10, totalPages) },
+                      (_, i) => i + 1
+                    ).map((num) => (
                       <option key={num} value={num}>
                         {num}
                       </option>
                     ))}
                   </select>
                 </div>
-                
+
                 <button
                   onClick={handleExportTickets}
                   disabled={isExporting}
@@ -341,24 +360,25 @@ const handleExportTickets = () => {
                   Nu există tickete
                 </h3>
                 <p className="text-gray-500 dark:text-gray-400">
-                  Nu au fost găsite tickete pentru perioada și filtrele selectate.
+                  Nu au fost găsite tickete pentru perioada și filtrele
+                  selectate.
                 </p>
               </div>
             ) : (
               <div className="space-y-6">
                 <TicketList
-                tickets={tickets}
-                onDelete={handleDelete}
-                fetchData={fetchData}
-                onAdd={handleAdd}
-                filters={filters}
-                setFilters={setFilters}
-                currentPage={currentPage}
-                ticketsPerPage={ticketsPerPage}
-                period={period}
-                totalPages={totalPages}
-                setCurrentPage={setCurrentPage}
-                setTicketsPerPage={setTicketsPerPage}
+                  tickets={tickets}
+                  onDelete={handleDelete}
+                  fetchData={fetchData}
+                  onAdd={handleAdd}
+                  filters={filters}
+                  setFilters={setFilters}
+                  currentPage={currentPage}
+                  ticketsPerPage={ticketsPerPage}
+                  period={period}
+                  totalPages={totalPages}
+                  setCurrentPage={setCurrentPage}
+                  setTicketsPerPage={setTicketsPerPage}
                 />
                 {/* Pagination Controls */}
                 <div className="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
@@ -392,7 +412,9 @@ const handleExportTickets = () => {
                     <div className="flex items-center gap-1">
                       {/* Previous button */}
                       <button
-                        onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                        onClick={() =>
+                          setCurrentPage(Math.max(1, currentPage - 1))
+                        }
                         disabled={currentPage === 1}
                         className="flex items-center justify-center w-10 h-10 rounded-lg border border-gray-300 dark:border-gray-600
                                  bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300
@@ -406,10 +428,15 @@ const handleExportTickets = () => {
 
                       {/* Page numbers */}
                       <div className="flex items-center gap-1 mx-2">
-                        {pageNumbers.map((pageNum, index) => (
+                        {pageNumbers.map((pageNum, index) =>
                           pageNum === '...' ? (
-                            <div key={`ellipsis-${index}`} className="flex items-center justify-center w-10 h-10">
-                              <span className="text-gray-400 dark:text-gray-500">...</span>
+                            <div
+                              key={`ellipsis-${index}`}
+                              className="flex items-center justify-center w-10 h-10"
+                            >
+                              <span className="text-gray-400 dark:text-gray-500">
+                                ...
+                              </span>
                             </div>
                           ) : (
                             <button
@@ -417,22 +444,26 @@ const handleExportTickets = () => {
                               onClick={() => setCurrentPage(pageNum)}
                               className={`flex items-center justify-center w-10 h-10 rounded-lg text-sm font-medium
                                         transition-all duration-200 hover:scale-105 ${
-                                currentPage === pageNum
-                                  ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/25'
-                                  : 'border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
-                              }`}
+                                          currentPage === pageNum
+                                            ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/25'
+                                            : 'border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
+                                        }`}
                               aria-label={`Mergi la pagina ${pageNum}`}
-                              aria-current={currentPage === pageNum ? 'page' : undefined}
+                              aria-current={
+                                currentPage === pageNum ? 'page' : undefined
+                              }
                             >
                               {pageNum}
                             </button>
                           )
-                        ))}
+                        )}
                       </div>
 
                       {/* Next button */}
                       <button
-                        onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                        onClick={() =>
+                          setCurrentPage(Math.min(totalPages, currentPage + 1))
+                        }
                         disabled={currentPage === totalPages}
                         className="flex items-center justify-center w-10 h-10 rounded-lg border border-gray-300 dark:border-gray-600
                                  bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300

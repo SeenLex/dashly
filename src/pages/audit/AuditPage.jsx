@@ -1,18 +1,18 @@
 // src/pages/Audit/AuditPage.jsx
+
 import React, { useState, useEffect } from 'react';
 import * as XLSX from 'xlsx';
 import AuditTable from '../../components/AuditTable';
 import Pagination from '../../components/ui/Pagination';
-import Navbar from '../../components/Navbar';
 
-const AuditPage = () => {
-  // table data & pagination
+export default function AuditPage() {
+  // ─── Table data & pagination ─────────────────────────────────────────────
   const [logs, setLogs] = useState([]);
   const [totalRows, setTotalRows] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const logsPerPage = 7;
 
-  // filters
+  // ─── Filter state ─────────────────────────────────────────────────────────
   const [teamId, setTeamId] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
@@ -20,56 +20,77 @@ const AuditPage = () => {
   const [userId, setUserId] = useState('');
   const [ticketId, setTicketId] = useState('');
 
-  // filter options
+  // ─── Dropdown options (fetched from server) ───────────────────────────────
   const [teams, setTeams] = useState([]);
   const [projects, setProjects] = useState([]);
   const [users, setUsers] = useState([]);
   const [tickets, setTickets] = useState([]);
 
-  // fetch projects and teams on mount
+  // ─── 1) Fetch Projects on mount ─────────────────────────────────────────────
   useEffect(() => {
     const token = localStorage.getItem('token');
     const headers = { Authorization: `Bearer ${token}` };
-    // always fetch teams; endpoint returns only for super-admin
-    fetch('http://localhost/get_teams.php', { headers })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) setTeams(data.rows);
-      })
-      .catch(() => setTeams([]));
+
     fetch('http://localhost/get_projects.php', { headers })
       .then((res) => res.json())
       .then((data) => {
         if (data.success) setProjects(data.rows);
+        else setProjects([]);
       })
       .catch(() => setProjects([]));
   }, []);
 
-  // fetch users & tickets when project filter changes
+  // ─── 2) Fetch Teams whenever projectId changes ──────────────────────────────
   useEffect(() => {
     const token = localStorage.getItem('token');
     const headers = { Authorization: `Bearer ${token}` };
     const qs = projectId ? `?project_id=${projectId}` : '';
+
+    fetch(`http://localhost/get_teams.php${qs}`, { headers })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          setTeams(data.rows);
+          setTeamId(''); // clear previously selected team
+        } else {
+          setTeams([]);
+        }
+      })
+      .catch(() => setTeams([]));
+  }, [projectId]);
+
+  // ─── 3) Fetch Users & Tickets whenever projectId changes ───────────────────
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const headers = { Authorization: `Bearer ${token}` };
+    const qs = projectId ? `?project_id=${projectId}` : '';
+
+    // Fetch users
     fetch(`http://localhost/get_users.php${qs}`, { headers })
       .then((res) => res.json())
       .then((data) => {
         if (data.success) setUsers(data.rows);
+        else setUsers([]);
       })
       .catch(() => setUsers([]));
+
+    // Fetch tickets
     fetch(`http://localhost/get_tickets.php${qs}`, { headers })
       .then((res) => res.json())
       .then((data) => {
         if (data.success) setTickets(data.rows);
+        else setTickets([]);
       })
       .catch(() => setTickets([]));
   }, [projectId]);
 
-  // fetch audits when filters or page change
+  // ─── 4) Fetch Audit Logs whenever any filter or page changes ───────────────
   useEffect(() => {
     const params = new URLSearchParams({
       page: currentPage,
       per_page: logsPerPage,
     });
+
     if (teamId) params.append('team_id', teamId);
     if (startDate) params.append('start_date', startDate);
     if (endDate) params.append('end_date', endDate);
@@ -84,30 +105,35 @@ const AuditPage = () => {
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
-          // map rows to desired shape and update totalRows separately
           const mapped = data.rows.map((row) => ({
             id: row.row_number,
             timestamp: typeof row.timp === 'object' ? row.timp.date : row.timp,
             user: row.nume_utilizator,
             project: row.provider,
             echipa: row.echipa,
-            entity: row.id ?? `Ticket #${row.id_ticket}`,
+            entity: row.ticket_id ?? `Ticket #${row.id_ticket}`,
             actiune: row.actiune,
             previousValue: row.stare_trecuta ?? '-',
             newValue: row.stare_curenta ?? '-',
           }));
           setLogs(mapped);
           setTotalRows(data.total || 0);
+        } else {
+          setLogs([]);
+          setTotalRows(0);
         }
+      })
+      .catch(() => {
+        setLogs([]);
+        setTotalRows(0);
       });
   }, [currentPage, teamId, startDate, endDate, projectId, userId, ticketId]);
 
-  // generate Excel for all filtered logs (not just current page)
+  // ─── 5) Export all filtered logs to Excel ─────────────────────────────────
   const exportToExcel = () => {
-    // Build the same filter params but request all rows (per_page = totalRows)
     const params = new URLSearchParams({
       page: 1,
-      per_page: totalRows || 1, // if totalRows is 0, at least request 1 to avoid per_page=0
+      per_page: totalRows || 1,
     });
     if (teamId) params.append('team_id', teamId);
     if (startDate) params.append('start_date', startDate);
@@ -125,14 +151,13 @@ const AuditPage = () => {
         if (!data.success) {
           throw new Error(data.error || 'Failed to fetch all logs');
         }
-        // Transform allRows using the same mapping logic
         const allRows = data.rows.map((row) => ({
           '#': row.row_number,
           Timestamp: typeof row.timp === 'object' ? row.timp.date : row.timp,
           User: row.nume_utilizator,
           Team: row.echipa,
           Project: row.provider,
-          Entity: row.id ?? `Ticket #${row.id_ticket}`,
+          Entity: row.ticket_id ?? `Ticket #${row.id_ticket}`,
           Action: row.actiune,
           'Previous Value': row.stare_trecuta ?? '-',
           'New Value': row.stare_curenta ?? '-',
@@ -151,34 +176,34 @@ const AuditPage = () => {
 
   const totalPages = Math.ceil(totalRows / logsPerPage);
 
+  // ─── JSX Rendering ────────────────────────────────────────────────────────
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
-      <Navbar />
       <div className="flex-1 p-4">
         {/* Filters & Export */}
         <div className="max-w-4xl mx-auto bg-white p-4 rounded-lg shadow-md mb-6">
           <div className="flex flex-wrap justify-center gap-4 items-end">
-            {teams.length > 0 && (
-              <div>
-                <label className="block text-sm font-medium">Team</label>
-                <select
-                  value={teamId}
-                  onChange={(e) => {
-                    setTeamId(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  className="mt-1 block w-full border-gray-300 rounded-md"
-                >
-                  <option value="">All</option>
-                  {teams.map((t) => (
-                    <option key={t.id_team} value={t.id_team}>
-                      {t.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
+            {/* Team Dropdown */}
+            <div>
+              <label className="block text-sm font-medium">Team</label>
+              <select
+                value={teamId}
+                onChange={(e) => {
+                  setTeamId(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="mt-1 block w-full border-gray-300 rounded-md"
+              >
+                <option value="">All</option>
+                {teams.map((t) => (
+                  <option key={t.id_team} value={t.id_team}>
+                    {t.name}
+                  </option>
+                ))}
+              </select>
+            </div>
 
+            {/* Start Date */}
             <div>
               <label className="block text-sm font-medium">Start Date</label>
               <input
@@ -192,6 +217,7 @@ const AuditPage = () => {
               />
             </div>
 
+            {/* End Date */}
             <div>
               <label className="block text-sm font-medium">End Date</label>
               <input
@@ -205,6 +231,7 @@ const AuditPage = () => {
               />
             </div>
 
+            {/* Project Dropdown */}
             <div>
               <label className="block text-sm font-medium">Project</label>
               <select
@@ -224,6 +251,7 @@ const AuditPage = () => {
               </select>
             </div>
 
+            {/* User Dropdown */}
             <div>
               <label className="block text-sm font-medium">User</label>
               <select
@@ -243,6 +271,7 @@ const AuditPage = () => {
               </select>
             </div>
 
+            {/* Ticket Dropdown */}
             <div>
               <label className="block text-sm font-medium">Ticket</label>
               <select
@@ -256,12 +285,13 @@ const AuditPage = () => {
                 <option value="">All</option>
                 {tickets.map((t) => (
                   <option key={t.id} value={t.id}>
-                    {t.id || `#${t.id}`}
+                    {t.ticket_id}
                   </option>
                 ))}
               </select>
             </div>
 
+            {/* Export Button */}
             <div className="self-center">
               <button
                 onClick={exportToExcel}
@@ -273,6 +303,7 @@ const AuditPage = () => {
           </div>
         </div>
 
+        {/* Audit Table & Pagination */}
         <AuditTable logs={logs} />
         <Pagination
           currentPage={currentPage}
@@ -282,6 +313,4 @@ const AuditPage = () => {
       </div>
     </div>
   );
-};
-
-export default AuditPage;
+}

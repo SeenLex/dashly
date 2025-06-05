@@ -16,7 +16,7 @@ function Filters({ filters, setFilters, allValues, isLineChart = false }) {
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         <Filter
-          labelTitle="Team created by:"
+          labelTitle="Echipă creată de:"
           value={filters.team_created_by_name}
           onChangeCallback={(e) =>
             setFilters({ ...filters, team_created_by_name: e.target.value })
@@ -25,7 +25,7 @@ function Filters({ filters, setFilters, allValues, isLineChart = false }) {
         />
 
         {!isLineChart && <Filter
-          labelTitle="Team assigned to:"
+          labelTitle="Echipă atribuită:"
           value={filters.team_assigned_person_name}
           onChangeCallback={(e) =>
             setFilters({ ...filters, team_assigned_person_name: e.target.value })
@@ -35,7 +35,7 @@ function Filters({ filters, setFilters, allValues, isLineChart = false }) {
 
 
         <Filter
-          labelTitle="Priority:"
+          labelTitle="Prioritate:"
           value={filters.priority}
           onChangeCallback={(e) =>
             setFilters({ ...filters, priority: e.target.value })
@@ -44,7 +44,7 @@ function Filters({ filters, setFilters, allValues, isLineChart = false }) {
         />
 
         {!isLineChart && <Filter
-          labelTitle="Project:"
+          labelTitle="Proiect:"
           value={filters.project}
           onChangeCallback={(e) =>
             setFilters({ ...filters, project: e.target.value })
@@ -62,7 +62,7 @@ function Filters({ filters, setFilters, allValues, isLineChart = false }) {
         />
 
         <Filter
-          labelTitle="SLA Status:"
+          labelTitle="Status SLA:"
           value={filters.slaStatus}
           onChangeCallback={(e) =>
             setFilters({ ...filters, slaStatus: e.target.value })
@@ -71,7 +71,7 @@ function Filters({ filters, setFilters, allValues, isLineChart = false }) {
         />
 
         <Filter
-          labelTitle="SLA Type:"
+          labelTitle="Tip SLA:"
           value={filters.sla}
           onChangeCallback={(e) =>
             setFilters({ ...filters, sla: e.target.value })
@@ -83,7 +83,7 @@ function Filters({ filters, setFilters, allValues, isLineChart = false }) {
       {/* Date Filters */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Filter
-          labelTitle="Assigned from:"
+          labelTitle="Alocat începând cu data:"
           type="date"
           value={filters.startDate}
           onChangeCallback={(e) =>
@@ -92,7 +92,7 @@ function Filters({ filters, setFilters, allValues, isLineChart = false }) {
         />
 
         <Filter
-          labelTitle="Assigned to:"
+          labelTitle="Alocat până la data:"
           type="date"
           value={filters.endDate}
           onChangeCallback={(e) =>
@@ -119,7 +119,7 @@ function Filters({ filters, setFilters, allValues, isLineChart = false }) {
           }}
           className="custom-button custom-button-inactive"
         >
-          Clear Filters
+          Șterge filtrele
         </button>
       </div>
     </div>

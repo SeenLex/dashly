@@ -84,7 +84,7 @@ function LineChartSection({ filters }) {
       .catch((err) => console.error("Error:", err));
   }, [filters]);
 
-  // Export functions with pre-processing to fix CSV output
+
   const exportDailyTrend = () => {
     exportTicketsPerDayToCSV({
       title: "Trend_Tichete_Zilnic",

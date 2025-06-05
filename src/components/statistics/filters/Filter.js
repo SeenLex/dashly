@@ -14,7 +14,7 @@ function Filter({ labelTitle, value, onChangeCallback, allValues, type = "select
           onChange={onChangeCallback}
           className="custom-select-field"
         >
-          <option value="">All</option>
+          <option value="">Toate</option>
           {safeValues.map((v) => (
             <option key={v} value={v} className="bg-blue-100 dark:bg-gray-700 text-black dark:text-white">
               {v}

@@ -1,23 +1,26 @@
 import { useRef } from "react";
+import {exportTooltipTicketsToCSV} from "../exportCSV"
 
 function ticketItem(ticket) {
   return <li
-    key={ticket.id}
+    key={ticket.id} 
     style={{
       padding: "10px",
       backgroundColor: "#f9f9f9",
       borderRadius: "6px",
-      borderLeft: `3px solid ${ticket.priority === "High"
+
+      borderLeft: `3px solid ${ticket.priority_name === "High"
         ? "orange"
-        : ticket.priority === "Medium"
+        : ticket.priority_name === "Medium"
           ? "#ffd84d"
-          : ticket.priority === "Low"
+          : ticket.priority_name === "Low"
             ? "blue"
-            : "red"
+            : "red" 
         }`,
       marginBottom: "20px"
     }}
   >
+    
     <div
       style={{
         display: "grid",
@@ -27,17 +30,19 @@ function ticketItem(ticket) {
       }}
     >
       <span style={{ color: "#666", fontWeight: 500 }}>ID:</span>
-      <span>{ticket.ticket_id}</span>
+      <span>{ticket.ticket_id ?? 'N/A'}</span> 
 
       <span style={{ color: "#666", fontWeight: 500 }}>
         Project:
       </span>
-      <span>{ticket.project || "N/A"}</span>
+     
+      <span>{ticket.project_name ?? "N/A"}</span>
 
       <span style={{ color: "#666", fontWeight: 500 }}>
         Priority:
       </span>
-      <span>{ticket.priority || "N/A"}</span>
+   
+      <span>{ticket.priority_name ?? "N/A"}</span>
 
       <span style={{ color: "#666", fontWeight: 500 }}>
         Status:
@@ -49,10 +54,10 @@ function ticketItem(ticket) {
               ? "#4CAF50"
               : ticket.resolution === "Exceeded"
                 ? "#F44336"
-                : "#666",
+                : "#666", 
         }}
       >
-        {ticket.resolution || "Open"}
+        {ticket.status ?? "N/A"}
       </span>
 
       {ticket.response_time && (
@@ -64,116 +69,65 @@ function ticketItem(ticket) {
         </>
       )}
 
-      {ticket.team_assigned_person && (
+      {ticket.team_assigned_person_name && ( 
         <>
           <span style={{ color: "#666", fontWeight: 500 }}>
             Team:
           </span>
-          <span>{ticket.team_assigned_person}</span>
+  
+          <span>{ticket.team_assigned_person_name}</span>
+        </>
+      )}
+     
+      {ticket.team_created_by_name && (
+        <>
+          <span style={{ color: "#666", fontWeight: 500 }}>
+            Created By:
+          </span>
+          <span>{ticket.team_created_by_name}</span>
         </>
       )}
     </div>
   </li>
 }
 
+
 function CustomTooltip({ active, payload, displayLabel, label, showPercentage, coordinate, buttonCallback }) {
   const scrollRef = useRef(null);
   const tooltipWidth = 550;
-  const margin = 400;
+  const margin = 20; 
 
   const x = coordinate?.x || 0;
   const windowWidth = window.innerWidth;
 
-  // Determină dacă tooltipul ar ieși în afara ecranului
+  
   const wouldOverflowRight = x + tooltipWidth + margin > windowWidth;
 
   const leftPosition = wouldOverflowRight
-    ? x - margin
+    ? x - tooltipWidth - margin 
     : x + margin;
   const y = coordinate?.y || 0;
   const windowHeight = window.innerHeight;
-  const tooltipHeight = 0;
-  const wouldOverflowBottom = y + tooltipHeight > windowHeight;
 
-  const topPosition = wouldOverflowBottom
-    ? windowHeight
-    : y;
+  const tooltipHeight = 0;
+
+
+  const wouldOverflowBottom = y + tooltipHeight > windowHeight; 
+
+
+  const topPosition = y;
+
 
   if (!(active && payload && payload.length)) return null;
 
   const data = payload[0].payload || {};
-  const startedTickets = data.startedTickets || []
-  const closedTickets = data.closedTickets || []
-  const metTickets = data.metTickets || []
-  const exceededTickets = data.exceededTickets || []
+
+ 
+  const startedTickets = data.startedTickets || [];
+  const closedTickets = data.closedTickets || [];
+  const metTickets = data.metTickets || [];
+  const exceededTickets = data.exceededTickets || [];
   const tickets = data.tickets || [];
-  // const value = data.count || data[payload[0].dataKey] || 0;
-  // const percentage = data.perc || 0;
-  // const metCount = tickets.filter((t) => t.resolution === "Met").length;
-  // const inProgressCount = tickets.filter(
-  //   (t) => t.resolution === "In Progress"
-  // ).length;
-  // const exceededCount = tickets.filter(
-  //   (t) => t.resolution === "Exceeded"
-  // ).length;
-  // const totalCount = tickets.length;
-  // const topMargin = 200
-
-  const projects = {};
-  tickets.forEach((ticket) => {
-    const project = ticket.project || "N/A";
-    if (!projects[project]) {
-      projects[project] = {
-        count: 0,
-        met: 0,
-        exceeded: 0,
-        open: 0,
-        responseTimeSum: 0,
-        tickets: [],
-      };
-    }
-    projects[project].count++;
-    if (ticket.resolution === "Met") projects[project].met++;
-    else if (ticket.resolution === "Exceeded") projects[project].exceeded++;
-    else projects[project].open++;
-
-    if (ticket.response_time) {
-      projects[project].responseTimeSum += ticket.response_time;
-    }
-    projects[project].tickets.push(ticket);
-  });
-
-
-  // const projectsWithSla = Object.entries(projects).map(([project, stats]) => {
-  //   const avgResponseTime =
-  //     stats.count > 0 ? (stats.responseTimeSum / stats.count).toFixed(2) : 0;
-  //   const slaCompliance =
-  //     stats.count > 0 ? Math.round((stats.met / stats.count) * 100) : 0;
-
-  //   return {
-  //     project,
-  //     ...stats,
-  //     avgResponseTime,
-  //     slaCompliance,
-  //   };
-  // });
-
-  // const handleWheel = (e) => {
-  //   const el = scrollRef.current;
-  //   if (!el) return;
-
-  //   const { scrollTop, scrollHeight, clientHeight } = el;
-  //   const delta = e.deltaY;
-
-  //   if (
-  //     (delta > 0 && scrollTop + clientHeight >= scrollHeight) ||
-  //     (delta < 0 && scrollTop <= 0)
-  //   ) {
-  //     //e.preventDefault();
-  //   }
-  //   e.stopPropagation();
-  // };
-
   return (
     <div
       ref={scrollRef}
@@ -190,7 +144,7 @@ function CustomTooltip({ active, payload, displayLabel, label, showPercentage, c
         borderRadius: "8px",
         fontSize: "14px",
         width: `${tooltipWidth}px`,
-        maxHeight: "700px",
+        maxHeight: "700px", 
         boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
         backdropFilter: "blur(4px)",
         display: "flex",
@@ -199,9 +153,8 @@ function CustomTooltip({ active, payload, displayLabel, label, showPercentage, c
         transform: "scale(1)",
         transition: "transform 0.3s ease-in-out",
       }}
-    //onWheel={handleWheel}
     >
-      {/* Header Section */}
+    
       <div
         style={{
           borderBottom: "1px solid #f0f0f0",
@@ -220,127 +173,45 @@ function CustomTooltip({ active, payload, displayLabel, label, showPercentage, c
           >
             {displayLabel}{" "}{label ?? payload[0].name ?? ""}
           </p>
-          <button style={{ fontWeight: "bold", fontSize: "16px", color: "red" }} onClick={() => { buttonCallback() }}>X</button>
+          <button style={{ fontWeight: "bold", fontSize: "16px", color: "red", cursor: "pointer", background: "none", border: "none" }} onClick={() => { buttonCallback() }}>X</button>
         </div>
       </div>
+<button
+  className="bg-green-600 text-white px-3 py-1 rounded text-sm"
+  onClick={() => {
+ 
+    let name = displayLabel || "Tickets";
+    if (label) {
+      name += ` ${label}`;
+    } else if (payload[0]?.name) {
+      name += ` ${payload[0].name}`;
+    }
+    
+    const safeFilename = name
+      .replace(/[\\/:*?"<>|]/g, "")
+      .trim() + ".csv";
 
-      {/* Afișăm întotdeauna cele 3 stări */}
-      {/* <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "auto auto",
-            gap: "8px",
-            marginTop: "4px",
-          }}
-        >
-          <p style={{ margin: 0, color: "#4CAF50" }}>
-            <strong>Met:</strong> {metCount}
-          </p>
-          <p style={{ margin: 0, color: "#FF9800" }}>
-            <strong>In Progress:</strong> {inProgressCount}
-          </p>
-          <p style={{ margin: 0, color: "#F44336" }}>
-            <strong>Exceeded:</strong> {exceededCount}
-          </p>
-          <p style={{ margin: 0, color: "#666" }}>
-            <strong>Total:</strong> {totalCount}
-          </p>
-        </div>
-      </div> */}
+    exportTooltipTicketsToCSV({
+      tickets,
+      startedTickets,
+      closedTickets,
+      metTickets,
+      exceededTickets,
+      filename: safeFilename
+    });
+  }}
+>
+  Descarcă CSV
+</button>
 
-      {/* Projects Summary Section with SLA Details */}
-      {/* {projectsWithSla.length > 0 && (
-        <div style={{ marginBottom: "8px" }}>
-          <p
-            style={{
-              fontWeight: 500,
-              margin: "0 0 6px 0",
-              color: "#444",
-            }}
-          >
-            Projects Summary (SLA Metrics):
-          </p>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr auto auto auto auto",
-              gap: "8px 12px",
-              fontSize: "13px",
-              overflowX: "auto",
-            }}
-          >
-            <span style={{ fontWeight: 500, color: "#666" }}>Project</span>
-            <span
-              style={{ fontWeight: 500, color: "#666", textAlign: "right" }}
-            >
-              Total
-            </span>
-            <span
-              style={{ fontWeight: 500, color: "#4CAF50", textAlign: "right" }}
-            >
-              Met
-            </span>
-            <span
-              style={{ fontWeight: 500, color: "#F44336", textAlign: "right" }}
-            >
-              Exceeded
-            </span>
-            <span
-              style={{ fontWeight: 500, color: "#666", textAlign: "right" }}
-            >
-              Avg Time
-            </span>
 
-            {projectsWithSla.map(
-              ({
-                project,
-                count,
-                met,
-                exceeded,
-                avgResponseTime,
-                slaCompliance,
-              }) => (
-                <React.Fragment key={project}>
-                  <span>{project}</span>
-                  <span style={{ textAlign: "right" }}>{count}</span>
-                  <span style={{ textAlign: "right", color: "#4CAF50" }}>
-                    {met}
-                  </span>
-                  <span style={{ textAlign: "right", color: "#F44336" }}>
-                    {exceeded}
-                  </span>
-                  <span style={{ textAlign: "right" }}>
-                    {avgResponseTime}h
-                    <br />
-                    <span
-                      style={{
-                        color:
-                          slaCompliance >= 90
-                            ? "#4CAF50"
-                            : slaCompliance >= 75
-                              ? "#FF9800"
-                              : "#F44336",
-                        fontSize: "12px",
-                      }}
-                    >
-                      ({slaCompliance}%)
-                    </span>
-                  </span>
-                </React.Fragment>
-              )
-            )}
-          </div>
-        </div>
-      )} */}
-
-      {/* Tickets List Section */}
-      {startedTickets.length > 0 || closedTickets.length > 0 || tickets.length > 0 || metTickets.length > 0 || exceededTickets.length > 0 ? (
+     
+      {tickets.length > 0 || startedTickets.length > 0 || closedTickets.length > 0 || metTickets.length > 0 || exceededTickets.length > 0 ? (
         <div
           ref={scrollRef}
-          //onWheel={handleWheel}
           style={{
             overflowY: "auto",
-            maxHeight: "600px",
+            maxHeight: "600px", 
             scrollbarWidth: "thin",
             paddingRight: "4px",
           }}
@@ -355,51 +226,51 @@ function CustomTooltip({ active, payload, displayLabel, label, showPercentage, c
               gap: "8px",
             }}
           >
-            {tickets.length ?
-              (tickets.map((ticket) => (
+            
+            {tickets.length > 0 ? (
+              tickets.map((ticket) => (
+                
                 ticketItem(ticket)
-              )))
-              :
-              (startedTickets.length || closedTickets.length ?
-                (<>
-                  {startedTickets.length ?
-                    <div>
-                      <p className="text-md font-bold" style={{ marginBottom: "20px" }}>Started tickets:</p>
-                      {startedTickets.map((ticket) => (
-                        ticketItem(ticket)
-                      ))}
-                    </div> : <></>}
-                  {closedTickets.length ?
-                    <div>
-                      <p className="text-md font-bold" style={{ marginBottom: "20px" }}>Closed tickets:</p>
-                      {closedTickets.map((ticket) => (
-                        ticketItem(ticket)
-                      ))}
-                    </div>
-                    : <></>}
-                </>
-                ) : (
-                  metTickets.length || exceededTickets.length ? (<>
-                    {metTickets.length ?
-                      <div>
-                        <p className="text-md font-bold" style={{ marginBottom: "20px" }}>Met SLA tickets:</p>
-                        {metTickets.map((ticket) => (
-                          ticketItem(ticket)
-                        ))}
-                      </div> : <></>}
-                    {exceededTickets.length ?
-                      <div>
-                        <p className="text-md font-bold" style={{ marginBottom: "20px" }}>Exceeded SLA tickets:</p>
-                        {exceededTickets.map((ticket) => (
-                          ticketItem(ticket)
-                        ))}
-                      </div>
-                      : <></>}
-                  </>
-                  )
-                    : <></>
-                )
-              )
+              ))
+            ) : (startedTickets.length > 0 || closedTickets.length > 0) ? (
+              <>
+                {startedTickets.length > 0 && (
+                  <div>
+                    <p className="text-md font-bold" style={{ marginBottom: "20px" }}>Started tickets:</p>
+                    {startedTickets.map((ticket) => (
+                      ticketItem(ticket)
+                    ))}
+                  </div>
+                )}
+                {closedTickets.length > 0 && (
+                  <div>
+                    <p className="text-md font-bold" style={{ marginBottom: "20px" }}>Closed tickets:</p>
+                    {closedTickets.map((ticket) => (
+                      ticketItem(ticket)
+                    ))}
+                  </div>
+                )}
+              </>
+            ) : (metTickets.length > 0 || exceededTickets.length > 0) ? (
+              <>
+                {metTickets.length > 0 && (
+                  <div>
+                    <p className="text-md font-bold" style={{ marginBottom: "20px" }}>Met SLA tickets:</p>
+                    {metTickets.map((ticket) => (
+                      ticketItem(ticket)
+                    ))}
+                  </div>
+                )}
+                {exceededTickets.length > 0 && (
+                  <div>
+                    <p className="text-md font-bold" style={{ marginBottom: "20px" }}>Exceeded SLA tickets:</p>
+                    {exceededTickets.map((ticket) => (
+                      ticketItem(ticket)
+                    ))}
+                  </div>
+                )}
+              </>
+            ) : null 
             }
           </ul>
         </div>

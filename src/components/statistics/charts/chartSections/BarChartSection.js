@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import CustomBarChart from "../chartComponents/CustomBarChart.js";
 import CustomHorizontalContainer from "../../customContainers/CustomHorizontalContainer.js";
+import { exportChartSectionToCSV } from '../../exportCSV';
 
 function BarChartSection({ filters }) {
   const [numByPriority, setNumByPriority] = useState([]);
@@ -72,83 +73,205 @@ function BarChartSection({ filters }) {
       .catch((err) => console.error("Error fetching filtered tickets:", err));
   }, [filters]);
 
+  const exportPriorityTickets = () => {
+    exportChartSectionToCSV({
+      title: "Tichete_pe_Prioritate",
+      data: numByPriority,
+      ticketsKey: "tickets"
+    });
+  };
+
+  const exportPrioritySLA = () => {
+    exportChartSectionToCSV({
+      title: "SLA_pe_Prioritate",
+      data: resolutionSLANumByPriority,
+      ticketsKey: "tickets"
+    });
+  };
+
+  const exportTeamSLA = () => {
+    exportChartSectionToCSV({
+      title: "SLA_pe_Echipa",
+      data: resolutionSLANumByTeam,
+      ticketsKey: "tickets"
+    });
+  };
+
+  const exportProjectSLA = () => {
+    exportChartSectionToCSV({
+      title: "SLA_pe_Proiect",
+      data: resolutionSLANumByProject,
+      ticketsKey: "tickets"
+    });
+  };
+
+  const exportTeamSLAStatus = () => {
+  const formattedData = slaStatusByTeam.map(item => ({
+    name: item.name,
+    Met: item.Met,
+    Exceeded: item.Exceeded,
+    "In Progress": item["In Progress"],
+    tickets: item.tickets ? item.tickets.map(t => t.ticket_id).join(", ") : "N/A"
+  }));
+  
+  exportChartSectionToCSV({
+    title: "SLA_Status_pe_Echipa",
+    data: formattedData
+  });
+};
+
+const exportProjectSLAStatus = () => {
+  const formattedData = slaStatusByProject.map(item => ({
+    name: item.name,
+    Met: item.Met,
+    Exceeded: item.Exceeded,
+    "In Progress": item["In Progress"],
+    tickets: item.tickets ? item.tickets.map(t => t.ticket_id).join(", ") : "N/A"
+  }));
+  
+  exportChartSectionToCSV({
+    title: "SLA_Status_pe_Proiect",
+    data: formattedData
+  });
+};
   return (
     <>
       <div style={{ display: "flex", justifyContent: "center" }}>
-         <h1 className="text-2xl font-bold text-black dark:text-white">Bar charts</h1>
+        <h1 className="text-2xl font-bold text-black dark:text-white">
+          Diagrame cu bare
+        </h1>
       </div>
+
       <CustomHorizontalContainer
         components={[
-          // Basic ticket metrics
-          <CustomBarChart
-            key="num-priority"
-            title="Număr de tichete pe prioritate"
-            data={numByPriority}
-            dataKey="count"
-            categoryKey="priority"
-            teamsByCategory={teamsByCategory}
-            showBothValues={true}
-            colors={["#4299e1"]}
-          />,
+          // Grafic 1 cu butonul său
+          <div key="num-priority-container">
+            <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "10px" }}>
+              <button
+                onClick={exportPriorityTickets}
+                className="bg-green-600 text-white px-3 py-1 rounded text-sm"
+              >
+                Descarcă CSV
+              </button>
+            </div>
+            <CustomBarChart
+              title="Număr de tichete pe prioritate"
+              data={numByPriority}
+              dataKey="count"
+              categoryKey="priority"
+              teamsByCategory={teamsByCategory}
+              showBothValues={true}
+              colors={["#4299e1"]}
+            />
+          </div>,
 
-          // SLA resolution metrics
-          <CustomBarChart
-            key="sla-num-priority"
-            title="SLA de rezolvare pe prioritate"
-            data={resolutionSLANumByPriority}
-            dataKey="count"
-            categoryKey="priority"
-            teamsByCategory={teamsByCategory}
-            showBothValues={true}
-            colors={["#4299e1"]}
-          />,
+          // Grafic 2 cu butonul său
+          <div key="sla-num-priority-container">
+            <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "10px" }}>
+              <button
+                onClick={exportPrioritySLA}
+                className="bg-green-600 text-white px-3 py-1 rounded text-sm"
+              >
+                Descarcă CSV
+              </button>
+            </div>
+            <CustomBarChart
+              title="SLA de rezolvare pe prioritate"
+              data={resolutionSLANumByPriority}
+              dataKey="count"
+              categoryKey="priority"
+              teamsByCategory={teamsByCategory}
+              showBothValues={true}
+              colors={["#4299e1"]}
+            />
+          </div>,
 
-          <CustomBarChart
-            key="sla-num-team"
-            title="SLA de rezolvare pe echipă"
-            data={resolutionSLANumByTeam}
-            dataKey="count"
-            categoryKey="team_assigned_person"
-            teamsByCategory={teamsByCategory}
-            showBothValues={true}
-            colors={["#4299e1"]}
-            slaStatusByTeam={slaStatusByTeam}
-          />,
+          // [Restul graficelor cu butoane similare...]
+          // Grafic 3
+          <div key="sla-num-team-container">
+            <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "10px" }}>
+              <button
+                onClick={exportTeamSLA}
+                className="bg-green-600 text-white px-3 py-1 rounded text-sm"
+              >
+                Descarcă CSV
+              </button>
+            </div>
+            <CustomBarChart
+              title="SLA de rezolvare pe echipă"
+              data={resolutionSLANumByTeam}
+              dataKey="count"
+              categoryKey="team_assigned_person"
+              teamsByCategory={teamsByCategory}
+              showBothValues={true}
+              colors={["#4299e1"]}
+              slaStatusByTeam={slaStatusByTeam}
+            />
+          </div>,
 
-          <CustomBarChart
-            key="sla-num-project"
-            title="SLA de rezolvare pe proiect"
-            data={resolutionSLANumByProject}
-            dataKey="count"
-            categoryKey="project"
-            teamsByCategory={teamsByCategory}
-            showBothValues={true}
-            colors={["#4299e1"]}
-            slaStatusByProject={slaStatusByProject}
-          />,
+          // Grafic 4
+          <div key="sla-num-project-container">
+            <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "10px" }}>
+              <button
+                onClick={exportProjectSLA}
+                className="bg-green-600 text-white px-3 py-1 rounded text-sm"
+              >
+                Descarcă CSV
+              </button>
+            </div>
+            <CustomBarChart
+              title="SLA de rezolvare pe proiect"
+              data={resolutionSLANumByProject}
+              dataKey="count"
+              categoryKey="project"
+              teamsByCategory={teamsByCategory}
+              showBothValues={true}
+              colors={["#4299e1"]}
+              slaStatusByProject={slaStatusByProject}
+            />
+          </div>,
 
-          // SLA Compliance charts
-          <CustomBarChart
-            key="sla-team-count"
-            title="Respectarea SLA-ului pe echipă"
-            data={slaStatusByTeam}
-            dataKey={["Met", "In Progress", "Exceeded"]}
-            categoryKey="name"
-            stacked={true}
-            teamsByCategory={teamsByCategory}
-            slaStatusByTeam={slaStatusByTeam}
-          />,
+          // Grafic 5
+          <div key="sla-team-count-container">
+            <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "10px" }}>
+              <button
+                onClick={exportTeamSLAStatus}
+                className="bg-green-600 text-white px-3 py-1 rounded text-sm"
+              >
+                Descarcă CSV
+              </button>
+            </div>
+            <CustomBarChart
+              title="Respectarea SLA-ului pe echipă"
+              data={slaStatusByTeam}
+              dataKey={["Met", "In Progress", "Exceeded"]}
+              categoryKey="name"
+              stacked={true}
+              teamsByCategory={teamsByCategory}
+              slaStatusByTeam={slaStatusByTeam}
+            />
+          </div>,
 
-          <CustomBarChart
-            key="sla-project-count"
-            title="Respectarea SLA-ului pe proiect"
-            data={slaStatusByProject}
-            dataKey={["Met", "In Progress", "Exceeded"]}
-            categoryKey="name"
-            stacked={true}
-            teamsByCategory={teamsByCategory}
-            slaStatusByProject={slaStatusByProject}
-          />,
+          // Grafic 6
+          <div key="sla-project-count-container">
+            <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "10px" }}>
+              <button
+                onClick={exportProjectSLAStatus}
+                className="bg-green-600 text-white px-3 py-1 rounded text-sm"
+              >
+                Descarcă CSV
+              </button>
+            </div>
+            <CustomBarChart
+              title="Respectarea SLA-ului pe proiect"
+              data={slaStatusByProject}
+              dataKey={["Met", "In Progress", "Exceeded"]}
+              categoryKey="name"
+              stacked={true}
+              teamsByCategory={teamsByCategory}
+              slaStatusByProject={slaStatusByProject}
+            />
+          </div>
         ]}
       />
     </>

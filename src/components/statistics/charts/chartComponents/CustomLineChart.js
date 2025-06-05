@@ -92,7 +92,6 @@ const CustomLineChart = ({
               name={secondLabel}
             />
           )}
-          {/* 👇 Add Brush here */}
           <Brush
             dataKey={labelDataKey}
             height={30}

@@ -67,7 +67,7 @@ export default function Home2() {
               : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
           }`}
         >
-          Statistics
+          Statistici
         </button>
 
         {/* Dacă este admin sau superuser, afișează Admin Panel */}

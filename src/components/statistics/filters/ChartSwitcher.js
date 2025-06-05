@@ -61,14 +61,14 @@ function ChartSwitcher() {
             showFilters ? "custom-button-active" : "custom-button-inactive"
           }`}
         >
-          {showFilters ? "Hide Filters" : "Show Filters"}
+          {showFilters ? "Ascunde Filtrele" : "Afișează filtrele"}
         </button>
       </div>
 
       {showFilters && (
         <div className="bg-blue-200 dark:bg-gray-700 border border-gray-600 rounded-lg p-6 mb-6 shadow-inner">
           <h3 className="text-lg font-semibold text-black dark:text-white mb-4">
-            Advanced Filters
+          Filtre
           </h3>
           <Filters
             filters={filters}
@@ -94,7 +94,7 @@ function ChartSwitcher() {
               : "custom-button-inactive"
           }`}
         >
-          Bar Chart
+         Diagramă cu bare
         </button>
         <button
           onClick={() => setChartType("line")}
@@ -104,7 +104,7 @@ function ChartSwitcher() {
               : "custom-button-inactive"
           }`}
         >
-          Line Chart
+          Diagramă liniară
         </button>
         <button
           onClick={() => setChartType("pie")}
@@ -114,7 +114,7 @@ function ChartSwitcher() {
               : "custom-button-inactive"
           }`}
         >
-          Pie Chart
+          Diagramă circulară
         </button>
       </div>
 

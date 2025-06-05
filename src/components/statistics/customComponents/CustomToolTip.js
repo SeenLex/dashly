@@ -1,5 +1,5 @@
 import { useRef } from "react";
-
+import {exportTooltipTicketsToCSV} from "../exportCSV"
 // --- MODIFIED TICKET ITEM FUNCTION ---
 function ticketItem(ticket) {
   return <li
@@ -20,6 +20,7 @@ function ticketItem(ticket) {
       marginBottom: "20px"
     }}
   >
+    
     <div
       style={{
         display: "grid",
@@ -131,7 +132,6 @@ function CustomTooltip({ active, payload, displayLabel, label, showPercentage, c
   const metTickets = data.metTickets || [];
   const exceededTickets = data.exceededTickets || [];
   const tickets = data.tickets || []; // This is the main array from get_tickets_by_priority.php
-
   return (
     <div
       ref={scrollRef}
@@ -180,6 +180,35 @@ function CustomTooltip({ active, payload, displayLabel, label, showPercentage, c
           <button style={{ fontWeight: "bold", fontSize: "16px", color: "red", cursor: "pointer", background: "none", border: "none" }} onClick={() => { buttonCallback() }}>X</button>
         </div>
       </div>
+<button
+  className="bg-green-600 text-white px-3 py-1 rounded text-sm"
+  onClick={() => {
+    // Create a safe filename
+    let name = displayLabel || "Tickets";
+    if (label) {
+      name += ` ${label}`;
+    } else if (payload[0]?.name) {
+      name += ` ${payload[0].name}`;
+    }
+    
+    // Remove invalid filename characters and trim
+    const safeFilename = name
+      .replace(/[\\/:*?"<>|]/g, "")
+      .trim() + ".csv";
+
+    exportTooltipTicketsToCSV({
+      tickets,
+      startedTickets,
+      closedTickets,
+      metTickets,
+      exceededTickets,
+      filename: safeFilename
+    });
+  }}
+>
+  Descarcă CSV
+</button>
+
 
       {/* Tickets List Section */}
       {tickets.length > 0 || startedTickets.length > 0 || closedTickets.length > 0 || metTickets.length > 0 || exceededTickets.length > 0 ? (

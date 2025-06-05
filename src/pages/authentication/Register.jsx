@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Eye,
   EyeOff,
@@ -8,25 +8,30 @@ import {
   Mail,
   ArrowRight,
   UserPlus,
-} from 'lucide-react';
+  Archive, // Added for Project ID
+} from "lucide-react";
 
 const Register = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [form, setForm] = useState({
-    fullName: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
+    fullName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
     isAdmin: false,
+    projectId: "", // Added for admin registration
   });
+  const [error, setError] = useState(""); // For displaying errors
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    setError(""); // Clear previous errors
 
     if (form.password !== form.confirmPassword) {
-      alert('Passwords do not match');
+      alert("Passwords do not match");
+      setError("Passwords do not match");
       return;
     }
 
@@ -34,33 +39,53 @@ const Register = () => {
       mail: form.email,
       parola: form.password,
       nume: form.fullName,
-      id_project: parseInt(form.projectId),
       isAdmin: form.isAdmin,
     };
 
+    if (form.isAdmin) {
+      if (!form.projectId.trim()) {
+        const msg = "Project ID is required for admin registration.";
+        alert(msg);
+        setError(msg);
+        return;
+      }
+      const projectIdParsed = parseInt(form.projectId);
+      if (isNaN(projectIdParsed)) {
+        const msg = "Project ID must be a valid number.";
+        alert(msg);
+        setError(msg);
+        return;
+      }
+      payload.id_project = projectIdParsed;
+    }
+
     try {
-      const res = await fetch('http://localhost/request_register.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("http://localhost/request_register.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
       const data = await res.json();
 
       if (res.ok) {
-        alert('Registration request submitted. Await admin approval.');
-        navigate('/');
+        alert("Registration request submitted. Await admin approval.");
+        navigate("/");
       } else {
-        alert(data.error || 'Registration failed');
+        const errorMsg = data.error || "Registration failed";
+        alert(errorMsg);
+        setError(errorMsg);
       }
     } catch (err) {
       console.error(err);
-      alert('An error occurred. Please try again later.');
+      const errorMsg = "An error occurred. Please try again later.";
+      alert(errorMsg);
+      setError(errorMsg);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-slate-900 dark:to-indigo-950 transition-all duration-700 relative overflow-hidden">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-slate-900 dark:to-indigo-950 transition-all duration-700 relative overflow-hidden">
       <div className="relative z-10 w-full max-w-sm sm:max-w-md">
         <div className="flex flex-col items-center mb-8">
           <div className="w-14 h-14 mb-3 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl shadow-lg flex items-center justify-center">
@@ -74,13 +99,20 @@ const Register = () => {
           </p>
         </div>
 
-        <div className="bg-white dark:bg-slate-800/90 rounded-xl shadow-lg p-7 sm:p-8">
+        <div className="bg-white dark:bg-slate-800/90 rounded-xl shadow-xl p-7 sm:p-8">
           <h2 className="text-xl font-semibold text-slate-700 dark:text-slate-200 mb-1.5 text-left">
             Cerere de Înregistrare
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mb-6 text-left">
-            Completează formularul pentru a solicita accesul la portal. Cererea ta va fi revizuită de un administrator.
+            Completează formularul pentru a solicita accesul la portal. Cererea
+            ta va fi revizuită de un administrator.
           </p>
+
+          {error && (
+            <div className="bg-red-100 dark:bg-red-500/20 border border-red-300 dark:border-red-500/30 text-red-700 dark:text-red-400 px-4 py-2.5 rounded-lg mb-4 text-xs">
+              {error}
+            </div>
+          )}
 
           <form onSubmit={handleRegister} className="space-y-4">
             <div>
@@ -98,11 +130,12 @@ const Register = () => {
                 <input
                   id="fullName"
                   type="text"
-                  placeholder="Enter your full name"
+                  placeholder="Numele tău complet"
                   value={form.fullName}
                   onChange={(e) =>
                     setForm({ ...form, fullName: e.target.value })
                   }
+                  required
                   className="w-full bg-transparent outline-none text-slate-700 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 text-sm"
                 />
               </div>
@@ -126,6 +159,7 @@ const Register = () => {
                   placeholder="you@example.com"
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  required
                   className="w-full bg-transparent outline-none text-slate-700 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 text-sm"
                 />
               </div>
@@ -145,12 +179,13 @@ const Register = () => {
                 />
                 <input
                   id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="Create a strong password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Creează o parolă puternică"
                   value={form.password}
                   onChange={(e) =>
                     setForm({ ...form, password: e.target.value })
                   }
+                  required
                   className="w-full bg-transparent outline-none text-slate-700 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 text-sm"
                 />
                 <button
@@ -159,7 +194,7 @@ const Register = () => {
                     setShowPassword(!showPassword);
                   }}
                   className="text-slate-400 dark:text-slate-500 hover:text-purple-600 dark:hover:text-purple-400 ml-2"
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? (
                     <EyeOff size={16} />
@@ -184,12 +219,13 @@ const Register = () => {
                 />
                 <input
                   id="confirmPassword"
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  placeholder="Re-enter your password"
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="Reintrodu parola"
                   value={form.confirmPassword}
                   onChange={(e) =>
                     setForm({ ...form, confirmPassword: e.target.value })
                   }
+                  required
                   className="w-full bg-transparent outline-none text-slate-700 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 text-sm"
                 />
                 <button
@@ -197,7 +233,7 @@ const Register = () => {
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="text-slate-400 dark:text-slate-500 hover:text-purple-600 dark:hover:text-purple-400 ml-2"
                   aria-label={
-                    showConfirmPassword ? 'Hide password' : 'Show password'
+                    showConfirmPassword ? "Hide password" : "Show password"
                   }
                 >
                   {showConfirmPassword ? (
@@ -209,7 +245,7 @@ const Register = () => {
               </div>
             </div>
 
-            <div className="flex items-center pt-2">
+            <div className="flex items-center pt-1">
               <input
                 id="isAdmin"
                 type="checkbox"
@@ -227,11 +263,39 @@ const Register = () => {
               </label>
             </div>
 
+            {form.isAdmin && (
+              <div>
+                <label
+                  htmlFor="projectId"
+                  className="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1"
+                >
+                  ID Proiect (pentru admin)
+                </label>
+                <div className="flex items-center bg-white dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2.5 focus-within:ring-1 focus-within:ring-purple-500">
+                  <Archive // Using Archive icon for Project ID
+                    size={16}
+                    className="text-slate-400 dark:text-slate-500 mr-2"
+                  />
+                  <input
+                    id="projectId"
+                    type="number" // Changed to number for easier parsing, can be text if IDs are alphanumeric
+                    placeholder="Introdu ID-ul proiectului"
+                    value={form.projectId}
+                    onChange={(e) =>
+                      setForm({ ...form, projectId: e.target.value })
+                    }
+                    required={form.isAdmin} // Required only if isAdmin is checked
+                    className="w-full bg-transparent outline-none text-slate-700 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 text-sm"
+                  />
+                </div>
+              </div>
+            )}
+
             <button
               type="submit"
-              className="w-full group flex items-center justify-center px-6 py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-medium rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 text-sm"
+              className="w-full group flex items-center justify-center px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 text-sm transition-all duration-150"
             >
-              Crează Cont
+              Trimite Cererea
               <ArrowRight
                 size={16}
                 className="ml-1.5 transition-transform duration-200 group-hover:translate-x-1"
@@ -244,7 +308,7 @@ const Register = () => {
               Ai deja un cont?
               <Link
                 to="/"
-                className="text-purple-600 dark:text-purple-400 font-medium ml-1 hover:text-purple-800"
+                className="text-purple-600 dark:text-purple-400 font-medium ml-1 hover:text-purple-700 dark:hover:text-purple-500"
               >
                 Autentifică-te
               </Link>
@@ -259,4 +323,4 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default Register;  

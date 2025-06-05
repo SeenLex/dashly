@@ -1,21 +1,21 @@
 import { useRef } from "react";
 import {exportTooltipTicketsToCSV} from "../exportCSV"
-// --- MODIFIED TICKET ITEM FUNCTION ---
+
 function ticketItem(ticket) {
   return <li
-    key={ticket.id} // Assuming 'id' is still unique and present for the key
+    key={ticket.id} 
     style={{
       padding: "10px",
       backgroundColor: "#f9f9f9",
       borderRadius: "6px",
-      // Use ticket.priority_name for color logic
+
       borderLeft: `3px solid ${ticket.priority_name === "High"
         ? "orange"
         : ticket.priority_name === "Medium"
           ? "#ffd84d"
           : ticket.priority_name === "Low"
             ? "blue"
-            : "red" // Assuming "Critical" or other defaults to red
+            : "red" 
         }`,
       marginBottom: "20px"
     }}
@@ -30,18 +30,18 @@ function ticketItem(ticket) {
       }}
     >
       <span style={{ color: "#666", fontWeight: 500 }}>ID:</span>
-      <span>{ticket.ticket_id ?? 'N/A'}</span> {/* Use nullish coalescing for safety */}
+      <span>{ticket.ticket_id ?? 'N/A'}</span> 
 
       <span style={{ color: "#666", fontWeight: 500 }}>
         Project:
       </span>
-      {/* --- CHANGE HERE: Use project_name --- */}
+     
       <span>{ticket.project_name ?? "N/A"}</span>
 
       <span style={{ color: "#666", fontWeight: 500 }}>
         Priority:
       </span>
-      {/* --- CHANGE HERE: Use priority_name --- */}
+   
       <span>{ticket.priority_name ?? "N/A"}</span>
 
       <span style={{ color: "#666", fontWeight: 500 }}>
@@ -54,7 +54,7 @@ function ticketItem(ticket) {
               ? "#4CAF50"
               : ticket.resolution === "Exceeded"
                 ? "#F44336"
-                : "#666", // Default color for "Open" or other statuses
+                : "#666", 
         }}
       >
         {ticket.status ?? "N/A"}
@@ -69,16 +69,16 @@ function ticketItem(ticket) {
         </>
       )}
 
-      {ticket.team_assigned_person_name && ( // Check for the new name property
+      {ticket.team_assigned_person_name && ( 
         <>
           <span style={{ color: "#666", fontWeight: 500 }}>
             Team:
           </span>
-          {/* --- CHANGE HERE: Use team_assigned_person_name --- */}
+  
           <span>{ticket.team_assigned_person_name}</span>
         </>
       )}
-      {/* If you also want to show the 'Created By' team: */}
+     
       {ticket.team_created_by_name && (
         <>
           <span style={{ color: "#666", fontWeight: 500 }}>
@@ -91,34 +91,30 @@ function ticketItem(ticket) {
   </li>
 }
 
-// --- CustomTooltip component remains largely the same, but now feeds correct data to ticketItem ---
+
 function CustomTooltip({ active, payload, displayLabel, label, showPercentage, coordinate, buttonCallback }) {
   const scrollRef = useRef(null);
   const tooltipWidth = 550;
-  const margin = 20; // Changed from 400 to 20 to reduce the side offset.
+  const margin = 20; 
 
   const x = coordinate?.x || 0;
   const windowWidth = window.innerWidth;
 
-  // Determine if tooltip would overflow right
+  
   const wouldOverflowRight = x + tooltipWidth + margin > windowWidth;
 
   const leftPosition = wouldOverflowRight
-    ? x - tooltipWidth - margin // Adjusted to prevent overflow to the left if it overflows right
+    ? x - tooltipWidth - margin 
     : x + margin;
   const y = coordinate?.y || 0;
   const windowHeight = window.innerHeight;
-  // Estimate tooltip height, or calculate dynamically if needed. For now, assume it expands.
-  // The 'maxHeight' property will control actual height, but for positioning 'tooltipHeight' needs to be somewhat accurate
-  const tooltipHeight = 0; // This value is not used for topPosition calculation directly for dynamic height
 
-  // Check if tooltip would overflow bottom
-  const wouldOverflowBottom = y + tooltipHeight > windowHeight; // This logic might need refinement if tooltipHeight is dynamic
+  const tooltipHeight = 0;
 
-  // For `topPosition`, it's common to place it slightly above or below the cursor.
-  // Given your click-trigger, `y` might be a good starting point.
-  // If `maxHeight` is fixed, you could subtract that if `wouldOverflowBottom` is true.
-  // Let's simplify for now assuming scroll will handle internal overflow, or `maxHeight` prevents external overflow.
+
+  const wouldOverflowBottom = y + tooltipHeight > windowHeight; 
+
+
   const topPosition = y;
 
 
@@ -126,12 +122,12 @@ function CustomTooltip({ active, payload, displayLabel, label, showPercentage, c
 
   const data = payload[0].payload || {};
 
-  // Ensure these properties exist and default to empty arrays if not
+ 
   const startedTickets = data.startedTickets || [];
   const closedTickets = data.closedTickets || [];
   const metTickets = data.metTickets || [];
   const exceededTickets = data.exceededTickets || [];
-  const tickets = data.tickets || []; // This is the main array from get_tickets_by_priority.php
+  const tickets = data.tickets || [];
   return (
     <div
       ref={scrollRef}
@@ -148,7 +144,7 @@ function CustomTooltip({ active, payload, displayLabel, label, showPercentage, c
         borderRadius: "8px",
         fontSize: "14px",
         width: `${tooltipWidth}px`,
-        maxHeight: "700px", // Controls vertical scroll
+        maxHeight: "700px", 
         boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
         backdropFilter: "blur(4px)",
         display: "flex",
@@ -158,7 +154,7 @@ function CustomTooltip({ active, payload, displayLabel, label, showPercentage, c
         transition: "transform 0.3s ease-in-out",
       }}
     >
-      {/* Header Section */}
+    
       <div
         style={{
           borderBottom: "1px solid #f0f0f0",
@@ -183,7 +179,7 @@ function CustomTooltip({ active, payload, displayLabel, label, showPercentage, c
 <button
   className="bg-green-600 text-white px-3 py-1 rounded text-sm"
   onClick={() => {
-    // Create a safe filename
+ 
     let name = displayLabel || "Tickets";
     if (label) {
       name += ` ${label}`;
@@ -191,7 +187,6 @@ function CustomTooltip({ active, payload, displayLabel, label, showPercentage, c
       name += ` ${payload[0].name}`;
     }
     
-    // Remove invalid filename characters and trim
     const safeFilename = name
       .replace(/[\\/:*?"<>|]/g, "")
       .trim() + ".csv";
@@ -210,13 +205,13 @@ function CustomTooltip({ active, payload, displayLabel, label, showPercentage, c
 </button>
 
 
-      {/* Tickets List Section */}
+     
       {tickets.length > 0 || startedTickets.length > 0 || closedTickets.length > 0 || metTickets.length > 0 || exceededTickets.length > 0 ? (
         <div
           ref={scrollRef}
           style={{
             overflowY: "auto",
-            maxHeight: "600px", // Allows scrolling for long lists
+            maxHeight: "600px", 
             scrollbarWidth: "thin",
             paddingRight: "4px",
           }}
@@ -231,10 +226,10 @@ function CustomTooltip({ active, payload, displayLabel, label, showPercentage, c
               gap: "8px",
             }}
           >
-            {/* Logic to render tickets based on which array has data */}
+            
             {tickets.length > 0 ? (
               tickets.map((ticket) => (
-                // Passing the ticket object to the ticketItem function
+                
                 ticketItem(ticket)
               ))
             ) : (startedTickets.length > 0 || closedTickets.length > 0) ? (
@@ -275,7 +270,7 @@ function CustomTooltip({ active, payload, displayLabel, label, showPercentage, c
                   </div>
                 )}
               </>
-            ) : null // Should not reach here if the outer condition is met
+            ) : null 
             }
           </ul>
         </div>

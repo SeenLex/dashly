@@ -1,23 +1,23 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, User, Lock, ArrowRight, Building } from 'lucide-react';
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Eye, EyeOff, User, Lock, ArrowRight, Building } from "lucide-react";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [mail, setMail] = useState('');
-  const [parola, setParola] = useState('');
-  const [error, setError] = useState('');
+  const [mail, setMail] = useState("");
+  const [parola, setParola] = useState("");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
     try {
-      const res = await fetch('http://localhost/login.php', {
-        method: 'POST',
+      const res = await fetch("http://localhost/login.php", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ mail, parola }),
       });
@@ -25,23 +25,28 @@ const Login = () => {
       const data = await res.json();
 
       if (res.ok) {
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('role', data.role);
-        navigate('/home');
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("role", data.role);
+        navigate("/home");
       } else {
-        alert(data.error || 'Login failed');
-        setError(data.error || 'Login failed');
+        const errorMsg = data.error || "Login failed";
+        alert(errorMsg); // Keep alert for immediate user feedback
+        setError(errorMsg);
       }
     } catch (err) {
-      alert('Network error');
-      setError('Network error');
+      console.error("Login error:", err); // Log the actual error
+      const errorMsg = "Network error or server is unreachable.";
+      alert(errorMsg);
+      setError(errorMsg);
     }
   };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-slate-900 dark:to-indigo-950 transition-all duration-700 relative overflow-hidden">
+      {/* Decorative elements are already responsive with sm: prefixes */}
       <div className="absolute -top-40 -right-40 w-72 h-72 sm:w-96 sm:h-96 bg-gradient-to-br from-blue-400/10 to-purple-600/10 dark:from-blue-400/15 dark:to-purple-600/15 rounded-full blur-3xl opacity-60 pointer-events-none animate-pulse-slow"></div>
       <div className="absolute -bottom-40 -left-40 w-72 h-72 sm:w-96 sm:h-96 bg-gradient-to-br from-indigo-400/10 to-pink-600/10 dark:from-indigo-400/15 dark:to-pink-600/15 rounded-full blur-3xl opacity-50 pointer-events-none animate-pulse-slow-delay"></div>
+
       <div className="relative z-10 w-full max-w-md">
         <div className="flex flex-col items-center mb-8">
           <div className="w-16 h-16 mb-4 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg shadow-blue-500/30 flex items-center justify-center">
@@ -50,7 +55,7 @@ const Login = () => {
           <h1 className="text-4xl font-bold text-slate-800 dark:text-white">
             Dash<span className="text-blue-500 dark:text-blue-400">ly</span>
           </h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-1">
+          <p className="text-slate-500 dark:text-slate-400 mt-1 text-center px-2">
             Acces securizat la platforma Dashly
           </p>
         </div>
@@ -60,7 +65,8 @@ const Login = () => {
             Autentifică-te în cont
           </h2>
           <p className="text-slate-500 dark:text-slate-400 text-sm mb-8 text-center">
-            Bine ai venit! Te rugăm să te autentifici pentru a accesa platforma Dashly.
+            Bine ai venit! Te rugăm să te autentifici pentru a accesa platforma
+            Dashly.
           </p>
 
           {error && (
@@ -108,10 +114,10 @@ const Login = () => {
                 />
                 <input
                   id="password"
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   value={parola}
                   onChange={(e) => setParola(e.target.value)}
-                  placeholder="Enter your password"
+                  placeholder="Introdu parola"
                   required
                   className="flex-1 bg-transparent outline-none text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 text-sm"
                 />
@@ -119,7 +125,7 @@ const Login = () => {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 ml-2"
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? (
                     <EyeOff size={18} />
@@ -134,7 +140,7 @@ const Login = () => {
               type="submit"
               className="w-full group relative overflow-hidden px-6 py-3.5 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 transition-all duration-300 transform hover:scale-[1.02] focus:outline-none focus:ring-4 focus:ring-blue-500/50 flex items-center justify-center text-sm"
             >
-              <span className="relative z-10">Sign In</span>
+              <span className="relative z-10">Autentificare</span>
               <ArrowRight
                 size={18}
                 className="ml-2 relative z-10 transition-transform duration-300 group-hover:translate-x-1"
@@ -145,10 +151,10 @@ const Login = () => {
 
           <div className="text-center mt-8 text-sm">
             <p className="text-slate-600 dark:text-slate-400">
-              Nu ai un cont?{' '}
+              Nu ai un cont?{" "}
               <Link
                 to="/register"
-                className="text-purple-600 dark:text-purple-400 font-medium ml-1 hover:text-purple-800"
+                className="text-purple-600 dark:text-purple-400 font-medium ml-1 hover:text-purple-700 dark:hover:text-purple-500"
               >
                 Înregistrează-te
               </Link>

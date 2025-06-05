@@ -96,7 +96,7 @@ const exportSlaData = () => {
                 onClick={exportStatusData}
                 className="bg-green-600 text-white px-3 py-1 rounded text-sm"
               >
-                DEscarcă CSV
+                Descarcă CSV
               </button>
             </div>
             <CustomPieChart
@@ -114,7 +114,7 @@ const exportSlaData = () => {
                 onClick={exportSlaData}
                 className="bg-green-600 text-white px-3 py-1 rounded text-sm"
               >
-                DEscarcă CSV
+                Descarcă CSV
               </button>
             </div>
             <CustomPieChart
@@ -132,7 +132,7 @@ const exportSlaData = () => {
                 onClick={exportPriorityData}
                 className="bg-green-600 text-white px-3 py-1 rounded text-sm"
               >
-                DEscarcă CSV
+                Descarcă CSV
               </button>
             </div>
             <CustomPieChart
@@ -150,7 +150,7 @@ const exportSlaData = () => {
                 onClick={exportTeamAssignedData}
                 className="bg-green-600 text-white px-3 py-1 rounded text-sm"
               >
-                DEscarcă CSV
+                Descarcă CSV
               </button>
             </div>
             <CustomPieChart
@@ -168,7 +168,7 @@ const exportSlaData = () => {
           //       onClick={exportTicketsSLA}
           //       className="bg-green-600 text-white px-3 py-1 rounded text-sm"
           //     >
-          //       DEscarcă CSV
+          //       Descarcă CSV
           //     </button>
           //   </div>
           //   {/* Dacă vrei să afișezi acest grafic, de-comentează */}

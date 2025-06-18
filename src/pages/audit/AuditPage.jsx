@@ -46,7 +46,10 @@ export default function AuditPage() {
           setTeams(data.rows);
           // If the currently selected teamId is not in the new list of teams, reset it.
           // This can happen if the project changes and the old team is not part of the new project.
-          if (teamId && !data.rows.some((t) => t.id_team === teamId)) {
+          if (
+            teamId &&
+            !data.rows.some((t) => t.id_team.toString() === teamId)
+          ) {
             setTeamId('');
           }
         } else {
@@ -63,15 +66,20 @@ export default function AuditPage() {
   useEffect(() => {
     const token = localStorage.getItem('token');
     const headers = { Authorization: `Bearer ${token}` };
-    const qs = projectId ? `?project_id=${projectId}` : '';
+    const qs = new URLSearchParams();
+    if (projectId) qs.append('project_id', projectId);
+    if (teamId !== '') qs.append('team_id', parseInt(teamId, 10));
 
-    fetch(`http://localhost/get_users.php${qs}`, { headers })
+    fetch(`http://localhost/get_users.php?${qs.toString()}`, { headers })
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
           setUsers(data.rows);
           // If the currently selected userId is not in the new list of users, reset it.
-          if (userId && !data.rows.some((u) => u.id_user === userId)) {
+          if (
+            userId &&
+            !data.rows.some((u) => u.id_user.toString() === userId)
+          ) {
             setUserId('');
           }
         } else {
@@ -390,13 +398,12 @@ export default function AuditPage() {
                 <option value="">Toți Utilizatorii</option>
                 {users.map((u) => (
                   <option key={u.id_user} value={u.id_user}>
-                    {u.nume} ({u.rol || 'N/A'})
+                    {u.nume}
                   </option>
                 ))}
               </select>
             </div>
 
-            {/* Ticket ID Search Bar - THIS IS THE CHANGED PART */}
             <div>
               <label
                 htmlFor="ticketIdSearch"

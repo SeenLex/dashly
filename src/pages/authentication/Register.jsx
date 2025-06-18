@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Eye,
   EyeOff,
@@ -9,29 +9,29 @@ import {
   ArrowRight,
   UserPlus,
   Archive, // Added for Project ID
-} from "lucide-react";
+} from 'lucide-react';
 
 const Register = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [form, setForm] = useState({
-    fullName: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
+    fullName: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
     isAdmin: false,
-    projectId: "", // Added for admin registration
+    projectId: '', // Added for admin registration
   });
-  const [error, setError] = useState(""); // For displaying errors
+  const [error, setError] = useState(''); // For displaying errors
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    setError(""); // Clear previous errors
+    setError(''); // Clear previous errors
 
     if (form.password !== form.confirmPassword) {
-      alert("Passwords do not match");
-      setError("Passwords do not match");
+      alert('Passwords do not match');
+      setError('Passwords do not match');
       return;
     }
 
@@ -42,43 +42,26 @@ const Register = () => {
       isAdmin: form.isAdmin,
     };
 
-    if (form.isAdmin) {
-      if (!form.projectId.trim()) {
-        const msg = "Project ID is required for admin registration.";
-        alert(msg);
-        setError(msg);
-        return;
-      }
-      const projectIdParsed = parseInt(form.projectId);
-      if (isNaN(projectIdParsed)) {
-        const msg = "Project ID must be a valid number.";
-        alert(msg);
-        setError(msg);
-        return;
-      }
-      payload.id_project = projectIdParsed;
-    }
-
     try {
-      const res = await fetch("http://localhost/request_register.php", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const res = await fetch('http://localhost/request_register.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 
       const data = await res.json();
 
       if (res.ok) {
-        alert("Registration request submitted. Await admin approval.");
-        navigate("/");
+        alert('Registration request submitted. Await admin approval.');
+        navigate('/');
       } else {
-        const errorMsg = data.error || "Registration failed";
+        const errorMsg = data.error || 'Registration failed';
         alert(errorMsg);
         setError(errorMsg);
       }
     } catch (err) {
       console.error(err);
-      const errorMsg = "An error occurred. Please try again later.";
+      const errorMsg = 'An error occurred. Please try again later.';
       alert(errorMsg);
       setError(errorMsg);
     }
@@ -179,7 +162,7 @@ const Register = () => {
                 />
                 <input
                   id="password"
-                  type={showPassword ? "text" : "password"}
+                  type={showPassword ? 'text' : 'password'}
                   placeholder="Creează o parolă puternică"
                   value={form.password}
                   onChange={(e) =>
@@ -194,13 +177,9 @@ const Register = () => {
                     setShowPassword(!showPassword);
                   }}
                   className="text-slate-400 dark:text-slate-500 hover:text-purple-600 dark:hover:text-purple-400 ml-2"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
-                  {showPassword ? (
-                    <EyeOff size={16} />
-                  ) : (
-                    <Eye size={16} />
-                  )}
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
             </div>
@@ -219,7 +198,7 @@ const Register = () => {
                 />
                 <input
                   id="confirmPassword"
-                  type={showConfirmPassword ? "text" : "password"}
+                  type={showConfirmPassword ? 'text' : 'password'}
                   placeholder="Reintrodu parola"
                   value={form.confirmPassword}
                   onChange={(e) =>
@@ -233,7 +212,7 @@ const Register = () => {
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="text-slate-400 dark:text-slate-500 hover:text-purple-600 dark:hover:text-purple-400 ml-2"
                   aria-label={
-                    showConfirmPassword ? "Hide password" : "Show password"
+                    showConfirmPassword ? 'Hide password' : 'Show password'
                   }
                 >
                   {showConfirmPassword ? (
@@ -262,34 +241,6 @@ const Register = () => {
                 Înregistrează-te ca administrator
               </label>
             </div>
-
-            {form.isAdmin && (
-              <div>
-                <label
-                  htmlFor="projectId"
-                  className="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1"
-                >
-                  ID Proiect (pentru admin)
-                </label>
-                <div className="flex items-center bg-white dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2.5 focus-within:ring-1 focus-within:ring-purple-500">
-                  <Archive // Using Archive icon for Project ID
-                    size={16}
-                    className="text-slate-400 dark:text-slate-500 mr-2"
-                  />
-                  <input
-                    id="projectId"
-                    type="number" // Changed to number for easier parsing, can be text if IDs are alphanumeric
-                    placeholder="Introdu ID-ul proiectului"
-                    value={form.projectId}
-                    onChange={(e) =>
-                      setForm({ ...form, projectId: e.target.value })
-                    }
-                    required={form.isAdmin} // Required only if isAdmin is checked
-                    className="w-full bg-transparent outline-none text-slate-700 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 text-sm"
-                  />
-                </div>
-              </div>
-            )}
 
             <button
               type="submit"
@@ -323,4 +274,4 @@ const Register = () => {
   );
 };
 
-export default Register;  
+export default Register;

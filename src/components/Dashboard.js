@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import StatsCards from './StatsCards';
 import TicketList from './TicketList';
-
+import * as XLSX from 'xlsx';
 export default function Dashboard() {
   const [period, setPeriod] = useState('day');
   const [loading, setLoading] = useState(true);
@@ -138,23 +138,68 @@ export default function Dashboard() {
       });
   };
 
-  const handleExportTickets = () => {
-    const visibleIds = tickets.map((t) => t.ticket_id);
+  const handleExportTickets = async () => {
+    setIsExporting(true);
+    try {
+      const token = localStorage.getItem('token');
+      const params = new URLSearchParams({
+        page: '1',
+        limit: (ticketsPerPage * exportPages).toString(),
+        period,
+      });
 
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = 'http://localhost/tickets-api/export_tickets.php';
-    form.target = '_blank';
+      Object.entries(filters).forEach(([key, val]) => {
+        if (val && val.trim() !== '') params.append(key, val);
+      });
 
-    const input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = 'ticket_ids';
-    input.value = JSON.stringify(visibleIds);
-    form.appendChild(input);
+      const response = await fetch(
+        `http://localhost/tickets-api/tickets.php?${params.toString()}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-    document.body.appendChild(form);
-    form.submit();
-    document.body.removeChild(form);
+      if (!response.ok) throw new Error(`Eroare: ${response.statusText}`);
+
+      const data = await response.json();
+      const allTickets = data.tickets || [];
+
+      if (allTickets.length === 0) {
+        alert('Nicio înregistrare de exportat.');
+        return;
+      }
+
+      const wsData = allTickets.map((t) => ({
+        'Ticket ID': t.ticket_id,
+        Status: t.status,
+        Priority: t.priority_name,
+        Project: t.project,
+        'Assigned Person': t.assigned_person,
+        'Created By': t.created_by,
+        'Start Date': t.start_date
+          ? new Date(t.start_date).toLocaleString('ro-RO')
+          : '',
+        'Closed Date': t.closed_date
+          ? new Date(t.closed_date).toLocaleString('ro-RO')
+          : '',
+        'Duration (Hours)': t.duration_hours,
+        Description: t.description,
+        Resolution: t.resolution,
+      }));
+
+      const ws = XLSX.utils.json_to_sheet(wsData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Tickets');
+
+      XLSX.writeFile(wb, 'tickets_export.xlsx');
+    } catch (err) {
+      console.error('Export error:', err);
+      alert(`Export eșuat: ${err.message}`);
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const handlePeriodChange = (p) => {
@@ -250,241 +295,237 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-7xl mx-auto p-6 space-y-8">
+    <div className=" dark:bg-gray-900 min-h-screen">
+      <div className=" dark:bg-gray-900 min-h-screen">
         {/* Period Selector */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Calendar className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-              Perioada selectată
-            </h2>
-          </div>
+        <div className="flex items-center justify-center gap-2 mb-4">
+          <Calendar className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+            Perioada selectată
+          </h2>
+        </div>
 
-          <div className="flex justify-center gap-2">
-            {['day', 'week', 'month', 'year'].map((p) => (
-              <button
-                key={p}
-                onClick={() => handlePeriodChange(p)}
-                className={`px-6 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
-                  period === p
-                    ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-600/25 transform scale-105'
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 hover:scale-105'
-                }`}
-              >
-                {periodLabels[p]}
-              </button>
-            ))}
-          </div>
+        <div className="flex justify-center gap-2">
+          {['day', 'week', 'month', 'year'].map((p) => (
+            <button
+              key={p}
+              onClick={() => handlePeriodChange(p)}
+              className={`px-6 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
+                period === p
+                  ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-600/25 transform scale-105'
+                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 hover:scale-105'
+              }`}
+            >
+              {periodLabels[p]}
+            </button>
+          ))}
         </div>
 
         {role === 'super_admin' ? <StatsCards stats={stats} /> : null}
 
         {/* Tickets Section */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-          {/* Section Header */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-            <div className="flex items-center gap-2">
-              <Filter className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Lista Tickete
-              </h2>
-              {loading && (
-                <Loader2 className="w-4 h-4 text-blue-600 animate-spin ml-2" />
-              )}
-            </div>
 
-            {/* Export Controls */}
-            {tickets.length > 0 && (
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2">
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Export pagini:
-                  </label>
-                  <select
-                    value={exportPages}
-                    onChange={(e) => setExportPages(Number(e.target.value))}
-                    className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg 
+        {/* Section Header */}
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex items-center gap-2">
+            <Filter className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              Lista Tickete
+            </h2>
+            {loading && (
+              <Loader2 className="w-4 h-4 text-blue-600 animate-spin ml-2" />
+            )}
+          </div>
+
+          {/* Export Controls */}
+          {tickets.length > 0 && (
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Export pagini:
+                </label>
+                <select
+                  value={exportPages}
+                  onChange={(e) => setExportPages(Number(e.target.value))}
+                  className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg 
                              bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
                              focus:ring-2 focus:ring-blue-500 focus:border-blue-500 
                              hover:border-gray-400 dark:hover:border-gray-500
                              transition-colors duration-200 cursor-pointer min-w-[70px]"
+                >
+                  {Array.from(
+                    { length: Math.min(10, totalPages) },
+                    (_, i) => i + 1
+                  ).map((num) => (
+                    <option key={num} value={num}>
+                      {num}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <button
+                onClick={handleExportTickets}
+                disabled={isExporting}
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 
+                           text-white text-sm font-medium rounded-lg transition-all duration-200 
+                           hover:shadow-lg hover:shadow-green-600/25 disabled:opacity-50 
+                           disabled:cursor-not-allowed transform hover:scale-105"
+              >
+                {isExporting ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Download className="w-4 h-4" />
+                )}
+                {isExporting ? 'Exportând...' : 'Export Excel'}
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Content */}
+        <div className="p-6">
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center space-y-3">
+                <Loader2 className="w-8 h-8 text-blue-600 animate-spin mx-auto" />
+                <p className="text-gray-500 dark:text-gray-400">
+                  Se încarcă ticketele...
+                </p>
+              </div>
+            </div>
+          ) : tickets.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Filter className="w-8 h-8 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                Nu există tickete
+              </h3>
+              <p className="text-gray-500 dark:text-gray-400">
+                Nu au fost găsite tickete pentru perioada și filtrele selectate.
+              </p>
+            </div>
+          ) : (
+            <div>
+              <TicketList
+                tickets={tickets}
+                onDelete={handleDelete}
+                fetchData={fetchData}
+                onAdd={handleAdd}
+                filters={filters}
+                setFilters={setFilters}
+                currentPage={currentPage}
+                ticketsPerPage={ticketsPerPage}
+                period={period}
+                totalPages={totalPages}
+                setCurrentPage={setCurrentPage}
+                setTicketsPerPage={setTicketsPerPage}
+              />
+              {/* Pagination Controls */}
+              <div className="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
+                {/* Per page selector */}
+                <div className="flex items-center gap-3">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Tickete pe pagină:
+                  </label>
+                  <select
+                    value={ticketsPerPage}
+                    onChange={(e) => {
+                      setTicketsPerPage(Number(e.target.value));
+                      setCurrentPage(1);
+                    }}
+                    className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg 
+                               bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
+                               focus:ring-2 focus:ring-blue-500 focus:border-blue-500 
+                               hover:border-gray-400 dark:hover:border-gray-500
+                               transition-colors duration-200 cursor-pointer min-w-[70px]"
                   >
-                    {Array.from(
-                      { length: Math.min(10, totalPages) },
-                      (_, i) => i + 1
-                    ).map((num) => (
-                      <option key={num} value={num}>
-                        {num}
+                    {[5, 10, 20, 50, 100].map((val) => (
+                      <option key={val} value={val}>
+                        {val}
                       </option>
                     ))}
                   </select>
                 </div>
 
-                <button
-                  onClick={handleExportTickets}
-                  disabled={isExporting}
-                  className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 
-                           text-white text-sm font-medium rounded-lg transition-all duration-200 
-                           hover:shadow-lg hover:shadow-green-600/25 disabled:opacity-50 
-                           disabled:cursor-not-allowed transform hover:scale-105"
-                >
-                  {isExporting ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Download className="w-4 h-4" />
-                  )}
-                  {isExporting ? 'Exportând...' : 'Export Excel'}
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Content */}
-          <div className="p-6">
-            {loading ? (
-              <div className="flex items-center justify-center py-12">
-                <div className="text-center space-y-3">
-                  <Loader2 className="w-8 h-8 text-blue-600 animate-spin mx-auto" />
-                  <p className="text-gray-500 dark:text-gray-400">
-                    Se încarcă ticketele...
-                  </p>
-                </div>
-              </div>
-            ) : tickets.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Filter className="w-8 h-8 text-gray-400" />
-                </div>
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                  Nu există tickete
-                </h3>
-                <p className="text-gray-500 dark:text-gray-400">
-                  Nu au fost găsite tickete pentru perioada și filtrele
-                  selectate.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-6">
-                <TicketList
-                  tickets={tickets}
-                  onDelete={handleDelete}
-                  fetchData={fetchData}
-                  onAdd={handleAdd}
-                  filters={filters}
-                  setFilters={setFilters}
-                  currentPage={currentPage}
-                  ticketsPerPage={ticketsPerPage}
-                  period={period}
-                  totalPages={totalPages}
-                  setCurrentPage={setCurrentPage}
-                  setTicketsPerPage={setTicketsPerPage}
-                />
-                {/* Pagination Controls */}
-                <div className="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
-                  {/* Per page selector */}
-                  <div className="flex items-center gap-3">
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Tickete pe pagină:
-                    </label>
-                    <select
-                      value={ticketsPerPage}
-                      onChange={(e) => {
-                        setTicketsPerPage(Number(e.target.value));
-                        setCurrentPage(1);
-                      }}
-                      className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg 
-                               bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
-                               focus:ring-2 focus:ring-blue-500 focus:border-blue-500 
-                               hover:border-gray-400 dark:hover:border-gray-500
-                               transition-colors duration-200 cursor-pointer min-w-[70px]"
-                    >
-                      {[5, 10, 20, 50, 100].map((val) => (
-                        <option key={val} value={val}>
-                          {val}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Pagination */}
-                  {totalPages > 1 && (
-                    <div className="flex items-center gap-1">
-                      {/* Previous button */}
-                      <button
-                        onClick={() =>
-                          setCurrentPage(Math.max(1, currentPage - 1))
-                        }
-                        disabled={currentPage === 1}
-                        className="flex items-center justify-center w-10 h-10 rounded-lg border border-gray-300 dark:border-gray-600
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="flex items-center gap-1">
+                    {/* Previous button */}
+                    <button
+                      onClick={() =>
+                        setCurrentPage(Math.max(1, currentPage - 1))
+                      }
+                      disabled={currentPage === 1}
+                      className="flex items-center justify-center w-10 h-10 rounded-lg border border-gray-300 dark:border-gray-600
                                  bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300
                                  hover:bg-gray-50 dark:hover:bg-gray-600 hover:border-gray-400 dark:hover:border-gray-500
                                  disabled:opacity-50 disabled:cursor-not-allowed
                                  transition-all duration-200 group"
-                        aria-label="Pagina precedentă"
-                      >
-                        <ChevronLeft className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                      </button>
+                      aria-label="Pagina precedentă"
+                    >
+                      <ChevronLeft className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                    </button>
 
-                      {/* Page numbers */}
-                      <div className="flex items-center gap-1 mx-2">
-                        {pageNumbers.map((pageNum, index) =>
-                          pageNum === '...' ? (
-                            <div
-                              key={`ellipsis-${index}`}
-                              className="flex items-center justify-center w-10 h-10"
-                            >
-                              <span className="text-gray-400 dark:text-gray-500">
-                                ...
-                              </span>
-                            </div>
-                          ) : (
-                            <button
-                              key={pageNum}
-                              onClick={() => setCurrentPage(pageNum)}
-                              className={`flex items-center justify-center w-10 h-10 rounded-lg text-sm font-medium
+                    {/* Page numbers */}
+                    <div className="flex items-center gap-1 mx-2">
+                      {pageNumbers.map((pageNum, index) =>
+                        pageNum === '...' ? (
+                          <div
+                            key={`ellipsis-${index}`}
+                            className="flex items-center justify-center w-10 h-10"
+                          >
+                            <span className="text-gray-400 dark:text-gray-500">
+                              ...
+                            </span>
+                          </div>
+                        ) : (
+                          <button
+                            key={pageNum}
+                            onClick={() => setCurrentPage(pageNum)}
+                            className={`flex items-center justify-center w-10 h-10 rounded-lg text-sm font-medium
                                         transition-all duration-200 hover:scale-105 ${
                                           currentPage === pageNum
                                             ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/25'
                                             : 'border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
                                         }`}
-                              aria-label={`Mergi la pagina ${pageNum}`}
-                              aria-current={
-                                currentPage === pageNum ? 'page' : undefined
-                              }
-                            >
-                              {pageNum}
-                            </button>
-                          )
-                        )}
-                      </div>
+                            aria-label={`Mergi la pagina ${pageNum}`}
+                            aria-current={
+                              currentPage === pageNum ? 'page' : undefined
+                            }
+                          >
+                            {pageNum}
+                          </button>
+                        )
+                      )}
+                    </div>
 
-                      {/* Next button */}
-                      <button
-                        onClick={() =>
-                          setCurrentPage(Math.min(totalPages, currentPage + 1))
-                        }
-                        disabled={currentPage === totalPages}
-                        className="flex items-center justify-center w-10 h-10 rounded-lg border border-gray-300 dark:border-gray-600
+                    {/* Next button */}
+                    <button
+                      onClick={() =>
+                        setCurrentPage(Math.min(totalPages, currentPage + 1))
+                      }
+                      disabled={currentPage === totalPages}
+                      className="flex items-center justify-center w-10 h-10 rounded-lg border border-gray-300 dark:border-gray-600
                                  bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300
                                  hover:bg-gray-50 dark:hover:bg-gray-600 hover:border-gray-400 dark:hover:border-gray-500
                                  disabled:opacity-50 disabled:cursor-not-allowed
                                  transition-all duration-200 group"
-                        aria-label="Pagina următoare"
-                      >
-                        <ChevronRight className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                      </button>
-                    </div>
-                  )}
-
-                  {/* Results info */}
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
-                    Pagina {currentPage} din {totalPages}
+                      aria-label="Pagina următoare"
+                    >
+                      <ChevronRight className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                    </button>
                   </div>
+                )}
+
+                {/* Results info */}
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  Pagina {currentPage} din {totalPages}
                 </div>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

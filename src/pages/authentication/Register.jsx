@@ -7,8 +7,7 @@ import {
   Lock,
   Mail,
   ArrowRight,
-  UserPlus,
-  Archive, // Added for Project ID
+  Archive,
 } from 'lucide-react';
 
 const Register = () => {
@@ -21,17 +20,16 @@ const Register = () => {
     password: '',
     confirmPassword: '',
     isAdmin: false,
-    projectId: '', // Added for admin registration
+    projectId: '',
   });
-  const [error, setError] = useState(''); // For displaying errors
+  const [error, setError] = useState('');
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    setError(''); // Clear previous errors
+    setError('');
 
     if (form.password !== form.confirmPassword) {
-      alert('Passwords do not match');
-      setError('Passwords do not match');
+      setError('Parolele nu coincid');
       return;
     }
 
@@ -42,76 +40,66 @@ const Register = () => {
       isAdmin: form.isAdmin,
     };
 
+    if (form.isAdmin) {
+      const id = parseInt(form.projectId);
+      if (!id || isNaN(id)) {
+        setError('ID Proiect invalid');
+        return;
+      }
+      payload.id_project = id;
+    }
+
     try {
       const res = await fetch('http://localhost/request_register.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-
       const data = await res.json();
-
       if (res.ok) {
-        alert('Registration request submitted. Await admin approval.');
+        alert('Cererea a fost trimisă. Așteaptă aprobarea adminului.');
         navigate('/');
       } else {
-        const errorMsg = data.error || 'Registration failed';
-        alert(errorMsg);
-        setError(errorMsg);
+        setError(data.error || 'Eroare la înregistrare');
       }
     } catch (err) {
-      console.error(err);
-      const errorMsg = 'An error occurred. Please try again later.';
-      alert(errorMsg);
-      setError(errorMsg);
+      setError('Eroare de rețea sau server indisponibil.');
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-slate-900 dark:to-indigo-950 transition-all duration-700 relative overflow-hidden">
-      <div className="relative z-10 w-full max-w-sm sm:max-w-md">
-        <div className="flex flex-col items-center mb-8">
-          <div className="w-14 h-14 mb-3 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl shadow-lg flex items-center justify-center">
-            <UserPlus className="w-7 h-7 text-white" />
-          </div>
-          <h1 className="text-3xl font-bold text-slate-800 dark:text-white">
-            Dashly
-          </h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-            Crează-ți un cont nou
-          </p>
+    <div className="min-h-screen w-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-slate-900 dark:to-indigo-950 overflow-hidden">
+      <div className="w-full max-w-md p-6">
+        <div className="flex justify-center mb-6">
+          <img
+            src="/NOKILABS.png"
+            alt="Dashly Logo"
+            className="h-20 object-contain rounded-xl shadow"
+          />
         </div>
-
-        <div className="bg-white dark:bg-slate-800/90 rounded-xl shadow-xl p-7 sm:p-8">
-          <h2 className="text-xl font-semibold text-slate-700 dark:text-slate-200 mb-1.5 text-left">
+        <div className="bg-white dark:bg-slate-800/90 rounded-xl shadow-xl p-7">
+          <h2 className="text-xl font-semibold text-slate-700 dark:text-slate-200 mb-1.5">
             Cerere de Înregistrare
           </h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mb-6 text-left">
-            Completează formularul pentru a solicita accesul la portal. Cererea
-            ta va fi revizuită de un administrator.
+          <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
+            Completează formularul pentru a solicita accesul. Cererea va fi
+            revizuită de un administrator.
           </p>
 
           {error && (
-            <div className="bg-red-100 dark:bg-red-500/20 border border-red-300 dark:border-red-500/30 text-red-700 dark:text-red-400 px-4 py-2.5 rounded-lg mb-4 text-xs">
+            <div className="bg-red-100 dark:bg-red-500/20 border border-red-300 text-red-700 px-4 py-2.5 rounded-lg mb-4 text-xs">
               {error}
             </div>
           )}
 
           <form onSubmit={handleRegister} className="space-y-4">
             <div>
-              <label
-                htmlFor="fullName"
-                className="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1"
-              >
+              <label className="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">
                 Nume Complet
               </label>
-              <div className="flex items-center bg-white dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2.5 focus-within:ring-1 focus-within:ring-purple-500 ">
-                <User
-                  size={16}
-                  className="text-slate-400 dark:text-slate-500 mr-2"
-                />
+              <div className="flex items-center bg-white dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2.5">
+                <User size={16} className="text-slate-400 mr-2" />
                 <input
-                  id="fullName"
                   type="text"
                   placeholder="Numele tău complet"
                   value={form.fullName}
@@ -119,65 +107,48 @@ const Register = () => {
                     setForm({ ...form, fullName: e.target.value })
                   }
                   required
-                  className="w-full bg-transparent outline-none text-slate-700 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 text-sm"
+                  className="w-full bg-transparent outline-none text-slate-700 dark:text-slate-200 text-sm"
                 />
               </div>
             </div>
 
             <div>
-              <label
-                htmlFor="email"
-                className="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1"
-              >
-                Adresă de Email
+              <label className="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">
+                Email
               </label>
-              <div className="flex items-center bg-white dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2.5 focus-within:ring-1 focus-within:ring-purple-500">
-                <Mail
-                  size={16}
-                  className="text-slate-400 dark:text-slate-500 mr-2"
-                />
+              <div className="flex items-center bg-white dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2.5">
+                <Mail size={16} className="text-slate-400 mr-2" />
                 <input
-                  id="email"
                   type="email"
                   placeholder="you@example.com"
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                   required
-                  className="w-full bg-transparent outline-none text-slate-700 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 text-sm"
+                  className="w-full bg-transparent outline-none text-slate-700 dark:text-slate-200 text-sm"
                 />
               </div>
             </div>
 
             <div>
-              <label
-                htmlFor="password"
-                className="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1"
-              >
+              <label className="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">
                 Parolă
               </label>
-              <div className="flex items-center bg-white dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2.5 focus-within:ring-1 focus-within:ring-purple-500">
-                <Lock
-                  size={16}
-                  className="text-slate-400 dark:text-slate-500 mr-2"
-                />
+              <div className="flex items-center bg-white dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2.5">
+                <Lock size={16} className="text-slate-400 mr-2" />
                 <input
-                  id="password"
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="Creează o parolă puternică"
+                  placeholder="Creează o parolă"
                   value={form.password}
                   onChange={(e) =>
                     setForm({ ...form, password: e.target.value })
                   }
                   required
-                  className="w-full bg-transparent outline-none text-slate-700 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 text-sm"
+                  className="w-full bg-transparent outline-none text-slate-700 dark:text-slate-200 text-sm"
                 />
                 <button
                   type="button"
-                  onClick={() => {
-                    setShowPassword(!showPassword);
-                  }}
-                  className="text-slate-400 dark:text-slate-500 hover:text-purple-600 dark:hover:text-purple-400 ml-2"
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="text-slate-400 ml-2"
                 >
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
@@ -185,19 +156,12 @@ const Register = () => {
             </div>
 
             <div>
-              <label
-                htmlFor="confirmPassword"
-                className="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1"
-              >
+              <label className="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">
                 Confirmă Parola
               </label>
-              <div className="flex items-center bg-white dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2.5 focus-within:ring-1 focus-within:ring-purple-500">
-                <Lock
-                  size={16}
-                  className="text-slate-400 dark:text-slate-500 mr-2"
-                />
+              <div className="flex items-center bg-white dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2.5">
+                <Lock size={16} className="text-slate-400 mr-2" />
                 <input
-                  id="confirmPassword"
                   type={showConfirmPassword ? 'text' : 'password'}
                   placeholder="Reintrodu parola"
                   value={form.confirmPassword}
@@ -205,15 +169,12 @@ const Register = () => {
                     setForm({ ...form, confirmPassword: e.target.value })
                   }
                   required
-                  className="w-full bg-transparent outline-none text-slate-700 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 text-sm"
+                  className="w-full bg-transparent outline-none text-slate-700 dark:text-slate-200 text-sm"
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="text-slate-400 dark:text-slate-500 hover:text-purple-600 dark:hover:text-purple-400 ml-2"
-                  aria-label={
-                    showConfirmPassword ? 'Hide password' : 'Show password'
-                  }
+                  className="text-slate-400 ml-2"
                 >
                   {showConfirmPassword ? (
                     <EyeOff size={16} />
@@ -224,7 +185,7 @@ const Register = () => {
               </div>
             </div>
 
-            <div className="flex items-center pt-1">
+            <div className="flex items-center">
               <input
                 id="isAdmin"
                 type="checkbox"
@@ -232,11 +193,11 @@ const Register = () => {
                 onChange={(e) =>
                   setForm({ ...form, isAdmin: e.target.checked })
                 }
-                className="h-3.5 w-3.5 text-purple-600 bg-slate-100 border-slate-300 dark:border-slate-500 rounded focus:ring-purple-500 dark:focus:ring-purple-600 dark:ring-offset-slate-800 focus:ring-1 dark:bg-slate-700 cursor-pointer"
+                className="h-4 w-4 text-purple-600 border-gray-300 rounded"
               />
               <label
                 htmlFor="isAdmin"
-                className="ml-2 block text-xs text-slate-600 dark:text-slate-300 cursor-pointer"
+                className="ml-2 text-sm text-slate-600 dark:text-slate-300"
               >
                 Înregistrează-te ca administrator
               </label>
@@ -244,32 +205,26 @@ const Register = () => {
 
             <button
               type="submit"
-              className="w-full group flex items-center justify-center px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 text-sm transition-all duration-150"
+              className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold py-2.5 rounded-lg hover:from-purple-700 hover:to-blue-700 transition"
             >
-              Trimite Cererea
-              <ArrowRight
-                size={16}
-                className="ml-1.5 transition-transform duration-200 group-hover:translate-x-1"
-              />
+              Trimite Cererea <ArrowRight size={16} className="inline ml-1" />
             </button>
           </form>
 
-          <div className="text-center mt-6">
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Ai deja un cont?
-              <Link
-                to="/"
-                className="text-purple-600 dark:text-purple-400 font-medium ml-1 hover:text-purple-700 dark:hover:text-purple-500"
-              >
+          <div className="text-center mt-6 text-sm">
+            <p className="text-slate-600 dark:text-slate-400">
+              Ai deja un cont?{' '}
+              <Link to="/" className="text-purple-600 hover:underline">
                 Autentifică-te
               </Link>
             </p>
           </div>
         </div>
+
+        <footer className="text-center mt-6 text-xs text-slate-500 dark:text-slate-400">
+          © {new Date().getFullYear()} Dashly Corporation. All rights reserved.
+        </footer>
       </div>
-      <footer className="absolute bottom-6 text-center w-full text-xs text-slate-400 dark:text-slate-500 z-0">
-        © {new Date().getFullYear()} Dashly Corporation. All rights reserved.
-      </footer>
     </div>
   );
 };

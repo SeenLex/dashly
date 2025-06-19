@@ -101,7 +101,7 @@ export default function AuditPage() {
         else setTickets([]);
       })
       .catch(() => setTickets([]));
-  }, [projectId, userId]); // Added userId to ensure it's re-evaluated
+  }, [projectId, teamId, userId]); // Added userId to ensure it's re-evaluated
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -150,10 +150,7 @@ export default function AuditPage() {
               row.id_audit_stare ||
               row.row_number ||
               `log-${currentPage}-${index}`,
-            timestamp:
-              typeof row.timp === 'object' && row.timp?.date
-                ? row.timp.date
-                : row.timp,
+            timestamp: formatDateTime(row.timp),
             user: row.nume_utilizator,
             project: row.provider,
             echipa: row.echipa,
@@ -191,7 +188,11 @@ export default function AuditPage() {
     ticketId,
     logsPerPage,
   ]); // Added logsPerPage and token
-
+  function formatDateTime(raw) {
+    if (!raw) return '-';
+    const str = typeof raw === 'object' && raw?.date ? raw.date : raw;
+    return str.split('.')[0]; // elimină microsecundele
+  }
   const exportToExcel = () => {
     const token = localStorage.getItem('token');
     if (!token) {
